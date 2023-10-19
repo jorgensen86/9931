@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Icop Journal 3 Template Mods</name>
+    <code>icop_j3_template_mods</code>
+    <version>3.0</version>
+    <author>Jorgensen</author>
+    <link></link>
+
+    <file path="catalog/language/el-gr/el-gr.php" error="skip">
+        <operation info="change add to cart text">
+            <search><![CDATA[Καλάθι]]></search>
+            <add position="replace"><![CDATA[Προσθήκη στο καλάθι]]></add>
+        </operation>
+        <operation info="change add to cart text">
+            <search><![CDATA[$_['button_cart']]]></search>
+            <add position="before"><![CDATA[
+                $_['text_delivery'] = 'Παράδοση';]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/{product/*,information/*,account/*}.php" error="skip">
+        <operation info="hides home breadcrumb from pages">
+            <search><![CDATA[
+            'href' => $this->url->link('common/home')
+            ]]></search>
+            <add position="after" offset="1"><![CDATA[
+            $data['breadcrumbs'] = array(); /* icop_j3_template_mods.ocmod.xml */
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/journal3/template/journal3/product_card.twig" error="skip">
+        <operation info="hides stat 2 from product grid">
+            <search><![CDATA[<span class="stat-2"><span class="stats-label">{{ product.stat2.label }}:</span> <span>{{ product.stat2.text }}</span></span>]]></search>
+            <add position="replace"><![CDATA[{# <span class="stat-2"><span class="stats-label">{{ product.stat2.label }}:</span> <span>{{ product.stat2.text }}</span></span> #} {# icop_j3_template_mods.ocmod.xml #}]]></add>
+        </operation>
+        <operation info="add stat 2 after price product grid">
+            <search><![CDATA[{% if product.rating %}]]></search>
+            <add position="before"><![CDATA[
+                {# icop_j3_template_mods.ocmod.xml #}
+                <div class="stats">
+                    <span class="stat-2"><span class="stats-label">{{ product.quantity ? product.stat2.label : text_delivery }}:</span> <span class="{{ product.quantity == 0 ? 'out-of-stock' : null }}">{{ product.quantity ? product.stat2.text : product.stock_status }}</span></span>
+                </div>
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/language/en-gb/catalog/product.php" error="skip">
+        <operation info="" error="skip">
+            <search><![CDATA[$_['entry_location']]]></search>
+            <add position="before"><![CDATA[
+                /* icop_j3_template_mods.ocmod.xml */
+                $_['entry_per_price'] = 'Price per'; 
+                $_['text_unit'] = 'Unit'; 
+                $_['text_set'] = 'Set';
+                $_['entry_appliance'] = 'Appliances';
+            ]]></add>
+        </operation>
+	</file>
+
+    <file path="admin/language/el-gr/catalog/product.php" error="skip">
+        <operation info="" error="skip">
+            <search><![CDATA[$_['entry_location']]]></search>
+            <add position="before"><![CDATA[
+                /* icop_j3_template_mods.ocmod.xml */
+                $_['entry_per_price'] = 'Τιμή ανά'; 
+                $_['text_unit'] = 'Τεμάχιο'; 
+                $_['text_set'] = 'Σετ'; 
+                $_['entry_appliance'] = 'Συσκευές'; 
+            ]]></add>
+        </operation>
+	</file>
+
+    <file path="admin/view/template/catalog/product_form.twig" error="skip">
+        <operation info="" error="skip">
+            <search><![CDATA[<input type="text" name="jan" value="{{ jan }}" placeholder="{{ entry_jan }}" id="input-jan" class="form-control"/>]]></search>
+            <add position="replace"><![CDATA[
+                {# icop_j3_template_mods.ocmod.xml #}
+                <select name="jan" id="input-jan" class="form-control">
+                    <option value="">{{ text_none }}</option>
+                    <option {{ jan == 1 ? 'selected' : null }} value="1">{{ text_unit }}</option>
+                    <option {{ jan == 2 ? 'selected' : null }} value="2">{{ text_set }}</option>
+                </select>
+                ]]></add>
+        </operation>
+		<operation info="" error="skip">
+            <search position="replace"><![CDATA[<label class="col-sm-2 control-label" for="input-jan"><span data-toggle="tooltip" title="{{ help_jan }}">{{ entry_jan }}</span></label>]]></search>
+            <add><![CDATA[ {# icop_j3_template_mods.ocmod.xml #} 
+            {# <label class="col-sm-2 control-label" for="input-jan"><span data-toggle="tooltip" title="{{ help_jan }}">{{ entry_jan }}</span></label> #}
+            <label class="col-sm-2 control-label" for="input-jan">{{ entry_per_price }}</label>    
+            ]]></add>
+        </operation>  
+    </file>
+    <file path="catalog/controller/product/{catalog,category,manufacturer,search,special}.php">
+        <operation>
+            <search><![CDATA[
+            $data['products'][] = array(
+            ]]></search>
+            <add position="before"><![CDATA[
+                if($result['jan']) {
+                    $price_per_type =  $result['jan'] == 1 ? $this->language->get('text_unit') : $this->language->get('text_set');
+                } else {
+                    $price_per_type = '';
+                }
+            ]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[
+            $data['products'][] = array(
+            ]]></search>
+            <add position="after"><![CDATA[
+                'price_per_type'       =>  $price_per_type,
+            ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/language/en-gb/en-gb.php" error="skip">
+        <operation info="" error="skip">
+            <search><![CDATA[$_['button_cart']]]></search>
+            <add position="before"><![CDATA[
+                /* icop_j3_template_mods.ocmod.xml */
+                $_['text_unit'] = 'unit'; 
+                $_['text_set'] = 'set'; 
+            ]]></add>
+        </operation>
+	</file>
+
+    <file path="catalog/language/el-gr/el-gr.php" error="skip">
+        <operation info="" error="skip">
+            <search><![CDATA[$_['button_cart']]]></search>
+            <add position="before"><![CDATA[
+                /* icop_j3_template_mods.ocmod.xml */
+                $_['text_unit'] = 'τεμάχιο'; 
+                $_['text_set'] = 'σετ'; 
+            ]]></add>
+        </operation>
+	</file>
+    <file path="catalog/view/theme/journal3/template/journal3/product_card.twig" error="skip">
+        <operation info="hides stat 2 from product grid">
+            <search><![CDATA[{{ product.price }}</span>]]></search>
+            <add position="after"><![CDATA[ {% if product.price_per_type %}<span class="price-per-type"><span class="price-seperator">/</span><span>{{ product.price_per_type }}</span>{# icop_j3_template_mods.ocmod.xml #} {% endif %} ]]></add>
+        </operation>
+    </file>
+</modification>

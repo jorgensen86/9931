@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>Icop Journal 3 Custom Labels</id>
+	<version>3.1</version>
+	<vqmver>2.6.2</vqmver>
+	<author>Jorgensen</author>
+
+    <!-- Admin Panel's Language Override -->
+    <file name="cmsadmin/language/*/catalog/product.php" error="skip">
+        <operation info="" error="skip">
+            <search position="before"><![CDATA[$_['entry_location']]]></search>
+            <add><![CDATA[
+                $_['entry_type'] = 'Product Type'; /* icop_custom_labels_j3.xml */
+            ]]></add>
+        </operation>
+	</file>
+
+    <!--System Override-->
+	<file name="system/library/journal3.php" error="skip">
+		<operation>
+            <search index="2"><![CDATA[
+                $results[$label_id] = Arr::get($this->product_data, 'product_label.data.' . $label_id . '.php');
+            ]]></search>
+            <add position="after"><![CDATA[
+                /* icop_custom_labels_j3.xml */
+                    if(($label_id == 31) || ($label_id == 284)) {
+                        $results[$label_id]['label'] = $result['location'];
+                    }
+            ]]></add>
+        </operation>
+	</file>
+
+    <!-- Front Controller + Model Override -->
+    <file name="catalog/model/journal3/product.php" error="skip">
+		<operation>
+            <search><![CDATA[
+                public function getProductsSecondImage() {
+            ]]></search>
+            <add position="before"><![CDATA[
+                /* icop_custom_labels_j3.xml */
+                public function getLocationLabelProducts($module_id) {
+                    $location = $module_id == 31 ? 'original' : 'alternative';
+
+                    return $this->db->query("SELECT DISTINCT p.product_id FROM " . DB_PREFIX . "product p LEFT JOIN " . DB_PREFIX . "product_to_store p2s ON (p.product_id = p2s.product_id) WHERE p.location LIKE '" . $this->db->escape($location) . "' AND p.status = '1' AND p.date_available <= NOW() AND p2s.store_id = '" . (int)$this->config->get('config_store_id') . "'")->rows;
+                }
+            ]]></add>
+        </operation>
+	</file>
+
+    <file name="catalog/controller/journal3/product.php" error="skip">
+		<operation>
+            <search><![CDATA[
+                $results = $this->model_journal3_product->getProduct($parser->getSetting('filter.products'));
+            ]]></search>
+            <add position="replace"><![CDATA[
+                /* icop_custom_labels_j3.xml */
+                    // $results = $this->model_journal3_product->getProduct($parser->getSetting('filter.products'));
+                    if ($module_id == 31 || $module_id == 284) {
+                        $results = $this->model_journal3_product->getProduct($this->model_journal3_product->getLocationLabelProducts($module_id));
+                    }
+            ]]></add>
+        </operation>
+	</file>
+
+    <file name="cmsadmin/view/template/catalog/product_form.twig" error="skip">
+        <operation info="" error="skip">
+            <search position="replace"><![CDATA[<input type="text" name="location" value="{{ location }}" placeholder="{{ entry_location }}" id="input-location" class="form-control"/>]]></search>
+            <add><![CDATA[
+                {# icop_custom_labels_j3.xml #}
+                <select name="location" id="input-location" class="form-control">
+                    <option value="">{{ text_none }}</option>
+                    <option {{ location == 'original' ? 'selected' : null }} value="original">Original</option>
+                    <option {{ location == 'alternative' ? 'selected' : null }} value="alternative">Alternative</option>
+                </select>
+                ]]></add>
+        </operation>
+		<operation info="" error="skip">
+            <search position="replace"><![CDATA[{{ entry_location }}]]></search>
+            <add><![CDATA[{{ entry_type }} {# icop_custom_labels_j3.xml #} ]]></add>
+        </operation>  
+    </file>
+</modification>

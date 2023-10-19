@@ -1,0 +1,355 @@
+{{ header }} {{ column_left }}
+<div id="content">
+
+	<div class="page-header">
+    	<div class="container-fluid">
+			<div class="pull-right">
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-danger"><i class="fa fa-times"></i></a>
+			</div>
+			<h1><i class="fa fa-puzzle-piece"></i>&nbsp;{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>	
+  	</div>
+  
+  	<div class="container-fluid">
+		{% if error_warning %}
+			<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			  <button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+		{% if success %}
+			<div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{ success }}
+			  <button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+	
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><i class="fa fa-cogs"></i> {{ heading_title_settings }}</h3>
+			</div>
+			<div class="panel-body">
+				<ul class="nav nav-tabs">
+				  	<li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-cog"></i>&nbsp;&nbsp;{{ tab_settings }}</a></li>
+				  	<li><a href="#tab-permissions" data-toggle="tab"><i class="fa fa-user"></i>&nbsp;&nbsp;{{ tab_permissions }}</a></li>
+					<span class="pull-right">					
+						<button type="button" id="button-save-settings" onclick="showOverlay('{{ text_ea_saving }}');$('#form-setting').attr('action', '{{ update_settings }}').submit();" class="btn btn-primary btn-sm"><i class="fa fa-save"></i>&nbsp;&nbsp;{{ button_save_settings }}</button>
+						
+						<button type="button" id="button-save-permissions" onclick="showOverlay('{{ text_ea_saving }}');$('#form-permissions').attr('action', '{{ update_permissions }}').submit();" class="btn btn-primary btn-sm hidden"><i class="fa fa-save"></i>&nbsp;&nbsp;{{ button_save_permission }}</button>
+					</span>
+				</ul>
+			
+				<div class="tab-content">
+					<div class="tab-pane active" id="tab-general">
+						<div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_global_settings }}</div>
+						<form action="{{ update_settings }}" method="post" enctype="multipart/form-data" id="form-setting" class="form-horizontal">
+							<div class="col-sm-6 col-lg-6">
+								<div class="form-group" style="padding-top:0">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_edit }}">{{ entry_disable_edit }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_edit %}
+											<input type="radio" name="oc_editor_edit" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_edit" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_edit %}
+											<input type="radio" name="oc_editor_edit" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_edit" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_upload }}">{{ entry_disable_upload }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_upload %}
+											<input type="radio" name="oc_editor_upload" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_upload" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_upload %}
+											<input type="radio" name="oc_editor_upload" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_upload" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>	
+								<div class="form-group">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_download }}">{{ entry_disable_download }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_download %}
+											<input type="radio" name="oc_editor_download" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_download" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_download %}
+											<input type="radio" name="oc_editor_download" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_download" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>
+                                <div class="form-group">
+                                	<label class="col-sm-4 control-label"><span data-toggle="tooltip" title="{{ help_screen_mode }}">{{ entry_screen_mode }}</span></label>
+                                    <div class="col-sm-8">
+                                        <select name="oc_editor_screen_mode" id="input-editor-screen" class="form-control">
+                                            {% for screen_mode in screen_modes %}                                              	
+												{% if screen_mode == oc_editor_screen_mode %}
+                                                	<option value="{{ screen_mode }}" selected="selected">{% if screen_mode == 1 %}{{ entry_single_screen }}{% else %}{{ entry_dual_screen }}{% endif %}</option>
+                                              	{% else %}
+                                                	<option value="{{ screen_mode }}" >{% if screen_mode == 1 %}{{ entry_single_screen }}{% else %}{{ entry_dual_screen }}{% endif %}</option>
+                                              	{% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+								</div>
+							</div>
+							
+							<div class="col-sm-6 col-lg-6">	
+								<div class="form-group" style="padding-top:0">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_delete }}">{{ entry_disable_delete }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_delete_file %}
+											<input type="radio" name="oc_editor_delete_file" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_delete_file" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_delete_file %}
+											<input type="radio" name="oc_editor_delete_file" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_delete_file" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_contact }}">{{ entry_disable_contact }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_contact %}
+											<input type="radio" name="oc_editor_contact" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_contact" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_contact %}
+											<input type="radio" name="oc_editor_contact" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_contact" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-5 col-lg-4 control-label"><span data-toggle="tooltip" title="{{ help_disable_uninstall }}">{{ entry_disable_uninstall }}</span></label>
+									<div class="col-sm-7 col-lg-8 ea-radio">
+										{% if oc_editor_uninstall %}
+											<input type="radio" name="oc_editor_uninstall" value="1" checked="checked"/>
+											<label>{{ text_yes }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_uninstall" value="1"/>
+											<label>{{ text_yes }}</label>
+										{% endif %}
+										{% if not oc_editor_uninstall %}
+											<input type="radio" name="oc_editor_uninstall" value="0" checked="checked"/>
+											<label>{{ text_no }}</label>
+										{% else %}
+											<input type="radio" name="oc_editor_uninstall" value="0"/>
+											<label>{{ text_no }}</label>
+										{% endif %}
+									</div>
+								</div>								
+                                <div class="form-group">
+                                	<label class="col-sm-4 control-label"><span data-toggle="tooltip" title="{{ help_ace_theme }}">{{ entry_ace_theme }}</span></label>
+                                    <div class="col-sm-8">
+                                        <select name="oc_editor_theme" id="input-editor-theme" class="form-control">
+                                        	<option value="theme-cobalt">theme-cobalt</option>
+                                            {% for theme in themes %}
+                                              	{% if theme == oc_editor_theme %}
+                                                	<option value="{{ theme }}" selected="selected">{{ theme }}</option>
+                                              	{% else %}
+                                                	<option value="{{ theme }}" >{{ theme }}</option>
+                                              	{% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+								</div>
+							</div>
+						</form>
+					</div>
+					
+					<div class="tab-pane" id="tab-permissions">					
+						<div class="alert alert-info"><i class="fa fa-info-circle"></i> {{ text_user_permissions }}</div>
+						<form action="{{ update_permissions }}" method="post" enctype="multipart/form-data" id="form-permissions" class="form-horizontal">
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_edit_permission }}">{{ entry_edit_permission }}</span></label>
+									<div class="col-sm-6">
+										<div class="well well-sm" style="height: 150px; overflow: auto; margin-bottom:0">
+										{% for user in users %}
+											<div class="checkbox">
+												<label>
+												{% if user.user_id in oc_editor_perm_edit %}
+												<input type="checkbox" name="oc_editor_perm_edit[]" value="{{ user.user_id }}" checked="checked" />
+												{{ user.username }}
+												{% else %}
+												<input type="checkbox" name="oc_editor_perm_edit[]" value="{{ user.user_id }}" />
+												{{ user.username }}
+												{% endif %}
+												</label>
+											</div>
+										{% endfor %}                      
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_delete_permission }}">{{ entry_delete_permission }}</span></label>
+									<div class="col-sm-6">
+										<div class="well well-sm" style="height: 150px; overflow: auto; margin-bottom:0">
+										{% for user in users %}
+											<div class="checkbox">
+												<label>
+												{% if user.user_id in oc_editor_perm_delete %}
+												<input type="checkbox" name="oc_editor_perm_delete[]" value="{{ user.user_id }}" checked="checked" />
+												{{ user.username }}
+												{% else %}
+												<input type="checkbox" name="oc_editor_perm_delete[]" value="{{ user.user_id }}" />
+												{{ user.username }}
+												{% endif %}
+												</label>
+											</div>
+										{% endfor %}                      
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_upload_permission }}">{{ entry_upload_permission }}</span></label>
+									<div class="col-sm-6">
+										<div class="well well-sm" style="height: 150px; overflow: auto; margin-bottom:0">
+										{% for user in users %}
+											<div class="checkbox">
+												<label>
+												{% if user.user_id in oc_editor_perm_upload %}
+												<input type="checkbox" name="oc_editor_perm_upload[]" value="{{ user.user_id }}" checked="checked" />
+												{{ user.username }}
+												{% else %}
+												<input type="checkbox" name="oc_editor_perm_upload[]" value="{{ user.user_id }}" />
+												{{ user.username }}
+												{% endif %}
+												</label>
+											</div>
+										{% endfor %}                      
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-6">
+								<div class="form-group">
+									<label class="col-sm-3 control-label"><span data-toggle="tooltip" title="{{ help_download_permission }}">{{ entry_download_permission }}</span></label>
+									<div class="col-sm-6">
+										<div class="well well-sm" style="height: 150px; overflow: auto; margin-bottom:0">
+										{% for user in users %}
+											<div class="checkbox">
+												<label>
+												{% if user.user_id in oc_editor_perm_download %}
+												<input type="checkbox" name="oc_editor_perm_download[]" value="{{ user.user_id }}" checked="checked" />
+												{{ user.username }}
+												{% else %}
+												<input type="checkbox" name="oc_editor_perm_download[]" value="{{ user.user_id }}" />
+												{{ user.username }}
+												{% endif %}
+												</label>
+											</div>
+										{% endfor %}                      
+										</div>
+									</div>
+								</div>
+							</div>							
+						</form>						
+					</div>
+					
+				</div>
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+<div class="loading-overlay hidden" id="loading-overlay">
+	<div id="ea-loader"></div>  
+	<div id="ea-msg"></div>                           
+</div> 
+
+<a class="scrollup hidden" id="scrollup" href="#"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+
+<style type="text/css">
+.table thead td span[data-toggle="tooltip"]:after, label.control-label span:after {
+	font-size:17px;
+}
+</style>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	$(window).scroll(function() {		
+		if ($(this).scrollTop() >= 200) {
+			$('.scrollup').removeClass('hidden');
+			$('.scrollup').fadeIn();
+		} else {
+		   $('.scrollup').fadeOut();
+		   $('.scrollup').addClass('hidden');
+		}
+	});			
+	$('.scrollup').click(function() {
+		$('html, body').animate({
+			scrollTop:0
+		},500);
+		return false;
+	});
+});	
+
+$('a[href="#tab-general"]').on('shown.bs.tab', function () {
+	$('#button-save-settings').removeClass('hidden');
+	$('#button-save-permissions').addClass('hidden');
+});
+
+$('a[href="#tab-general"]').on('hidden.bs.tab', function () {
+	$('#button-save-settings').addClass('hidden');
+	$('#button-save-permissions').removeClass('hidden');
+});	
+
+function showOverlay(msg) {
+	$('#ea-msg').html('');
+	html = '<div>'+ msg +'</div>';
+	$('#ea-msg').prepend(html);
+	$('#loading-overlay').removeClass('hidden');
+}
+
+function hideOverlay() {
+	$('#loading-overlay').addClass('hidden');
+}
+//--></script>
+
+{{ footer}} 

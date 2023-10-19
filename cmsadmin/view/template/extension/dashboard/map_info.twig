@@ -1,0 +1,23 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><i class="fa fa-pie-chart"></i> {{ heading_title }}</h3>
+  </div>
+  <div class="panel-body">
+	<canvas id="order-chart" ></canvas>
+  </div>
+</div>
+<script src="view/javascript/charts/chart.min.js"></script>
+<script type="text/javascript"><!--
+var lol = document.getElementById('order-chart');
+Chart.defaults.global.legend.position = 'left';
+var myChart = new Chart(lol, {
+    type: 'pie',
+    data : {
+	    datasets: [{
+	        data: {{ order_statuses }},
+	        backgroundColor: ['#0B4A07', '#CF8D30', '#FF5722'],
+	    }],
+    labels: {{ labels }},
+}
+});
+//--></script> 

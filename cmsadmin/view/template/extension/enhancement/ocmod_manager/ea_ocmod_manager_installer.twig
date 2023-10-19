@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>OCMod Installer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+  <script type="text/javascript" src="view/javascript/jquery/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+  <link href="view/stylesheet/bootstrap.css" type="text/css" rel="stylesheet"/>
+  <link href="view/javascript/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet"/>  
+  <link type="text/css" href="view/stylesheet/stylesheet.css" rel="stylesheet" media="screen"/>
+</head>
+<body>
+
+<div id="container">
+	<div id="content">
+	
+		<div class="container-fluid" id="install_form">
+			<div class="panel panel-default">
+		  		<div class="panel-body">					
+					
+					<div class="alert alert-info alert-dismissible"><i class="fa fa-info-circle"></i> {{ help_upload }}</div>
+					
+					<table class="table">
+						<tbody>
+							<tr>
+								<td class="text-left">
+								<form enctype="multipart/form-data" id="form-upload-install" class="form-horizontal">
+								<input type="file" name="file" class="filestyle" data-placeholder="{{ text_no_file_selected }}" data-buttonText="{{ button_choose_file }}" accept=".ocmod.zip" />
+								</form>
+								</td>
+								<td class="text-right"><button type="button" id="button-upload-new" data-loading-text="{{ text_loading }}" class="btn btn-primary"><i class="fa fa-upload fa-lg"></i> {{ button_upload_zip }}</button></td>
+							</tr>
+						</tbody>
+					</table>
+
+					<form class="form-horizontal">
+						<div class="form-group" style="padding-bottom:0">
+							<label class="col-sm-3 control-label">{{ entry_progress_install }}</label>
+							<div class="col-sm-9">
+								<div class="progress progress-striped">
+									<div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+								</div>
+								<div id="progress-text"></div>
+							</div>
+						</div>
+					</form>
+		  		</div>
+			</div>
+	  	</div>
+		
+	</div>
+</div>
+
+<script src="view/template/extension/enhancement/ocmod_manager/js/bootstrap/bootstrap-filestyle.min.js" type="text/javascript" charset="utf-8"></script>
+
+<style>
+#container {
+    background: #fff;
+}
+.panel {
+    margin-bottom: 0px;
+}
+.panel-default {
+	box-shadow: 0 0 0 #ccc;
+	border: 0px solid #ccc;
+}
+.panel-body {
+    padding: 0px 15px 0px 15px;
+}
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+#content {
+    padding-bottom: 0px;
+}
+.form-horizontal .control-label {
+    padding-top: 0px;
+}
+.table > tbody > tr > td {
+    border-top: 0px solid #ddd;
+}
+.table {
+    margin-bottom: 0;
+}
+</style>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	$('#button-upload-new').prop('disabled', true);
+});
+
+$('#form-upload-install input[name=\'file\']').on('change', function() {
+	if ($('#form-upload-install input[name=\'file\']').val() == '') {
+		$('#button-upload-new').prop('disabled', true);
+	} else {
+		$('#button-upload-new').prop('disabled', false);
+	}
+});
+
+var refresh_location = '';
+$('#button-upload-new').on('click', function() {	
+	if (typeof timer != 'undefined') {
+		clearInterval(timer);
+	}
+
+	timer = setInterval(function() {
+		if ($('#form-upload-install input[name=\'file\']').val() != '') {
+			clearInterval(timer);
+
+			// Reset everything
+			$('#progress-bar').css('width', '0%');
+			$('#progress-bar').removeClass('progress-bar-danger progress-bar-success');
+			$('#progress-text').html('');
+			$(document).ajaxStart();
+			$.ajax({
+				url: 'index.php?route=extension/enhancement/ea_ocmod_manager/uploadMod&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: new FormData($('#form-upload-install')[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				beforeSend: function() {
+					$('#button-upload-new').button('loading');
+				},
+				success: function(json) {
+					if (json['error']) {
+						$('#progress-bar').addClass('progress-bar-danger');
+						$('#progress-text').html('<div class="text-danger">' + json['error'] + '</div>');
+
+						$('#button-upload-new').button('reset');
+					}
+
+					if (json['text']) {
+						$('#progress-bar').css('width', '20%');
+						$('#progress-text').html(json['text']);
+					}
+
+					if (json['next']) {
+						next(json['next'], 1);
+					}
+
+					if (json['location'] && !json['error']) {
+						refresh_location = json['location'];
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});	
+			$(document).ajaxStop(function() {	
+				setTimeout(function() {
+					if (refresh_location != '') {
+						window.parent.document.location = refresh_location;
+					}
+				}, 1000);
+			});
+		}
+	}, 500);
+});
+
+function next(url, i) {
+	i = i + 1;
+
+	$.ajax({
+		url: url,
+		dataType: 'json',
+		success: function(json) {
+			$('#progress-bar').css('width', (i * 20) + '%');
+
+			if (json['error']) {
+				$('#progress-bar').addClass('progress-bar-danger');
+				$('#progress-text').html('<div class="text-danger">' + json['error'] + '</div>');
+
+				$('#button-upload-new').button('reset');
+			}
+
+			if (json['success']) {
+				$('#progress-bar').addClass('progress-bar-success');
+				$('#progress-text').html('<span class="text-success">' + json['success'] + '</span>');
+
+				$('#button-upload-new').button('reset');
+			}
+
+			if (json['text']) {
+				$('#progress-text').html(json['text']);
+			}
+
+			if (json['next']) {
+				next(json['next'], i);
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+//--></script>
+
+</body></html>

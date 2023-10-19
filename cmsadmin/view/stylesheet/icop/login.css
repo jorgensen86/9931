@@ -1,0 +1,49 @@
+#header, #footer {
+	display: none; 
+}
+
+#container {
+	background-image: url('../../image/admin-bg.jpg');
+	background-repeat: no-repeat;
+    background-position: center;
+}
+
+#content {
+	position: absolute;
+    width: 100%;
+    top: 20%;
+}
+
+.panel-default {
+	max-width: 380px;
+	margin: auto;
+	border-radius: 15px;
+}
+
+.panel-default .panel-heading {
+	border: none;
+}
+
+.panel-default #logo img {
+    width: 100%;
+}
+
+.panel-default #logo a {
+	display: block;
+}
+
+.panel-default .input-group-addon:first-child {
+	background: #242D37;
+}
+
+.panel-default .input-group-addon .fa {
+	color: #fff;
+}
+
+.panel-default .form-control:hover, .panel-default .form-control:focus {
+	border-color: #323AA4;
+}
+
+.panel-default .alert-danger {
+    background-color: #e2e2e2;
+}

@@ -1,0 +1,9 @@
+#form-hidden-fields {
+	padding: 10px;
+}
+#form-hidden-fields label {
+	margin-left: 5px;
+}
+.btn:focus, .btn:active:focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn.active.focus {
+	outline: none;
+}

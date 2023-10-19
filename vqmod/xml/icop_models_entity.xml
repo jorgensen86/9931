@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>icop_models_entity</id>
+	<version>3.1</version>
+	<vqmver>2.6.2</vqmver>
+	<author>Jorgensen</author>
+    
+    <file path="admin/view/template/catalog/product_form.twig">
+        <operation info="add to product form appliances" error="skip">
+            <search position="before" offset="1"><![CDATA[
+                <label class="col-sm-2 control-label" for="input-category">
+            ]]></search>
+            <add><![CDATA[  
+                {# icop_models_entity.xml #}
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="input-appliance"><span data-toggle="tooltip" title="{{ help_category }}">{{ entry_appliance }}</span></label>
+                    <div class="col-sm-10">
+                      <input type="text" name="appliance" value="" placeholder="{{ entry_appliance }}" id="input-appliance" class="form-control"/>
+                      <div id="product-appliance" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_appliance in product_appliances %}
+                          <div id="product-appliance{{ product_appliance.appliance_id }}"><i class="fa fa-minus-circle"></i> {{ product_appliance.name }}
+                            <input type="hidden" name="product_appliance[]" value="{{ product_appliance.appliance_id }}"/>
+                          </div>
+                        {% endfor %}</div>
+                    </div>
+                  </div>
+                  {# icop_models_entity.xml #}
+            ]]></add>
+        </operation>
+        <operation info="autocomplete for appliances" error="skip">
+            <search position="before"><![CDATA[ 
+                // Category
+            ]]></search>
+            <add><![CDATA[  
+        /* icop_models_entity.xml */
+        // Models
+        $('input[name=\'appliance\']').autocomplete({
+            'source': function(request, response) {
+                $.ajax({
+                    url: 'index.php?route=catalog/appliance/autocomplete&user_token={{ user_token }}&filter_code=' + encodeURIComponent(request),
+                    dataType: 'json',
+                    success: function(json) {
+                        response($.map(json, function(item) {
+                            return {
+                                label: item['manufacturer'] + '/' + item['code'],
+                                value: item['appliance_id']
+                            }
+                        }));
+                    }
+                });
+            },
+            'select': function(item) {
+                $('input[name=\'appliance\']').val('');
+      
+                $('#product-appliance' + item['value']).remove();
+      
+                $('#product-appliance').append('<div id="product-appliance' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_appliance[]" value="' + item['value'] + '" /></div>');
+            }
+        });
+      
+        $('#product-appliance').delegate('.fa-minus-circle', 'click', function() {
+            $(this).parent().remove();
+        });
+        /* icop_models_entity.xml */
+            ]]></add>
+        </operation>
+	</file>
+   
+    <file path="admin/controller/catalog/product.php">
+        <operation info="add to product form appliances" error="skip">
+            <search position="before"><![CDATA[
+                // Categories
+            ]]></search>
+            <add><![CDATA[  
+                /* icop_models_entity.xml */
+                // Appliances
+                $this->load->model('catalog/appliance');
+        
+                if (isset($this->request->post['product_appliance'])) {
+                    $appliances = $this->request->post['product_appliance'];
+                } elseif (isset($this->request->get['product_id'])) {
+                    $appliances = $this->model_catalog_product->getProductAppliances($this->request->get['product_id']);
+                } else {
+                    $appliances = array();
+                }
+
+                $data['product_appliances'] = array();
+        
+                foreach ($appliances as $appliance_id) {
+                    $appliance_info = $this->model_catalog_appliance->getAppliance($appliance_id);
+;
+                    if ($appliance_info) {
+                        $data['product_appliances'][] = array(
+                            'appliance_id' => $appliance_info['appliance_id'],
+                            'name'         => $appliance_info['manufacturer'] . '/' . $appliance_info['code']
+                        );
+                    }
+                }
+        
+                /* icop_models_entity.xml */
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/model/catalog/product.php">
+        <operation info="add to product form appliances" error="skip">
+            <search position="before"><![CDATA[
+                public function getProductCategories($product_id) {
+            ]]></search>
+            <add><![CDATA[  
+                /* icop_models_entity.xml */
+                public function getProductAppliances($product_id) {
+                    $product_appliance_data = array();
+            
+                    $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_appliance WHERE product_id = '" . (int)$product_id . "'");
+            
+                    foreach ($query->rows as $result) {
+                        $product_appliance_data[] = $result['appliance_id'];
+                    }
+            
+                    return $product_appliance_data;
+                }
+                /* icop_models_entity.xml */
+            ]]></add>
+        </operation>
+        <operation info="add to product form appliances" error="skip">
+            <search position="before"><![CDATA[
+                if (isset($data['product_category'])) {
+            ]]></search>
+            <add><![CDATA[  
+        /* icop_models_entity.xml */
+        if(__FUNCTION__ === 'editProduct') {
+            $this->db->query("DELETE FROM " . DB_PREFIX . "product_to_appliance WHERE product_id = '" . (int)$product_id . "'");
+        }
+
+        if (isset($data['product_appliance'])) {
+            foreach ($data['product_appliance'] as $appliance_id) {
+                $this->db->query("INSERT INTO " . DB_PREFIX . "product_to_appliance SET product_id = '" . (int)$product_id . "', appliance_id = '" . (int)$appliance_id . "'");
+            }
+        }
+        /* icop_models_entity.xml */
+            ]]></add>
+        </operation>
+    </file>
+</modification>

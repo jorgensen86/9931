@@ -1,0 +1,17 @@
+User-agent: *
+
+Crawl-delay: 10
+
+Disallow: /cgi-bin/
+Disallow: /admin/
+Disallow: /system/
+
+Disallow: /*&limit
+Disallow: /*?sort
+Disallow: /*&sort
+Disallow: /*route=checkout/
+Disallow: /*route=account/
+Disallow: /*route=product/search
+Disallow: /cookies.html
+
+Sitemap: /sitemap.xml

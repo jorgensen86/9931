@@ -1,0 +1,304 @@
+<div class="modal-dialog">
+	<div class="modal-content">
+
+		<div class="modal-header">
+			<div class="pull-right">
+				<button type="button" class="btn btn-danger btn-sm" data-dismiss="modal" id="button-save-cancel">{{ button_cancel_return }}</button>
+			</div>
+			<h2 class="modal-title" id="mtitle"><i class="fa fa-envelope"></i> {{ text_contact_developer }}</h2>
+		</div>
+
+		<div class="modal-body">         
+        	<div class="container-fluid"> 
+            	<div class="panel panel-default">     
+			  
+					<div class="panel-body">
+						<form action="" method="post" enctype="multipart/form-data" id="form-ocmod-contact" class="form-horizontal">                    
+							<i class="fa fa-info-circle fa-lg"></i>&nbsp;&nbsp{{ text_contact_info }}
+							<hr style="margin-bottom:5px" />
+
+							<div class="row">								
+								<div class="col-sm-6">
+									<div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-4" for="from_name" style="margin-top:10px;">{{ entry_your_name }}:</label>
+										<div class="input-group col-sm-8">
+											<input type="text" name="from_name" id="from_name" class="form-control" value="{{ from_name }}" placeholder="{{ text_your_name }}" />
+											<div class="input-group-addon"><i class="fa fa-user fa-lg"></i></div>
+										</div>
+									</div>                
+								</div>
+								
+								<div class="col-sm-6"> 
+									<div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-4" for="subject" style="margin-top:10px;">{{ entry_email_subject }}:</label>
+										<div class="input-group col-sm-8">
+											<input type="text" name="subject" id="subject" class="form-control" value="{{ email_subject }}" placeholder="{{ text_email_subject }}" />
+											<div class="input-group-addon"><i class="fa fa-info-circle fa-lg"></i></div>
+										</div>
+									</div>               
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-sm-6"> <div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-4" for="from_email" style="margin-top:10px;">{{ entry_email_from }}:</label>
+										<div class="input-group col-sm-8">
+											<input type="email" name="from_email" id="from_email" class="form-control" value="{{ from_email }}" placeholder="{{ text_your_email }}" />
+											<div class="input-group-addon"><i class="fa fa-at fa-lg"></i></div>
+										</div>
+									</div>                
+								</div>
+								
+								<div class="col-sm-6">
+									<div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-4" for="to_email" style="margin-top:10px;">{{ entry_email_to }}:</label>
+										<div class="input-group col-sm-8">
+											<input type="email" name="to_email" id="to_email" class="form-control" value="{{ dev_email }}" />
+											<div class="input-group-addon"><i class="fa fa-at fa-lg"></i></div>
+										</div>
+									</div>          
+								</div>
+							</div>
+							
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-2" for="dev_message" style="margin-top:10px;">{{ entry_email_message }}:</label>
+										<div class="col-sm-10" style="padding:0;">
+											<textarea name="dev_message" id="dev_message" class="form-control" rows="4"></textarea>
+											<div id="textleft" style="text-align:right;">{{ text_max_character }}</div>
+										</div>
+									</div>                
+								</div>
+							</div>
+							
+							{% if userPermission %}							
+							<div class="row">
+								<div class="col-sm-12" style="padding-left:0">
+									<div class="form-group" style="padding:10px 0 20px 0;">
+									  <label class="col-sm-3 control-label" for="input-file">{{ text_filename }}</label>
+									  <div class="col-sm-2">
+										  <button type="button" id="button-upload" data-loading-text="{{ text_loading }}" class="btn btn-primary btn-sm"><i class="fa fa-upload fa-lg"></i>&nbsp;&nbsp;{{ button_upload_attachment }}</button>
+										  <input type="hidden" name="file" value="" id="file" />
+									  </div>
+									  <div class="col-sm-7">
+										  <div style="margin-top:8px;"><span id="input-attached">{{ file_limit }}</span>&nbsp;&nbsp;<a id="gmail" role="button" tabindex="0"><i class="fa fa-info-circle fa-lg text-primary"></i></a></div>
+									  </div>
+									</div>
+								</div>
+							</div>
+							{% endif %}
+							
+							<hr style="margin-top:5px;margin-bottom:5px" />
+							
+							<div class="row">								
+								<div class="col-sm-9" style="padding:15px 15px 0px 15px;">
+									<strong>{{ entry_send_copy }}</strong>&nbsp;&nbsp;<input type="checkbox" name="send_copy" />
+								</div>
+								<div class="col-sm-3" style="padding:10px 15px 0px 15px;">
+									<span class="pull-right"><button type="button" class="btn btn-success btn-sm" id="sendbutton"><i class="fa fa-forward fa-lg"></i>&nbsp;&nbsp;{{ button_send_email }}</button></span>
+								</div>
+							</div>
+						</form>
+					</div>
+			  
+            	</div>          
+        	</div>
+		</div>
+		
+    </div>
+</div>
+
+
+<style type="text/css">
+.form-horizontal .control-label {
+    text-align: left;
+}
+#modal-ocmod-contact .panel-default {
+	box-shadow: 0 0 0 #ccc;
+	border: 1px solid #ccc;
+}
+#modal-ocmod-contact .container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+#content {
+    padding-bottom: 0px;
+}
+#modal-ocmod-contact .panel {
+    margin-bottom: 0px;
+}
+.modal-dialog {
+	margin: 20px auto;
+	width:900px;
+}
+.popover{
+    max-width: 400px;
+	padding:0px;
+}
+.popover-title {
+	background-color: #515151;
+	color: #fff;
+}
+</style>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {	
+	$('#dev_email').keyup(function () {
+		var email = $('#dev_email').val();
+		if(!validateEmail(email)) {
+			$('#contact_button').prop('disabled', true);
+			$('#dev_email').css("border","1px solid red");
+		} else {
+			$('#contact_button').prop('disabled', false);
+			$('#dev_email').css("border","1px solid green");
+		}
+	});
+	
+	$('#dev_message').keypress(function (e) {
+		var max = 3000;
+		var len = $(this).val().length;
+
+		if (e.which < 0x20) {
+		  return;
+		}
+
+		if (len >= max) {
+		  e.preventDefault();
+		}
+	});
+
+	$('#dev_message').keyup(function () {
+		var max = 3000;
+		var len = $(this).val().length;
+		var chars = max - len;
+		
+		if (len >= 10 && len <= max ){
+			$('#textleft').html('{{ text_you_have }} <span class="text-success">' + chars + '</span> {{ text_characters_left }}');
+		} else {
+			$('#textleft').html('{{ text_you_have }} <span class="text-danger">' + chars + '</span> {{ text_characters_left }}');
+		}
+	});
+	
+	$('#sendbutton').on("click", function () {
+		$('[data-toggle=\'tooltip\']').tooltip('hide');
+		$('.alert-danger,.alert-success').remove();
+		$('#from_name,#from_email,#to_email,#subject,#dev_message').css("border","1px solid #b9b9b9");
+		$.ajax({
+			type: "POST",
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager/sendMessage&user_token={{ user_token }}&mid= {{ modification_id }}', 
+			data: $('#form-ocmod-contact').serialize(),
+			beforeSend: function() {
+				$('#sendbutton').removeClass('btn btn-primary btn-sm');
+				$('#sendbutton').addClass('btn btn-danger btn-sm');
+				$('#sendbutton').html('<i class="fa fa-cog fa-spin fa-lg"></i>&nbsp;&nbsp;{{ text_please_wait }}');
+				$('#sendbutton').prop('disabled', true);
+			},
+			complete: function() {
+				$('#sendbutton').removeClass('btn btn-danger btn-sm');
+				$('#sendbutton').addClass('btn btn-primary btn-sm');			
+				$('#sendbutton').html('<i class="fa fa-forward fa-lg"></i>&nbsp;&nbsp;{{ button_send_email }}');
+				$('#sendbutton').prop('disabled', false);
+			},
+			success: function(json) {
+				if (json['error_name']) {
+					$('#modal-ocmod-contact .panel-default').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error_name'] + '</div>');
+					$('#from_name').css("border","1px solid red");
+				}
+				if (json['error_from']) {
+					$('#modal-ocmod-contact .panel-default').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error_from'] + '</div>');
+					$('#from_email').css("border","1px solid red");
+				}
+				if (json['error_to']) {
+					$('#modal-ocmod-contact .panel-default').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error_to'] + '</div>');
+					$('#to_email').css("border","1px solid red");
+				}
+				if (json['error_subject']) {
+					$('#modal-ocmod-contact .panel-default').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error_subject'] + '</div>');
+					$('#subject').css("border","1px solid red");
+				}
+				if (json['error_message']) {
+					$('#modal-ocmod-contact .panel-default').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error_message'] + '</div>');
+					$('#dev_message').css("border","1px solid red");
+				}
+				if (json['success']) {
+					$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+					setTimeout(function() {
+						$('#modal-ocmod-contact').modal('hide');
+					}, 500);
+				}				
+			},	
+		});
+	});
+});
+
+$('#gmail').popover({
+	html: true,
+	placement: 'top',
+	trigger: 'hover',
+	title: '<i class="fa fa-exclamation-triangle"></i>&nbsp;&nbsp;<strong>{{ text_google_mail }}</strong>',
+	container: 'body',
+	content: function() {
+		html = '{{ text_cant_include }}';
+		return html;
+	}
+});
+
+$('button[id^=\'button-upload\']').on('click', function() {
+	var element = this;
+
+	$('#form-upload').remove();
+
+	$('body').prepend('<form enctype="multipart/form-data" id="form-upload" style="display: none;"><input type="file" name="file" /></form>');
+
+	$('#form-upload input[name=\'file\']').trigger('click');
+
+	timer = setInterval(function() {
+		if ($('#form-upload input[name=\'file\']').val() != '') {
+			clearInterval(timer);
+			$.ajax({
+				url: 'index.php?route=extension/enhancement/ea_ocmod_manager/uploadAttachment&user_token={{ user_token }}',
+				type: 'post',
+				dataType: 'json',
+				data: new FormData($('#form-upload')[0]),
+				cache: false,
+				contentType: false,
+				processData: false,
+				beforeSend: function() {
+					$(element).button('loading');
+				},
+				complete: function() {
+					$(element).button('reset');
+				},
+				success: function(json) {
+					$('.text-danger').remove();
+
+					if (json['error']) {
+						$(element).parent().find('input').after('<div class="text-danger">' + json['error'] + '</div>');
+					}
+
+					if (json['success']) {
+						alert(json['success']);
+
+						$('#input-attached').text(json['filename']);
+						$(element).parent().find('input').attr('value', json['code']);
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+				}
+			});
+		}
+	}, 500);
+});
+
+function validateUrl($url) {
+    var urlReg = new RegExp(/^(https?|s?ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i);
+	return urlReg.test($url);
+}
+
+function validateEmail($email) {
+	var emailReg = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+  	return emailReg.test($email);
+}
+//--></script>

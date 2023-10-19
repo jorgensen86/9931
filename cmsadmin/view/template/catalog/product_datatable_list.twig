@@ -1,0 +1,494 @@
+{{ header }}{{ column_left }}
+<div id="content">    
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <div class="dropdown" id="datatable-dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Στήλες<span
+                            class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        {% for key, column in columns %}
+                        <li class="{{ (key + 1) in hidden_columns ? 'hidden-item' : '' }}"><a href="#" data-column="{{ key + 1 }}" data-value="{{ column }}">{{ _context["entry_" ~ column] }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <button type="button" data-toggle="tooltip" title="{{ button_filter }}"
+                    onclick="$('#filter-product').toggleClass('hidden-sm hidden-xs');"
+                    class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
+                <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i
+                        class="fa fa-plus"></i></a>
+                <button type="submit" id="button-copy" form="form-product" formaction="{{ copy }}" data-toggle="tooltip"
+                    title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
+                <button type="button" id="button-delete" form="form-product" formaction="{{ delete }}" data-toggle="tooltip"
+                    title="{{ button_delete }}" class="btn btn-danger"
+                    onclick="confirm('{{ text_confirm }}') ? $('#form-product').submit() : false;"><i
+                        class="fa fa-trash-o"></i></button>
+            </div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+            <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}<button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+        <div class="row">
+           <div id="filter-product" class="hidden-sm hidden-xs col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <a class="collapseFilter" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter"><h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3></a>
+                    </div>
+                    <div class="panel-body collapse in" id="collapseFilter">
+                        {% for key,filterdata in filters %}
+                            {% if filterdata == 'text'  %}
+                            <div class="form-group col-lg-2 col-md-3">
+                                <input type="text" name="{{ key }}" value="{{ _context[key] }}"
+                                    placeholder="{{ _context[key| replace({'filter': 'entry'})] }}" id="input-{{ key | replace({'_': '-'}) }}" class="form-control" />
+                            </div>
+                            {% elseif filterdata == 'select'  %}
+                            <div class="form-group col-lg-2 col-md-3">
+                                <select name="{{ key }}" class="form-control">
+                                    <option value="" selected>{{ _context[key|replace({'filter': 'entry'})] }}</option>
+                                      {% for option in _context[key| replace({'filter_': ''}) ~'es' ] %}
+                                        <option {{ (_context[key] is not empty) and (_context[key] == option.id) ? 'selected' : null }} value="{{ option.id }}">{{ option.name }}</option>
+                                    {% endfor %}    
+                                </select>
+                            </div>
+                            {% elseif filterdata == 'hidden'  %}
+                            <input type="hidden" name="{{ key }}" value="{{ _context[key] }}">
+                            {% endif %}
+                        {% endfor %}
+                        <div class="form-group text-right">
+                            <button type="button" id="button-filter" class="btn btn-default"><i
+                                    class="fa fa-filter"></i> {{ button_filter }}</button>
+                            <button type="button" id="button-clear-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_clear }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-product">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="products-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            {% for column in columns %}
+                                                <th>{{ _context["entry_" ~ column] }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+<script src="view/javascript/ckeditor/ckeditor.js"></script>
+<script type="text/javascript"><!--
+    // IE and Edge fix!
+    $('button[form=\'form-product\']').on('click', function(e) {
+        $('#form-product').attr('action', $(this).attr('formaction'));
+    });
+    
+    let filterInput = '';
+    let action = '';
+    /* Product Filters */
+    $('input[name=\'filter_name\'], input[name=\'filter_model\'], input[name=\'filter_category\'], input[name=\'filter_manufacturer\']').autocomplete({
+        'source': function(request, response) {
+            let search = 'filter_name';
+            action = 'product';
+            filterInput = $(this);
+            
+            if (filterInput.attr('name') == 'filter_category') {
+                action = 'category';
+                $('input[name=\'filter_category_id\']').val('');
+            } else if (filterInput.attr('name') == 'filter_manufacturer') {
+                action = 'manufacturer';
+                $('input[name=\'filter_manufacturer_id\']').val('');
+            } else if (filterInput.attr('name') == 'filter_model') {
+                search = 'filter_model'
+            }
+            $.ajax({
+                url: 'index.php?route=catalog/' + action + '/autocomplete&user_token={{ user_token }}&' + search + '=' +  encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    response($.map(json, function(item) {
+                        return {
+                            label: item[search.replace('filter_','')],
+                            value: item[action + '_id']
+                        }
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            filterInput.val(item['label']);
+            $('input[name=\'filter_' + action + '_id\']').val(item['value']);
+        }
+    });    
+
+    $('#button-filter').on('click', function() {
+        productTable.ajax.reload();
+    });
+
+    $('#button-clear-filter').on('click', function() {
+        $('#filter-product').find(':input').val('');
+        productTable.ajax.reload();
+    });
+//--></script>
+
+<script type="text/javascript"><!--
+    /* Create DataTable Object */
+    const columns = [
+        { 
+            data: 'product_id', 
+            render: function(data, type, row) {
+                return '<input type="checkbox" name="selected[]" value="' + data + '">';
+            },
+            className: 'text-center',
+        },
+        {% for column in columns %}
+        { 
+            data: '{{ column }}',
+            render: function(data, type, row) {
+                return createView('{{ column }}', data, type, row);
+            },
+            className : (('{{ column }}' === 'action') || ('{{ column }}' === 'image') ) ? 'text-center' : null
+        },
+        {% endfor %}
+    ];
+
+    const language = {
+        "paginate": 
+        {
+            "first":      "Αρχή",
+            "last":       "Τέλος",
+            "next":       "Επόμενο",
+            "previous":   "Προηγούμενο",
+        },
+        "search"  :   "Γρήγορη Αναζήτηση με όνομα ή κωδικό",
+        "processing":     "Περιμένετε...",
+        "lengthMenu": "Εμφάνιση _MENU_ προιόντα ανά σελίδα",
+        "zeroRecords": "Δε βρέθηκαν προϊόντα",
+        "info": "Εμφάνιση σελίδας _PAGE_ από _PAGES_",
+        "infoEmpty": "Δεν υπάρχουν προϊόντα",
+        "infoFiltered": "( _TOTAL_ φιλτραρισμένα από _MAX_ συνολικά προϊόντα )"
+    };
+
+
+    const productTable = $('#products-table').DataTable( {
+        searchDelay: 2000,
+        search: true,
+        columnDefs: [
+            { targets: 0, orderable: false },
+            { targets: 1, orderable: false },
+            { targets: 4, orderable: false },
+            { targets: 5, orderable: false },
+            { targets: 6, orderable: false },
+            { targets: 9, orderable: false },
+            { targets: 13, orderable: false }
+        ],
+
+        language: language,
+        order: [{{ sort }}, '{{ order }}'],
+        processing: true,
+        serverSide: true,
+        searchDelay: 350,
+        displayStart: {{ start }},
+        drawCallback: function(settings) {
+            $('#button-copy').attr('formaction', settings.json.copy)
+            $('#form-product').attr('action', settings.json.delete)
+          //  $('#button-delete').attr('formaction', settings.json.delete)
+        },
+        ajax: {
+            url: 'index.php?route=catalog/product_datatable/getData&user_token={{ user_token }}',
+            data: function ( params ) {
+                return  $.extend(params, {
+                    {% for key, filter in filters %}
+                    {{ key }} : $('[name=\'{{ key }}\']').val(),
+                    {% endfor %}
+            });
+            }
+        },
+        columns: columns,
+    });
+//--></script>
+
+<script type="text/javascript"><!--
+    //bugfix gia na mhn patas enter sto dataTable
+    $(document).on('keyup keypress', '.dataTable input:not([type="checkbox"])', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) { 
+            $('#form-product').on('submit', function(e) {
+                e.preventDefault()
+                return false
+            })
+        }
+    })
+    
+    /* Buttons Events */
+    $(document).on('click', '.button-save', function() {
+		let elem = $(this);
+        let product_id = $(this).closest('tr').attr('id').slice(10);
+        let value = $(this).prev().val();
+        $.ajax({
+            url: 'index.php?route=catalog/product_datatable/editData&user_token={{ user_token }}&action=' + elem.attr('data-action'),
+            data: { 'product_id' : product_id, 'value' : value, 'key' : elem.prev().attr('name')},
+			type: 'post',
+			dataType: 'json',
+			success: function(json) {
+                if (elem.attr('data-action') == 'add_category' || elem.attr('data-action') == 'change_manufacturer' || elem.attr('data-action') == 'change_stock_status' || elem.attr('data-action') == 'change_status') {
+                    productTable.ajax.reload( null, false);
+                    return;
+                }
+
+                if(json.error) {
+					alert(json.error);
+                } else {
+                    elem.closest('div').hide();
+				    elem.closest('div').prev().find('span').text(value);
+                    elem.closest('div').prev().fadeIn();
+                }
+			}
+        });
+    }).on('click', '.button-edit, .button-add, .button-cancel', function() {
+        if($(this).hasClass('button-cancel')) {
+            $(this).closest('div').hide();
+            $(this).closest('div').prev().fadeIn();
+        } else {
+            $(this).closest('div').hide();
+            $(this).closest('div').next().fadeIn();   
+        }        
+    });
+    
+    $(document).on('click', '#products-table .fa-trash', function() {
+        if (confirm('{{text_confirm }}') == false) return;
+        let elem = $(this);
+        let product_id = elem.closest('tr').attr('id').slice(10);
+        let category_id = elem.attr('id').slice(9);
+
+        $.ajax({
+            url: 'index.php?route=catalog/product_datatable/editData&user_token={{ user_token }}&action=delete_category',
+            data: { 'product_id' : product_id, 'category_id' : category_id},
+			type: 'post',
+			dataType: 'json',
+			success: function(json) {
+				if(json.error) {
+					alert(json.error);
+				}
+				elem.closest('li').remove();
+			}
+        });
+        
+	});
+
+/* Datatable Image Manager */
+$(document).on('click', '.thumbnail', function() {
+    const url = $('#filemanager #button-refresh').attr('href').split('&');
+    for (let i = 0; i < url.length; i++) {
+        if(url[i].search('target=input-image-productId-') != -1) {
+             $('#' + url[i].replace('target=','')).trigger('change');
+             break;
+        }
+    }
+}).on('click', '#button-clear', function() {
+    $('#' + $(this).closest('.popover').next().attr('id')).trigger('change');
+}).on('change', 'input[name=\'image\']', function() {
+    let elem = $(this);
+    let product_id = elem.closest('tr').attr('id').slice(10);
+    let value = elem.val();
+    $.ajax({
+        url: 'index.php?route=catalog/product_datatable/editData&user_token={{ user_token }}',
+        data: { 'product_id' : product_id, 'value' : value, 'key' : 'image'},
+		type: 'post',
+		dataType: 'json',
+        beforeSend: function() {
+            $('.paginate_button').addClass('disabled');
+        },
+		success: function(json) {
+            productTable.ajax.reload( null, false )
+		}
+    });
+});
+	
+// Manufacturer - Category
+$(document).on('focus', 'input[name=\'category\'], input[name=\'manufacturer\']', function() {
+    let self = $(this);
+    self.next('ul').remove();
+    let id = self.attr('name') + '_id';
+    self.autocomplete({
+        'source': function(request, response) {
+            $.ajax({
+                url: 'index.php?route=catalog/' + self.attr('name') + '/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+                dataType: 'json',
+                success: function(json) {
+                    json.unshift({
+                        id : 0,
+                        name: '{{ text_none }}'
+                    });
+                    response($.map(json, function(item) {
+                        return {
+                            label: item['name'],
+                            value: item[self.attr('name') + '_id']
+                        }
+                    }));
+                }
+            });
+        },
+        'select': function(item) {
+            self.val(item['label']);
+            $('input[name=\'' + self.attr('name') + '_id\']').val(item['value']);
+        }
+    });
+});
+
+$('#datatable-dropdown a').on('click', function(e){
+    e.preventDefault();
+    
+       var column = productTable.column($(this).attr('data-column'));
+       var element = $(this);
+                  
+        $.ajax({
+            url: 'index.php?route=catalog/product_datatable/hiddenColumnsDatatable&user_token={{ user_token }}',
+            type: 'post',
+            data: {'column': $(this).attr('data-column')},
+            beforeSend: function() {
+                $('#datatable-dropdown li').addClass('disabled')
+            },
+            complete: function() {
+                $('#datatable-dropdown li').removeClass('disabled')
+                element.parent().toggleClass('hidden-item')
+            },
+            success: function() {
+                column.visible( ! column.visible() );
+            }
+        });
+   
+});
+$(document).ready(function() {
+   {% for hidden_column in hidden_columns %}
+    productTable.column('{{ hidden_column }}').visible(! productTable.column('{{ hidden_column }}').visible());
+   {% endfor %}
+});
+
+
+$(document).on('click', '.modalButton', function(e) {
+    e.preventDefault();
+    $('#productModal .modal-content').empty();
+    $.ajax({
+        url: 'index.php?route=catalog/product_datatable/openModal&user_token={{ user_token }}&product_id=' + $(this).attr('data-product-id').replace('productId-', '') + '&field=' + $(this).attr('href').replace('#', ''),
+        success: function(html) {
+            $('#productModal .modal-content').append(html);
+            $('#productModal').modal('show');
+        }
+    });
+}).on('click', '#modal-save', function(){
+    for (var key in CKEDITOR.instances) {
+        value = CKEDITOR.instances[key].getData();
+    }
+    $.ajax({
+        url: 'index.php?route=catalog/product_datatable/editData&user_token={{ user_token }}&action=true',
+        type: 'post',
+        data: { 'product_id' : $('.modal-content #input-product-id').val(), 'key' : 'description', 'value' : value},
+        success: function() {
+            $('#productModal').modal('hide');
+        }
+    });
+});
+
+function createView(element, data, type, row) {
+        if (element === 'image') {
+            return '<a href="" id="thumb-image-' + row.DT_RowId + '" data-toggle="image" class="img-thumbnail"><img src="' + data + '" data-placeholder="{{ placeholder }}"/></a> <input type="hidden" name="image" value="{{ image }}" id="input-image-' + row.DT_RowId + '"/>';
+        } else if (element === 'description') {
+            return '<a type="button" class="modalButton" data-product-id=' + row.DT_RowId + ' href="#description">{{ button_edit }}</a>';
+        } else if (element === 'category') {
+            let list = '';
+            $.each(data, function(index, value) { 
+                list += '<li class="list-group-item" data-toggle="tooltip" title="' + value.path + '">' + value.name + ' <i class="fa fa-trash" id="category-' + value.category_id + '"></i></li>';
+            });
+            return  '<ul class="list-group">' + list + '</ul>' +
+                    '<div class="text-right">' +
+                        '<button type="button" class="btn btn-success btn-default btn-xs button-add"><i class="fa fa-plus"></i></button>' +
+                    '</div>' + 
+                    '<div class="category-input" style="display:none">' + 
+                        '<input type="text" name="category" class="form-control" value="" /><input type="hidden" name="category_id" value="" />' +
+                        '<button type="button" data-action="add_category" class="btn btn-success btn-xs button-save" data-toggle="tooltip" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></button> ' + 
+                        '<button type="button" class="btn btn-default btn-xs button-cancel" data-toggle="tooltip" data-original-title="{{ button_cancel }}"><i class="fa fa-reply"></i>' + 
+                    '</div>';
+        } else if (element === 'manufacturer') {
+             return '<div class="manufacturer"><a type="button" class="button-edit"><span>' + data + '</span></a></div><div class="manufacturer-input" style="display:none"><input type="text" name="manufacturer" class="form-control" value="' + data + '"/><input type="hidden" name="manufacturer_id" value=""/><button data-action="change_manufacturer" type="button" class="btn btn-success btn-xs button-save" data-toggle="tooltip" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></button><button type="button" class="btn btn-default btn-xs button-cancel" data-toggle="tooltip" data-original-title="{{ button_cancel }}"><i class="fa fa-reply"></i></button></div>'
+        } else if ( element === 'stock_status') {
+            let options =  '';
+            {% for stock_status in stock_statuses %}
+                if(data.stock_status_id == '{{ stock_status.id }}') {
+                    options += '<option selected value="{{ stock_status.id }}">{{ stock_status.name }}</option>'
+                } else {
+                    options += '<option value="{{ stock_status.id }}">{{ stock_status.name }}</option>'
+                }
+            {% endfor %}
+            return '<div class="' + element + '">' + 
+                        '<a type="button" class="button-edit"><span>' + data.name + '</span></a>' +
+                    '</div>' + 
+                    '<div class="' + element + '-input" style="display:none">' +
+                        '<select name="' + element + '_id" class="form-control">' + options + '</select>' + 
+                        '<button data-action="change_stock_status" type="button" class="btn btn-success btn-xs button-save" data-toggle="tooltip" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></button>' + 
+                        '<button type="button" class="btn btn-default btn-xs button-cancel" data-toggle="tooltip" data-original-title="{{ button_cancel }}"><i class="fa fa-reply"></i></button>' + 
+                    '</div>';
+        } else if ( element === 'status') {
+            let options =  '';
+                if(data === '{{ text_enabled }}') {
+                    options += '<option value="0">{{ text_disabled }}</option>';
+                    options += '<option selected value="1">{{ text_enabled }}</option>';
+                } else {
+                    options += '<option selected value="0">{{ text_disabled }}</option>';
+                    options += '<option value="1">{{ text_enabled }}</option>';      
+                }
+            return '<div class="' + element + '">' + 
+                        '<a type="button" class="button-edit"><span>' + data + '</span></a>' +
+                    '</div>' + 
+                    '<div class="' + element + '-input" style="display:none">' +
+                        '<select name="' + element + '" class="form-control">' + options + '</select>' + 
+                        '<button data-action="change_status" type="button" class="btn btn-success btn-xs button-save" data-toggle="tooltip" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></button>' + 
+                        '<button type="button" class="btn btn-default btn-xs button-cancel" data-toggle="tooltip" data-original-title="{{ button_cancel }}"><i class="fa fa-reply"></i></button>' + 
+                    '</div>';
+        } else if (element === 'action') {
+            return '<a target="_blank" href="' + data.view + '" data-toggle="tooltip" title="" class="btn btn-info btn-sm" data-original-title="{{ button_view }}"><i class="fa fa-eye"></i></a> <a href="' + data.edit + '" data-toggle="tooltip" title="" class="btn btn-primary btn-sm" data-original-title="{{ button_edit }}"><i class="fa fa-pencil"></i></a>';
+        } else {
+            return '<div class="' + element + '">' + 
+                        '<a type="button" class="button-edit"><span>' + data + '</span></a>' +
+                    '</div>' + 
+                    '<div class="' + element + '-input" style="display:none">' +
+                        '<input type="text" name="' + element + '" class="form-control" value="' + data + '"/>' + 
+                        '<button type="button" class="btn btn-success btn-xs button-save" data-toggle="tooltip" data-original-title="{{ button_save }}"><i class="fa fa-save"></i></button> ' + 
+                        '<button type="button" class="btn btn-default btn-xs button-cancel" data-toggle="tooltip" data-original-title="{{ button_cancel }}"><i class="fa fa-reply"></i></button>' + 
+                    '</div>';
+        }
+    }
+//--></script>
+</div>
+{{ footer }}

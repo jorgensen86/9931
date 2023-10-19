@@ -1,0 +1,51 @@
+{% if user_group_id == '1' %}
+<div class="container-fluid">
+	<div class="pull-right">
+	<button class="btn btn-info btn-sm" type="button" data-toggle="collapse" data-target="#hiddenFields">{{ icop_button_hidden_fields }}</button>
+	</div>
+	<div class="collapse" id="hiddenFields">
+		<form id="form-hidden-fields" class="form-horizontal">
+			<div class="form-group">
+				{% for text,field in fields %}
+					<label class="control-label"><input type="checkbox" {{ field in hidden_fields ? 'checked' : null }} value="{{ field }}" name="{{ key }}[]"> {{ _context["entry_" ~ text] }}</span></label>
+				{% endfor %}
+			</div>
+		</form>
+	</div>
+</div>
+{% endif %}
+<script type="text/javascript">
+{% if user_group_id == '1' %}
+	$('#form-hidden-fields input').on('change', function() { 
+		var $input = $(this);
+		$.ajax({
+			url: 'index.php?route=event/icop/hiddenFields&user_token={{ user_token }}&file={{ key }}',
+			type: 'post',
+			data: $('#form-hidden-fields').serialize(),
+			beforeSend: function() {
+				$('#form-hidden-fields input').prop('disabled', true)
+			},
+			complete: function() {
+				$('#form-hidden-fields input').prop('disabled', false)
+			},
+			success: function() {
+				if ($input.is(':checked') === true) {
+					$('[name=\'' + $input.val() + '\']').closest('.form-group').addClass('hidden');
+				} else {
+					$('[name=\'' + $input.val() + '\']').closest('.form-group').removeClass('hidden');
+				}
+			}
+		});
+	});
+{% endif %}
+	$(function() {
+		{% for keys, item in hidden_fields %}
+			$('[name=\'{{ item }}\']').closest('.form-group').addClass('hidden');
+		{% endfor %}
+		{% for key,tab in hidden_tabs %}
+			{% if tab == false %}
+			$('.nav-tabs > li > a[href=\'#tab-{{ key }}\']').addClass('hidden');
+			{% endif %}
+		{% endfor %}
+	});
+</script>

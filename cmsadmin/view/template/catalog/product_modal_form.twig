@@ -1,0 +1,51 @@
+ <div class="modal-header">
+    <h5 class="modal-title" id="productModalLabel">{{ title }}</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <input type="hidden" name="product_id" id="input-product-id" value="{{ content.product_id }}">
+    <textarea class="form-control" name="description" id="input-description2">{{ content.description }}</textarea>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ button_cancel }}</button>
+    <button type="button" id="modal-save" class="btn btn-primary">{{ button_save }}</button>
+</div>
+
+<script>
+    						
+        CKEDITOR.replace('input-description2', {
+           	filebrowserBrowseUrl: 'index.php?route=common/filemanager&user_token=DhJDChDFBBgocP05oe6pxOMDGsiPcmel',
+            filebrowserImageBrowseUrl: 'index.php?route=common/filemanager&user_token=DhJDChDFBBgocP05oe6pxOMDGsiPcmel',
+            filebrowserFlashBrowseUrl: 'index.php?route=common/filemanager&user_token=DhJDChDFBBgocP05oe6pxOMDGsiPcmel',
+        });
+		
+		CKEDITOR.on('dialogDefinition', function (event) {
+            var editor = event.editor;
+            var dialogDefinition = event.data.definition;
+            var dialogName = event.data.name;
+            var tabCount = dialogDefinition.contents.length;
+
+            for (var i = 0; i < tabCount; i++) {
+                var browseButton = dialogDefinition.contents[i].get('browse');
+
+                if (browseButton !== null) {
+                    browseButton.hidden = false;
+                    browseButton.onClick = function() {
+						$('#modal-image').remove();
+						$.ajax({
+							url: 'index.php?route=common/filemanager&user_token=DhJDChDFBBgocP05oe6pxOMDGsiPcmel&ckedialog='+this.filebrowser.target,
+							dataType: 'html',
+							success: function(html) {
+								$('body').append('<div id="modal-image" style="z-index: 10020;" class="modal">' + html + '</div>');
+								$('#modal-image').modal('show');
+							}
+						});	
+					}
+                }
+            }
+        });
+							
+		//-->
+</script>

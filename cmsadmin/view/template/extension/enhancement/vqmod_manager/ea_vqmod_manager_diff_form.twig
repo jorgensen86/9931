@@ -1,0 +1,591 @@
+{{ header }} {{ column_left }}
+<div id="content">
+
+	<div class="page-header">
+    	<div class="container-fluid">
+      		<div class="pull-right">
+				{% if not vqmod_id %}
+					<span class="pull-left">
+						<span class="pull-left" style="margin-top: 10px">
+							<strong>{{ entry_filename }}</strong>
+						</span>
+						<span class="pull-right" style="margin: 5px 20px 0 5px">
+							<input type="text" name="xml_name" value="" placeholder="{{ text_filename_placeholder }}" data-toggle="tooltip" title="{{ help_xml_filename }}" id="input-xml-name" class="form-control input-sm" />
+						</span>
+					</span>
+				{% endif %}
+				<span class="pull-right">				
+					{% if vqmod_id %}
+						<button type="button" id="butcom" class="btn btn-warning" data-toggle="tooltip" title="{{ button_add_comment }}"><i class="fa fa-comment"></i></button>
+						
+						{% if vqmod_download == true %}
+							{% if has_perm_download == true %}
+								<a href="{{ download_vqmod }}" data-toggle="tooltip" title="{{ button_download_xml }}" class="btn btn-info"><i class="fa fa-download"></i></a>
+							{% endif %}
+						{% endif %}					
+					{% endif %}
+					
+					<button type="button" id="save-form" onclick="showOverlay('{{ text_ea_saving }}');$('#form-vqmod').attr('action', '{{ action }} ').submit();" data-toggle="tooltip" title="{{ button_save }} " class="btn btn-primary"><i class="fa fa-save"></i></button>
+        			
+					<a href="{{ cancel }} " data-toggle="tooltip" title="{{ button_cancel }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-danger"><i class="fa fa-times"></i></a>
+				</span>
+				<div class="clearfix"></div>
+			</div>
+      		
+			<h1><i class="fa fa-puzzle-piece"></i>&nbsp;
+				{% if vqmod_id %}
+					{% for breadcrumb in breadcrumbs %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endfor %}
+				{% else %}	
+					{% for breadcrumb in breadcrumbs %}{{ breadcrumb.text }}{% endfor %}
+				{% endif %}
+			</h1>
+    	</div>
+	</div>
+  
+	<div class="container-fluid">
+      	{% if error_warning %}
+        	<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+          		<button type="button" class="close" data-dismiss="alert">&times;</button>
+        	</div>
+      	{% endif %}
+      	{% if success %}
+        	<div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{ success }}
+          		<button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+      	{% endif %}
+
+		{% if vqmodified and vqmodified_count > 1 %}
+		<div id="path-bar">
+			<div class="handle"><i class="fa fa-link fa-lg"></i></div>
+			<h3><i class="fa fa-link"></i>&nbsp;&nbsp;{{ text_path_links }}</h3>
+			{% for vqmod in vqmodified %}
+				<a data-path="{{ vqmod.name }}">{{ vqmod.name }}</a>
+			{% endfor %}
+		</div>
+		{% endif %}
+	  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <div class="pull-right">
+			<div class="checkbox" style="margin-top:-2px;">
+				<label class="checkbox-inline"><input type="checkbox" name="scroll_lock" id="scroll_lock" />&nbsp;&nbsp;<strong>{{ entry_scroll_lock }}</strong></label>
+			</div>
+		</div>
+        <div class="pull-right">
+			<div class="checkbox" style="margin-top:-2px; margin-right:20px;">
+				<label class="checkbox-inline"><input type="checkbox" name="screen_mode" id="screen_mode" />&nbsp;&nbsp;<strong>{{ entry_single_screen }}</strong></label>
+			</div>
+		</div>
+		<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }} </h3>
+      </div>
+      <div class="panel-body">
+	  	<ul class="nav nav-tabs">
+          <li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-code"></i>&nbsp;&nbsp;{{ tab_general }}</a></li>
+		  {% if vqmodified %}<li><a href="#tab-modified" data-toggle="tab"><i class="fa fa-file"></i>&nbsp;&nbsp;{{ tab_modified }} ({{ vqmodified_count }})</a></li>{% endif %}
+		  {% if comments_count >= 1 %}<li><a data-toggle="tab" href="#tab-comments"><i class="fa fa fa-comment fa-lg"></i>&nbsp;&nbsp;{{ tab_comments }} ({{ comments_count }})</a></li>{% endif %}
+          {% if vqlog %}<li><a data-toggle="tab" href="#tab-error"><i class="fa fa fa-exclamation-circle fa-lg"></i>&nbsp;&nbsp;{{ tab_error_log }}</a></li>{% endif %}
+        </ul>		
+
+ 		<div class="tab-content">
+			<div class="tab-pane active" id="tab-general">
+				<form action="{{ action }} " method="post" enctype="multipart/form-data" id="form-vqmod" class="form-horizontal">
+					
+					<div id="form-status">
+						<div class="form-group" style="padding-top:0;">
+							<label class="col-sm-5 control-label" for="input-xml-status">{{ entry_status }}</label>
+							<div class="col-sm-7">
+								<select name="xml_status" id="input-xml-status" class="form-control">
+									{% if vqmod.status %}
+									<option value="1" selected="selected">{{ text_enabled }}</option>
+									<option value="0">{{ text_disabled }}</option>
+									{% else %}
+									<option value="1">{{ text_enabled }}</option>
+									<option value="0" selected="selected">{{ text_disabled }}</option>
+									{% endif %}
+								</select>
+							</div>
+						</div>
+					</div>
+
+					{% if vqmod_xml_error %}
+						<div class="col-sm-12">	
+							<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ vqmod_xml_error }}
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+							</div>
+						</div>
+					{% endif %}					
+					
+					<div class="col-sm-12" id="dual_pane">
+						<div class="form-group" style="padding-top:0">
+							<div class="col-sm-6">
+								<h3>{{ column_original }}</h3>
+							</div>
+							<div class="col-sm-6">
+								<h3>{{ column_backup }}</h3>
+							</div>
+
+							<div class="col-sm-12">
+								<div id="flex-wrapper">
+									<div id="flex-container"></div>
+								</div>								
+							</div>
+						</div>
+					</div>
+					
+					<textarea name="xml" id="input-xml" class="form-control hidden">{{ vqmod.xml|escape }}</textarea>
+					{% if backup.xml %}
+						<textarea id="input-backup" class="form-control hidden">{{ vqmod.xml|escape }}</textarea>
+					{% else %}
+						<textarea id="input-backup" class="form-control hidden">{{ vqmod.xml|escape }}</textarea>
+					{% endif %}
+				</form>
+			</div>
+
+			{% if vqmodified %}
+			<div class="tab-pane" id="tab-modified">
+				<div class="table-responsive">
+					<table id="files_table" class="table table-bordered table-hover table-striped table-condensed filestable">
+						<thead>
+							<tr>
+								<th>{{ column_filename }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for vqmod in vqmodified %}
+							<tr>
+								<td class="text-left">{{ vqmod.name }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			{% endif %}	 
+
+			{% if comments_count >= 1 %}
+			<div class="tab-pane" id="tab-comments">
+				<form method="post" enctype="multipart/form-data" id="form-del-comment" class="form-horizontal">
+					<table id="comments_table" class="table table-bordered table-striped table-hover commenttable" width="100%" cellpadding="0" cellspacing="0" border="0">
+						<thead>
+							<tr>
+								<th class="text-center vid" width="1%"></th>
+								<th>{{ column_comment }}</th>
+								<th width="120px">{{ column_added }}</th>
+								<th class="text-center" width="50px">{{ column_action }}</th>
+							</tr>
+						</thead>
+					</table>
+				</form>
+			</div>		
+			{% endif %}
+
+			{% if vqlog %}
+			<div class="tab-pane" id="tab-error">
+				<div class="table-responsive">
+					<table class="table table-bordered">
+						<tr>
+							<td class="text-left">
+								<textarea rows="20" id="error-log" class="form-control">{{ vqlog }}</textarea>
+							</td>
+						</tr>
+					</table>                             
+				</div>				
+			</div>
+			{% endif %} 
+			
+		</div>		
+				 
+    </div>
+	
+  </div>
+</div>
+
+</div>
+
+<div class="loading-overlay hidden" id="loading-overlay">
+	<div id="ea-loader"></div>  
+	<div id="ea-msg"></div>                           
+</div> 
+
+<a class="scrollup hidden" id="scrollup" href="#"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+
+<script src="view/template/extension/enhancement/vqmod_manager/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/vqmod_manager/js/ace/ace-diff.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/vqmod_manager/js/ace/theme-cobalt.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/vqmod_manager/js/ace/mode-xml.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/vqmod_manager/js/ace/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+
+
+<style type="text/css">
+.page-header h1 a, .page-header h1 a:hover, .page-header h1 a:visited, .page-header h1 a:active {color:#545454!important;}
+table.filetable td {padding: 4px 8px!important;}
+.pagination li:hover{
+    cursor: pointer;
+}
+#form-status {
+	position: absolute;
+	right:40px;
+	margin-top:-60px;
+	z-index:5;
+}
+
+.nav-tabs {
+    margin-bottom: 15px;
+}
+
+#flex-wrapper {
+    position: relative;
+	border:1px solid #ccc;
+}
+
+@media (min-width: 992px) {
+  #flex-wrapper { min-height: 450px; }
+}
+@media (min-width: 1200px) {
+  #flex-wrapper { min-height: 600px; }
+}
+
+.ace_editor {font-size:14px!important}
+
+.ace-cobalt .ace_marker-layer .ace_active-line {
+	background: #003F77!important;
+}
+.ace-cobalt .ace_gutter {
+	color: #fff!important;
+}
+.ace-cobalt .ace_gutter-active-line {
+	background-color: #003F77!important;
+}
+
+.errorline {
+    background: rgba(255, 50, 50, 0.5);
+    position: absolute;
+    width: 100% !important;
+    left: 0 !important;
+	z-index:999;
+}
+.searchline {
+    background: rgba(195,145,61,0.5);
+    position: absolute;
+    width: 100% !important;
+    left: 0 !important;
+	z-index:999;
+}
+
+table.commenttable tbody > tr > td {
+    vertical-align: top;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+</style>
+
+<script type="text/javascript"><!--
+$('a[href="#tab-general"]').on('shown.bs.tab', function () {
+	$('#path-bar').show(0);
+});
+
+$('a[href="#tab-general"]').on('hidden.bs.tab', function () {
+	$('#path-bar').hide(0);
+});
+
+var leditor;
+var reditor;
+$(function () {
+	var aceDiffer = new AceDiff({
+		element: '#flex-container',
+		theme:  "ace/theme/cobalt",
+		mode:  "ace/mode/xml",
+		selectionStyle: "text",
+		dragEnabled: false,
+		highlightActiveLine: true,
+		enableBasicAutocompletion: true,
+		autoScrollEditorIntoView: true,
+		showPrintMargin: false,
+		diffGranularity: 'broad',
+		showDiffs: true,
+		showConnectors: true,
+		maxDiffs: 5000,
+		left: {
+			id: 'editor-left',
+			content: $("#input-xml").text(),
+			editable: true,
+			copyLinkEnabled: false
+		},
+		right: {
+			id: 'editor-right',
+			content: $("#input-backup").text(),
+			editable: false,
+			copyLinkEnabled: true
+		}
+	});
+
+	var getEditors = aceDiffer.getEditors();
+	leditor = getEditors.left;
+	reditor = getEditors.right;
+	leditor.resize(true);
+	reditor.resize(true);
+	
+	leditor.renderer.setAnimatedScroll(true);
+	reditor.renderer.setAnimatedScroll(true);
+	
+	leditor.on('change', function () {
+		$('#input-xml').val(leditor.getSession().getValue());
+	});
+	
+	$('#scroll_lock').change(function() {
+        if(this.checked) {
+			leditor.getSession().on('changeScrollTop', function(scroll) {
+			  reditor.getSession().setScrollTop(parseInt(scroll) || 0);
+			});
+
+			reditor.getSession().on('changeScrollTop', function(scroll) {
+			  leditor.getSession().setScrollTop(parseInt(scroll) || 0);
+			});	
+        } else {
+			showOverlay('{{ text_ea_please_wait }}');
+			location.reload();
+		}       
+    });
+
+	$("#path-bar a").click(function(){
+		$("#path-bar").slideReveal("hide");
+		var path = $(this).attr("data-path");
+		leditor.focus();
+		var searchResults = leditor.find(path,{
+			backwards: false,
+			wrap: true,
+			caseSensitive: false,
+			wholeWord: false,
+			regExp: false
+		});
+
+		if (searchResults) {
+			leditor.scrollToLine(searchResults.start.row-1);
+		}
+	});
+
+    var slider = $("#path-bar").slideReveal({
+		width: 400,
+		push: false,
+		position: "right",
+		trigger: $(".handle"),
+		autoEscape: false,
+		shown: function(obj) {
+			obj.find(".handle").html('<i class="fa fa-chevron-right fa-lg"></i>');
+			obj.addClass("left-shadow-overlay");
+		},
+		hidden: function(obj) {
+			obj.find(".handle").html('<i class="fa fa-link fa-lg"></i>');
+			obj.removeClass("left-shadow-overlay");
+		}
+    });
+
+	if (leditor) {
+		leditor.focus();
+		editorChanged = false;
+
+		leditor.on('change', function() {
+			if (editorChanged == false) {
+				window.onbeforeunload = function() {
+					hideOverlay();
+					return '{{ text_ea_unsaved }}';
+				}
+			}
+
+			editorChanged = true;
+		});
+
+		$('#form-vqmod').bind('submit',function() {
+			if (editorChanged) {
+				window.onbeforeunload = null;
+			}
+		});
+	}
+
+	$(window).scroll(function() {		
+		if ($(this).scrollTop() >= 200) {
+			$('.scrollup').removeClass('hidden');
+			$('.scrollup').fadeIn();
+		} else {
+		   $('.scrollup').fadeOut();
+		   $('.scrollup').addClass('hidden');
+		}
+	});			
+	$('.scrollup').click(function() {
+		$('html, body').animate({
+			scrollTop:0
+		},500);
+		return false;
+	});
+
+    $('#screen_mode').change(function() {
+        if(this.checked) {			
+			if (editorChanged == false) {
+				window.onbeforeunload = null;
+				location = 'index.php?route=extension/enhancement/ea_vqmod_manager/updateConfig&user_token={{ user_token }}&vqmod_id={{ vqmod_id }}&screen_mode=1';
+			} else {
+				window.onbeforeunload = function() {
+					return '{{ text_ea_unsaved }}';
+				}
+				location = 'index.php?route=extension/enhancement/ea_vqmod_manager/updateConfig&user_token={{ user_token }}&vqmod_id={{ vqmod_id }}&screen_mode=1';
+				$('#screen_mode').prop('checked', false);
+			}
+			showOverlay('{{ text_ea_loading }}');
+        }       
+    });
+
+	var tablemod = $('#files_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{name: 'column_filename',visible: true,searchable: true,targets: [0]}
+        ],
+		order: [[0, 'asc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: false,
+        serverSide: false,
+		conditionalPaging: true
+    });
+
+	var tablecom = $('#comments_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{data: 0,name: 'comment_id',visible: true,searchable: false,orderable: false,className: 'text-center',targets: [0]},
+            {data: 1,name: 'comment',visible: true,searchable: false,targets: [1]},
+            {data: 2,name: 'date_added',visible: true,searchable: false,targets: [2]},
+			{data: 3,name: 'action',visible: true,searchable: false,orderable: false,width: '50px',className: 'text-center',targets: [3]}
+        ],
+		order: [[2, 'desc']],
+        fixedColumns: true,
+		searching: false,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: true,
+        serverSide: true,
+		conditionalPaging: true,
+		ajax:{
+			url : 'index.php?route=extension/enhancement/ea_vqmod_manager/getVqmodComments&user_token={{ user_token }}&vqmod_id={{ vqmod_id }}',
+			type: 'post',
+			error: function(){
+				$(".comments-error").html("");
+				$("#comments_table").append('<tbody class="comments-error"><tr><th colspan="5">{{ error_no_data }}</th></tr></tbody>');
+				$("#comments_processing").css("display","none");			
+			}
+		}
+    });
+
+	$('a[href="#tab-modified"]').on('shown.bs.tab', function () {
+		$('#files_table_filter input').attr('placeholder','{{ column_filename }}');
+	});
+
+	$('a[href="#tab-comments"]').on('shown.bs.tab', function () {
+		tablecom.columns.adjust();
+	});
+
+	$('#comments_table tbody').on('click', 'button', function () {
+		var dinput = $(this).parents('tr').find('.delinput');
+		var frow = $(this).parents('tr');				
+		var comment_id = $(dinput).val();
+		$(dinput).attr("checked", true);
+		$(frow).addClass('shared');
+		$.confirm({
+			title: ' {{ text_ea_sure }}',			
+			content: '{{ text_ea_delete_comment }}',
+			icon: 'fa fa-question-circle fa-lg',
+			columnClass: 'col-md-5 col-md-offset-4',
+			draggable: true,
+			buttons: { 
+				ok: {
+					text: '{{ text_ea_yes }}',
+					btnClass: 'btn-success',
+					action: function() {
+						$.ajax({
+							url: 'index.php?route=extension/enhancement/ea_vqmod_manager/deleteComment&user_token={{ user_token }}&comment_id=' + comment_id,
+							dataType: 'json',
+							beforeSend: function() {
+								showOverlay('{{ text_ea_removeing }}');
+							},
+							success: function(json) {
+								hideOverlay('{{ text_ea_removeing }}');
+								$('.alert-dismissible').remove();
+								if (json['error']) {
+									$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+								}
+
+								if (json['success']) {
+									$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									setTimeout(function() {
+										location.reload();
+									}, 500);
+								}						
+							},
+							error: function(xhr, ajaxOptions, thrownError) {
+								hideOverlay('{{ text_ea_removeing }}');
+								alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+							}
+						});
+					}
+				},
+				close: {
+					text: '{{ text_ea_no }}',
+					btnClass: 'btn-danger',
+					action: function() {
+						$(dinput).attr("checked", false);
+						$(frow).removeClass('shared');
+					}
+				}
+			}
+		});	
+	});	
+
+	$('#butcom').on('click', function () {
+		$('#modal-vqmod-comment').remove();
+		$.ajax({
+			url: 'index.php?route=extension/enhancement/ea_vqmod_manager/getFormComment&user_token={{ user_token }}&vqmod_id={{ vqmod_id }}',
+			dataType: 'html',
+			success: function(html) {
+				$('body').append('<div id="modal-vqmod-comment" class="modal fade modal-wide">' + html + '</div>');
+				$('#modal-vqmod-comment').modal({backdrop: 'static',keyboard: false});
+				$('#modal-vqmod-comment').modal('show');
+				setTimeout(function() {
+					$('#vqmod_comment').focus();
+				}, 500);
+			}
+		});
+	});
+});
+
+$(document).on('hidden.bs.modal', function () {
+    showOverlay('{{ text_ea_refreshing }}');
+	window.location.reload(true);
+})
+function reloadContent(url) {}
+//--></script>
+
+{% if vqmod_xml_error %}
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	ace_editor.focus();
+	var Range = ace.require('ace/range').Range;
+	ace_editor.session.addMarker(new Range('{{ error_line }}'-1, 0, '{{ error_line }}'-1, 1), "errorline", "fullLine");
+	ace_editor.scrollToLine('{{ error_line }}'-1);	
+	ace_editor.moveCursorTo('{{ error_line }}'-1, 0);
+});
+//--></script>
+{% endif %}
+
+<script type="text/javascript"><!--
+function showOverlay(msg) {
+	$('#ea-msg').html('');
+	html = '<div>'+ msg +'</div>';
+	$('#ea-msg').prepend(html);
+	$('#loading-overlay').removeClass('hidden');
+}
+
+function hideOverlay() {
+	$('#loading-overlay').addClass('hidden');
+}
+//--></script>
+
+{{ footer}} 

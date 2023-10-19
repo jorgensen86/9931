@@ -1,0 +1,16 @@
+/image/cache/*
+!/image/cache/index.html
+
+/vqmod/vqcache/
+/vqmod/logs/*
+/vqmod/mods.cache
+/vqmod/checked.cache
+
+/system/storage/cache/*
+!/system/storage/cache/index.html
+
+/system/storage/logs/*
+!/system/storage/logs/index.html
+
+/system/storage/modification/*
+!/system/storage/modification/*.html

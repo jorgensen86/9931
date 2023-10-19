@@ -1,0 +1,145 @@
+<div class="modal-dialog">
+	<div class="modal-content">
+
+		<div class="modal-header">
+			<div class="pull-right">
+				<button type="button" class="btn btn-primary" data-toggle="tooltip" title="{{ button_save_comment }}" id="savebutton"><i class="fa fa-save fa-lg"></i></button>
+				<button type="button" class="btn btn-danger" data-toggle="tooltip" title="{{ button_cancel }}" data-dismiss="modal">{{ button_cancel_return }}</button>
+			</div>
+			<h2 class="modal-title" id="mtitle"><i class="fa fa-comment"></i> {{ text_comment_title }}</h2>
+		</div>
+
+		<div class="modal-body">         
+        	<div class="container-fluid"> 
+            	<div class="panel panel-default">     
+			  
+					<div class="panel-body">
+						<form method="post" enctype="multipart/form-data" id="form-mod-comment" class="form-horizontal">                    
+							<i class="fa fa-info-circle fa-lg"></i>&nbsp;&nbsp{{ text_comment_info }}
+							<hr style="margin-bottom:5px" />
+							
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="form-group required" style="padding:10px 0;">
+										<label class="control-label col-sm-2" for="mod_comment" style="margin-top:10px;">{{ entry_mod_comment }}:</label>
+										<div class="col-sm-10" style="padding:0;">
+											<textarea name="mod_comment" id="mod_comment" class="form-control" rows="10"></textarea>
+											<div id="textleft" style="text-align:right;">{{ text_max_character }}</div>
+										</div>
+									</div>                
+								</div>
+							</div>
+						</form>
+					</div>
+			  
+            	</div>          
+        	</div>
+		</div>
+		
+    </div>
+</div>
+
+
+<style type="text/css">
+.form-horizontal .control-label {
+    text-align: left;
+}
+#modal-mod-comment .panel-default {
+	box-shadow: 0 0 0 #ccc;
+	border: 1px solid #ccc;
+}
+#modal-mod-comment .container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+#content {
+    padding-bottom: 0px;
+}
+#modal-mod-comment .panel {
+    margin-bottom: 0px;
+}
+.modal-dialog {
+	margin: 20px auto;
+	width:900px;
+}
+.popover{
+    max-width: 400px;
+	padding:0px;
+}
+.popover-title {
+	background-color: #515151;
+	color: #fff;
+}
+</style>
+
+<script type="text/javascript"><!--
+var reloadMain = '{{ reload_main }}';
+$(document).ready(function() {	
+	$('#mod_comment').keypress(function (e) {
+		var max = 3000;
+		var len = $(this).val().length;
+
+		if (e.which < 0x20) {
+		  return;
+		}
+
+		if (len >= max) {
+		  e.preventDefault();
+		}
+	});
+
+	$('#mod_comment').keyup(function () {
+		var max = 3000;
+		var len = $(this).val().length;
+		var chars = max - len;
+		
+		if (len >= 10 && len <= max ){
+			$('#textleft').html('{{ text_you_have }} <span class="text-success">' + chars + '</span> {{ text_characters_left }}');
+		} else {
+			$('#textleft').html('{{ text_you_have }} <span class="text-danger">' + chars + '</span> {{ text_characters_left }}');
+		}
+	});
+	
+	$('#savebutton').on("click", function () {
+		$('[data-toggle=\'tooltip\']').tooltip('hide');
+		$('#mod_comment').css("border","1px solid #b9b9b9");
+		$.ajax({
+			type: "POST",
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager/saveComment&user_token={{ user_token }}&modification_id={{ modification_id }}', 
+			data: $('#form-mod-comment').serialize(),
+			beforeSend: function() {
+				$('#savebutton').removeClass('btn btn-primary');
+				$('#savebutton').addClass('btn btn-warning');
+				$('#savebutton').html('<i class="fa fa-cog fa-spin fa-lg"></i>');
+				$('#savebutton').prop('disabled', true);
+			},
+			complete: function() {
+				$('#savebutton').removeClass('btn btn-warning');
+				$('#savebutton').addClass('btn btn-primary');			
+				$('#savebutton').html('<i class="fa fa-save fa-lg"></i>');
+				$('#savebutton').prop('disabled', false);
+			},
+			success: function(json) {
+				$('.alert-dismissible').remove();
+				if (json['error_comment']) {
+					$('#modal-mod-comment .panel-default').before('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error_comment'] + '</div>');
+					$('#mod_comment').css("border","1px solid red");
+				}
+				if (json['success']) {
+					$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+					if (reloadMain != '') {
+						reloadContent(reloadMain);
+						$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
+					}
+
+					setTimeout(function() {
+						$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
+						$('#modal-mod-comment').modal('hide');
+					}, 500);
+				}				
+			},	
+		});
+	});
+});
+//--></script>

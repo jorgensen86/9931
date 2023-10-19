@@ -1,0 +1,13 @@
+.loader {
+	display: none;
+	background: url('themes/default/throbber.gif') center no-repeat;
+	height: 50px;
+}
+
+.jstree-proton-large .jstree-anchor.deactive{
+	opacity: 0.5
+}
+
+#category-content .breadcrumb, #category-content .page-header {
+	display: none;
+}

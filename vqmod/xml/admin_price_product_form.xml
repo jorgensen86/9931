@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Calculate price with vat</id>
+    <version>1.0.0</version>
+    <vqmver>2.6.1</vqmver>
+    <author>Icop | Jorgensen</author>
+    <!-- Language modifications -->
+    <file name="admin/language/en-gb/catalog/product.php" error="skip">
+        <operation>
+            <search position="bottom"><![CDATA[]]></search>
+            <add><![CDATA[
+$_['entry_price_vat']        = 'Price with vat'; /* admin_price_product_form.xml */]]></add>
+        </operation>
+    </file>
+    <file name="admin/language/el-gr/catalog/product.php" error="skip">
+        <operation>
+            <search position="bottom"><![CDATA[]]></search>
+            <add><![CDATA[
+$_['entry_price_vat']        = 'Τιμή με Φ.π.α'; /* admin_price_product_form.xml */]]></add>
+        </operation>
+    </file>
+    <!--End og language modifications -->
+
+    <!-- View modifications-->
+    <file name="admin/view/template/catalog/product_form.twig">
+        <operation>
+            <search position="before" offset="1"><![CDATA[
+            {{ entry_tax_class }}
+            ]]></search>
+            <add><![CDATA[              <!-- admin_price_product_form.xml -->
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-price-vat">{{ entry_price_vat }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="price_vat" value="" placeholder="{{ entry_price_vat }}" id="input-price-vat" class="form-control"/>
+                </div>
+              </div>
+              <!-- admin_price_product_form.xml -->]]></add>
+        </operation>
+        <operation>
+            <search position="replace"><![CDATA[
+            <option value="{{ tax_class.tax_class_id }}" selected="selected">{{ tax_class.title }}</option>
+            ]]></search>
+            <add><![CDATA[<!-- admin_price_product_form.xml -->
+                <!-- <option value="{{ tax_class.tax_class_id }}" selected="selected">{{ tax_class.title }}</option> -->
+                <option value="{{ tax_class.tax_class_id }}" selected="selected" data-rate="{{ tax_rates[tax_class['tax_class_id']] }}">{{ tax_class.title }}</option>
+                <!-- admin_price_product_form.xml -->]]></add>
+        </operation>
+        <operation>
+            <search position="replace"><![CDATA[
+            <option value="{{ tax_class.tax_class_id }}">{{ tax_class.title }}</option>
+            ]]></search>
+            <add><![CDATA[<!-- admin_price_product_form.xml -->
+                <!-- <option value="{{ tax_class.tax_class_id }}">{{ tax_class.title }}</option> -->
+                <option value="{{ tax_class.tax_class_id }}" data-rate="{{ tax_rates[tax_class['tax_class_id']] }}">{{ tax_class.title }}</option>
+                <!-- admin_price_product_form.xml -->]]></add>
+        </operation>
+        <operation>
+            <search position="before"><![CDATA[
+           // Manufacturer
+            ]]></search>
+            <add><![CDATA[
+<!-- admin_price_product_form.xml -->
+  $('#input-price-vat, #input-price').on('keyup',function(){
+    var $tax_class_id = 0;
+    var $rate = $('#input-tax-class option:selected').attr('data-rate');
+    var $price = 0;
+    
+    switch($(this).attr('id')) {
+      case 'input-price-vat':
+      $price = $(this).val();
+      $tax_class_id = $('#input-tax-class option:selected').val();
+
+      if ($tax_class_id == 0) {
+        $('#input-price').val($price);
+      } else {
+        var $rate = $('#input-tax-class option:selected').attr('data-rate');
+        var $result = ($price / (1+($rate/100))).toFixed(4);
+        $('#input-price').val($result); 
+      }
+      break;
+      case 'input-price':
+      $tax_class_id = $('#input-tax-class option:selected').val();
+      $price = $(this).val();
+
+      if ($tax_class_id == 0) {
+        $('#input-price-vat').val($price);
+      } else {
+        var $rate = $('#input-tax-class option:selected').attr('data-rate');
+        var $result = ($price * (1+($rate/100))).toFixed(4);
+        $('#input-price-vat').val($result); 
+      }
+      break;
+    }
+    
+  });
+  
+  $('#input-tax-class').on('change',function(){
+    var $tax_class_id = $(this).val();
+    var $price = $('#input-price-vat').val();
+    
+    if ($tax_class_id == 0) {
+      $('#input-price').val($price);
+    } else {
+      var $rate = $('#input-tax-class option:selected').attr('data-rate');
+      var $result = ($price / (1+($rate/100))).toFixed(4);
+      $('#input-price').val($result); 
+    } 
+  });
+
+  $(document).ready(function(){
+    var $price = $('#input-price').val();
+    var $tax_class_id = $('#input-tax-class option:selected').val();
+    if ($tax_class_id == 0) {
+      $('#input-price-vat').val($price);
+    } else {
+      var $rate = $('#input-tax-class option:selected').attr('data-rate');
+      var $result = ($price * (1+($rate/100))).toFixed(2);
+      $('#input-price-vat').val($result); 
+    } 
+  }); <!-- admin_price_product_form.xml -->]]></add>
+        </operation>
+    </file>
+    <!--End of view modifications-->
+
+    <!-- Controller Modifications -->
+    <file name="admin/controller/catalog/product.php">
+        <operation>
+            <search position="after"><![CDATA[$this->currency->format($product_special['price'], $this->config->get('config_currency'));]]></search>
+            <add><![CDATA[
+                $special = $this->currency->format($this->tax->calculate($product_special['price'], $result['tax_class_id'], $this->config->get('config_tax')),  $this->config->get('config_currency'));
+            ]]></add>
+        </operation>        <operation>
+            <search position="after"><![CDATA['special'    => $special,]]></search>
+            <add><![CDATA[
+            'price'    	 => $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->config->get('config_currency')),
+            ]]></add>
+        </operation>
+        <operation info="get rates for each tax class">
+            <search position="after"><![CDATA[
+            $this->model_localisation_tax_class->getTaxClasses();
+            ]]></search>
+            <add><![CDATA[ 
+                /* admin_price_product_form.xml */
+                $data['entry_price_vat'] = $this->language->get('entry_price_vat');
+           		$data['tax_rates'] = array();
+				foreach ($data['tax_classes'] as $key => $value) {
+					foreach ($this->tax->getRates(0, $value['tax_class_id']) as $k => $v) {
+						$data['tax_rates'][$value['tax_class_id']] = $v['rate'];
+					}
+				} /* admin_price_product_form.xml */]]></add>
+        </operation>
+    </file>
+    <!-- end of Conroller modifications -->
+</modification>

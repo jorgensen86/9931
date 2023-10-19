@@ -1,0 +1,129 @@
+
+.panel-default .panel-heading h3 {
+    font-size: 13px; }
+
+.tile {
+	background: #eaeaea87;
+	box-shadow: 2px 4px 8px #949494;
+	border-radius: 10px; }
+
+.tile-body {
+	text-shadow: none;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	line-height: inherit; }
+
+.tile-body span {
+	font-weight: 600;
+	display: block;
+	text-align: right; }
+
+.tile-body .title {
+	font-size: 15px; }
+
+.tile-body .total {
+	font-size: 30px; }
+
+.tile a {
+	text-decoration: underline;
+	display: block;
+	text-align: right;
+	color: inherit; }
+
+.tile a:hover {
+	color: #19222E }
+
+.tile .tile-body i {
+	color: #fff;
+	min-width: 40px;
+	text-align: center;
+	padding: 10px;
+	top: -50px;
+    position: relative;
+    font-size: 20px;
+    opacity: 1; }
+
+.tile:hover .tile-body i {
+	color: #fff; }
+
+.tile #orders {
+	color: #ff5722; }
+.tile #orders i {
+	background: #ff5722;
+}
+.tile #sales {
+	color: #19a0e0; }
+.tile #sales i {
+	background: #19a0e0;
+}
+.tile #customers {
+	color: #0b4a07; }
+
+.tile #customers i {
+	background: #0b4a07;
+}
+
+.tile #online {
+	color: #19222E; }
+
+.tile #online i {
+	background: #19222E;
+}
+
+.btn-primary {
+	border-color: #242d37;
+	background: #242d37;
+}
+
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus  {
+	border-color: #FF5722!important;
+	background: #FF5722!important;
+}
+
+.caret {
+	color: #fff;
+}
+
+.btn-danger {
+	border-color: #ff0000;
+	background: #ff0000;
+}
+
+.btn {
+    padding: 4px 9px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 2px;
+}
+
+.nav-tabs > li > a {
+	color: #242d37;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+	color: #FF5722;
+}
+
+.pull-right .fa-calendar {
+	color: #fff
+}
+
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:hover, .dropdown-menu > .active > a:focus {
+	background: #F85722;
+}
+
+.oc3 .j-header {
+    top: 30px;
+}
+
+.oc3 .page {
+    padding-top: 77px;
+}
+
+.tabs-vertical > ul {
+    height: calc(100vh - 77px);
+}
+.dropdown-menu .hidden-item > a{
+	color: #c7c7c7;
+}

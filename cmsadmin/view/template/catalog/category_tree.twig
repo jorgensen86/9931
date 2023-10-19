@@ -1,0 +1,166 @@
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-3">
+                    <div class="pull-right">
+                        <button class="btn btn-info btn-sm" data-toggle="tooltip" title="{{ button_add }}"
+                            id="add-button"><i class="fa fa-plus"></i></button> <button class="btn btn-success btn-sm"
+                            data-toggle="tooltip" title="{{ button_save }}" id="save-button"><i
+                                class="fa fa-save"></i></button> <button id="delete-button"
+                            class="btn btn-danger btn-sm" data-toggle="tooltip" title="{{ button_remove }}" id=""><i
+                                class="fa fa-trash"></i></button>
+                    </div>
+                    <div id="category-tree"></div>
+                </div>
+                <div class="col-md-9">
+                    <div class="loader"></div>
+                    <div id="category-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let selected_node = '#';
+    const categoryTree = $('#category-tree').jstree({
+        plugins: ['massload', 'search', 'unique', 'state', 'changed', 'conditionalselect'],
+        core: {
+            themes: {
+                name: 'proton',
+                reponsive: 'true',
+                variant: 'large',
+            },
+            data: {
+                url: 'index.php?route=catalog/category_tree/getData&user_token={{ user_token }}',
+                data: function (node) {
+                    return { 'id': node.id, 'operation': 'get_node' };
+                }
+            },
+            multiple: false,
+            search: true
+        }
+    });
+
+    categoryTree.on('select_node.jstree', function (e, data) {
+
+        if (typeof timer != 'undefined') clearInterval(timer);
+
+        if (data.selected[0] == selected_node) return;
+
+        $('#category-content').empty();
+
+        timer = setInterval(function () {
+            clearInterval(timer);
+
+            $.ajax({
+                url: data.selected[0] == 0 ? 'index.php?route=catalog/category/add&user_token={{ user_token }}&ajax=true' : 'index.php?route=catalog/category/edit&user_token={{ user_token }}&ajax=true&category_id=' + data.selected,
+                beforeSend: function () {
+                    triggerLoader(true);
+                },
+                complete: function () {
+                    triggerLoader(false)
+                },
+                success: function (html) {
+                    selected_node = data.selected;
+                    $('#category-content').html(html);
+                }
+            });
+        }, 500);
+    });
+
+    $('#add-button').on('click', function () {
+        let parent_id = categoryTree.jstree('get_selected')[0];
+
+        let path = ((parent_id === '0') || (parent_id === '#')) ? '{{ text_none }}' : categoryTree.jstree('get_node', parent_id).text.trim();
+
+        $('#category-content').empty();
+
+        $.ajax({
+            url: 'index.php?route=catalog/category/add&user_token={{ user_token }}&ajax=true&path=' + encodeURIComponent(path) + '&parent_id=' + parent_id,
+            beforeSend: function () {
+                triggerLoader(true);
+            },
+            complete: function () {
+                triggerLoader(false)
+            },
+            success: function (html) {
+                $('#category-content').html(html);
+            }
+        });
+    });
+
+    $('#save-button').on('click', function () {
+        var data = $('form').serialize();
+        
+        for (var key in CKEDITOR.instances) {
+            data += '&category_description[' + key.replace('input-description', '') + '][description] = ' + encodeURIComponent(CKEDITOR.instances[key].getData());
+        }
+
+        $.ajax({
+            url: $('#form-category').attr('action') + '&ajax=true',
+            data: data,
+            type: 'post',
+            beforeSend: function () {
+                triggerLoader(true);
+            },
+            complete: function () {
+                triggerLoader(false)
+            },
+            success: function (html) {
+                $('#category-content').html(html);
+                if (html.indexOf('alert-danger') == -1) $('#category-tree').jstree("refresh");
+            }
+        });
+    });
+
+    $('#delete-button').on('click', function () {
+        let current_node = categoryTree.jstree('get_selected')[0];
+        if (current_node == 0) return;
+        if (confirm('{{ text_confirm }}') === false) return;
+        $.ajax({
+            url: 'index.php?route=catalog/category/delete&user_token={{ user_token }}&ajax=true',
+            data: { 'selected': { 'category_id': current_node } },
+            type: 'post',
+            beforeSend: function () {
+                triggerLoader(true);
+            },
+            complete: function () {
+                triggerLoader(false)
+            },
+            success: function (html) {
+                $('#category-content').html(html);
+                $('#category-tree').jstree("refresh");
+            }
+        });
+    });
+
+    function triggerLoader(mode) {
+        if (mode) {
+            $("[data-toggle='tooltip']").tooltip('hide');
+            $('.loader').show();
+            $('button').prop('disabled', true);
+            categoryTree.find('li').each(function () { categoryTree.jstree().disable_node(this.id); });
+        } else {
+            $('.loader').hide();
+            $('button').prop('disabled', false);
+            categoryTree.find('li').each(function () { categoryTree.jstree().enable_node(this.id); });
+        }
+    }
+</script>
+{{ footer }}

@@ -1,0 +1,54 @@
+<div class="modal fade" id="journal3ModulePermissions" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="modalLabel">Journal 3 Module Permissions</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for field in fields %}
+                    <li class="list-group-item {{ field not in hidden_fields ? 'active' : null }}" data-value="{{ field }}">{{ field }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('#journal3ModulePermissions .list-group-item').on('click', function() {
+            if($(this).hasClass('active')) {
+                $(this).removeClass('active');
+            } else {
+                $(this).addClass('active');
+            }
+    
+            let form = new FormData();
+            form.append('fields[]', '');
+    
+            $('#journal3ModulePermissions .list-group-item').each(function(i) {
+                if(!$(this).hasClass('active')) {
+                    form.append('fields[]', $(this).attr('data-value'));
+                }
+            })
+    
+            $.ajax({
+                url: 'index.php?route=event/icop/journal3ModulePermissions&user_token={{ user_token }}',
+                data: form,
+                processData: false,
+                contentType: false,
+                type: 'post',
+                beforeSend: function() {
+                    $('#journal3ModulePermissions .list-group-item').addClass('disabled');
+                },
+                complete: function() {
+                    $('#journal3ModulePermissions .list-group-item').removeClass('disabled');
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+		     		alert(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+		    	}
+            });
+        });
+    </script>
+</div>

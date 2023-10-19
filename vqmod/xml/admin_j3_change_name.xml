@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>Admin J3 Change Name</id>
+    <version>1.4.x and above</version>
+    <vqmver required="true">2.6.0</vqmver>
+    <author>vqmod.com</author>
+
+    <file name="admin/controller/journal3/journal3.php" error="skip">
+        <operation>
+            <search position="replace"><![CDATA[$this->language->get('Journal')]]></search>
+            <add><![CDATA[$this->language->get('Theme')]]></add>
+        </operation>
+        <operation error="skip">
+            <search position="replace"><![CDATA[fa-cogs journal3-icon]]></search>
+            <add><![CDATA[fa-cogs fa-columns]]></add>
+        </operation>
+	</file>
+</modification>

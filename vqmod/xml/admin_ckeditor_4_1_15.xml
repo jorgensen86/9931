@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <name>Admin CK Editor 4.1.5</name>
+    <id>adminckeditor</id>
+    <version>1.0</version>
+    <vqmver required="true">2.5.0</vqmver>
+    <author>Icop | Jorgensen</author>  
+    <file path="admin/view/template/common/header.twig">
+
+        <!-- Add ckeditor.js file -->
+        <operation error="log">
+            <search position="before">
+                <![CDATA[</head>]]>
+            </search>
+            <add>
+                <![CDATA[
+                   <script src="view/javascript/ckeditor/ckeditor.js"></script>
+                ]]>
+            </add>
+        </operation>
+    </file>
+
+    <!-- Replace the summernote -->
+    <file path="admin/view/template/" name="catalog/product_form.twig,catalog/information_form.twig,catalog/category_form.twig">
+        <operation error="skip">
+            <search position="replace">
+                <![CDATA[data-toggle="summernote" data-lang="{{ summernote }}"]]>
+            </search>
+            <add trim="true"></add>
+        </operation>
+		<operation error="skip">
+            <search position="before">
+                <![CDATA[
+                   footer
+                ]]>
+            </search>
+            <add>
+                <![CDATA[
+<script type="text/javascript">		
+    {% for language in languages %}					
+    	CKEDITOR.replace('input-description{{ language.language_id }}', {
+           	filebrowserBrowseUrl: 'index.php?route=common/filemanager&user_token={{ user_token }}',
+            filebrowserImageBrowseUrl: 'index.php?route=common/filemanager&user_token={{ user_token }}',
+            filebrowserFlashBrowseUrl: 'index.php?route=common/filemanager&user_token={{ user_token }}',
+        });
+		
+		CKEDITOR.on('dialogDefinition', function (event) {
+            var editor = event.editor;
+            var dialogDefinition = event.data.definition;
+            var dialogName = event.data.name;
+            var tabCount = dialogDefinition.contents.length;
+
+            for (var i = 0; i < tabCount; i++) {
+                var browseButton = dialogDefinition.contents[i].get('browse');
+
+                if (browseButton !== null) {
+                    browseButton.hidden = false;
+                    browseButton.onClick = function() {
+						$('#modal-image').remove();
+						$.ajax({
+							url: 'index.php?route=common/filemanager&user_token={{ user_token }}&ckedialog='+this.filebrowser.target,
+							dataType: 'html',
+							success: function(html) {
+								$('body').append('<div id="modal-image" style="z-index: 10020;" class="modal">' + html + '</div>');
+								$('#modal-image').modal('show');
+							}
+						});	
+					}
+                }
+            }
+        });
+		{% endfor %}
+//--></script>]]>
+            </add>
+        </operation>
+    </file>
+	<file name="admin/controller/common/filemanager.php">
+		<operation>
+			<search position="after" offset="1"><![CDATA[	
+			$url .= '&thumb=' . $this->request->get['thumb'];	
+			]]></search>
+			<add><![CDATA[
+		if (isset($this->request->get['ckedialog'])) {
+			$url .= '&ckedialog=' . $this->request->get['ckedialog'];
+		}
+          ]]></add>
+		</operation>
+		<operation>
+			<search position="after" offset="3"><![CDATA[
+			$data['thumb'] = $this->request->get['thumb'];
+			]]></search>
+			<add><![CDATA[
+		if (isset($this->request->get['ckedialog'])) {
+			$data['ckedialog'] = $this->request->get['ckedialog'];
+		} else {
+			$data['ckedialog'] = '';
+		}
+        ]]></add>
+		</operation>
+	</file>
+	
+	<file name="admin/view/template/common/filemanager.twig">		
+		<operation>
+			<search position="before"><![CDATA[	target ]]></search>
+			<add><![CDATA[
+{% if ckedialog %}			
+$('a.thumbnail').on('click', function(e) {
+	e.preventDefault();
+	dialog = CKEDITOR.dialog.getCurrent();
+	var targetElement = '{{ ckedialog }}' || null;
+	var target = targetElement.split( ':' );
+	dialog.setValueOf( target[ 0 ], target[ 1 ], this.getAttribute('href') );
+	$('#modal-image').modal('hide');
+});
+{% endif %}
+          ]]></add>
+	  </operation>
+	  
+	  <operation>
+	 	<search position="replace"><![CDATA[	var url = 'index.php?route=common/filemanager&user_token={{ user_token }}&directory={{ directory }}'; ]]></search>
+		<add><![CDATA[
+		var url = 'index.php?route=common/filemanager&user_token={{ user_token }}&directory={{ directory }}&ckedialog={{ ckedialog }}';
+          ]]></add>
+	  </operation>
+	</file>
+	
+</modification>

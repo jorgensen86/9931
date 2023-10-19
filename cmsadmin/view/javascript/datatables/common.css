@@ -1,0 +1,22 @@
+/* Datatables Custom CSS*/
+#datatable-dropdown {
+    display: inline-block; }
+#products-table td span {
+   cursor: pointer; }
+
+#products-table .list-group {
+    margin-bottom: 2px; }
+    
+#products-table .list-group-item {
+    padding: 2px;
+    border: none; }
+
+#products-table .img-thumbnail img {
+    width: 40px; }
+
+#products-table a span {
+    color: initial; }
+
+.collapseFilter, .collapseFilter:focus, .collapseFilter:hover {
+    color: #fff; }
+    

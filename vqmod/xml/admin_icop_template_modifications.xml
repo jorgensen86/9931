@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>icop admin template modifications</id>
+    <version>1.0</version>
+    <vqmver required="true">2.6.0</vqmver>
+    <author>Icop Web Services</author>
+
+<!--  1. Φόρτωση custom.css για αλλάγή του default style (Jorgensen) -->
+<!--  2. Αλλαγή template για τη σύνδεση στο διαχειριστικό (Jorgensen) -->
+<!--  3. Φόρτωση του αρχείου για νέα λεκτικά στο startup  (Jorgensen) -->
+<!--  4. Φόρτωση του αρχείου hidden_fields.js και επεξεργασία των template product/category/information/manufacturer  (Jorgensen) -->
+<!--  5. Ocmod cache αλλαγή response στο ajax call  (Jorgensen) -->
+<!--  6. Fix Ocmod για να παραμείνει ο φάκελος μες στο public_html  (Jorgensen) -->
+
+<!--  ############################# 1 ########################### -->   
+    <file path="admin/controller/common/header.php" error="skip">
+        <operation>
+            <search position="after"><![CDATA[
+            public function index() {
+            ]]></search>
+            <add><![CDATA[
+            $this->document->addStyle('view/stylesheet/icop/custom.css');
+            ]]></add>
+        </operation>
+    </file>
+<!--  ############################################################# -->
+
+
+<!--  ############################# 2 ########################### -->
+    <file path="cmsadmin/controller/common/login.php" error="skip">
+        <operation>
+            <search position="after"><![CDATA[
+            $this->document->setTitle($this->language->get('heading_title'));
+            ]]></search>
+            <add><![CDATA[
+            $this->document->addStyle('view/stylesheet/icop/login.css');
+            ]]></add>
+        </operation>
+        <operation>
+            <search position="replace"><![CDATA[
+            $this->response->setOutput($this->load->view('common/login', $data));
+            ]]></search>
+            <add><![CDATA[
+            /* $this->response->setOutput($this->load->view('common/login', $data)); */
+            $this->response->setOutput($this->load->view('common/login_icop', $data));
+            ]]></add>
+        </operation>
+    </file>
+<!--  ############################################################# -->
+
+
+<!--  ############################# 3 ########################### -->
+    <file path="cmsadmin/controller/startup/startup.php" error="skip">
+        <operation>
+            <search position="after"><![CDATA[
+            $language->load($this->config->get('config_admin_language'));
+            ]]></search>
+            <add><![CDATA[ /* icop_admin_modifications */
+        $language->load('icop');
+            ]]></add>
+        </operation>
+    </file>
+<!--  ############################################################# -->
+
+<!--  ############################# 4 ########################### -->
+    <file path="admin/controller/catalog/" name="product.php,category.php,information.php,manufacturer.php">
+        <operation>
+            <search position="after"><![CDATA[
+            getForm() {
+            ]]></search>
+            <add><![CDATA[
+            $data['hidden_fields_form'] = $this->load->controller('event/icop/hiddenFields', __CLASS__);
+            ]]></add>
+        </operation>
+    </file>
+    <file path="admin/view/template/catalog/" name="product_form.twig,category_form.twig,information_form.twig,manufacturer_form.twig">
+        <operation>
+            <search><![CDATA[
+               <div class="page-header">
+            ]]></search>
+            <add position="before" index="1"><![CDATA[
+            <?php /* icop_admin_modification.icmod.xml */ ?>
+            {{ hidden_fields_form }}
+            ]]></add>
+        </operation>
+    </file>
+    <file name="admin/controller/journal3/journal3.php">
+        <operation>
+            <search position="before"><![CDATA[
+            $data['header']
+            ]]></search>
+            <add><![CDATA[
+            $data['hidden_fields'] = $this->user->getGroupId() !== '1' ? true : false;
+            $data['hidden_modules'] = @file_get_contents(DIR_STORAGE . 'icop/journal3_hidden_modules.json');
+            ]]></add>
+        </operation>
+        <operation>
+            <search position="before" index="1"><![CDATA[
+            return array(
+            ]]></search>
+            <add><![CDATA[
+        // variables
+        if ($this->user->getGroupId() === '1') {
+            $journal[] = array(
+                'name'     => 'Module Permissions',
+                'href'     => '#',
+                'children' => array(),
+            );
+        }
+            ]]></add>
+        </operation>
+    </file>
+    <file name="admin/view/template/journal3/journal3.twig">
+        <operation>
+            <search><![CDATA[
+               {{ footer }}
+            ]]></search>
+            <add position="before"><![CDATA[
+{%if hidden_fields %}
+<script type="text/javascript">
+  let hidden_titles = ["Blog", "Special Purpose"];
+
+  let hidden_modules = {{ hidden_modules }};
+  
+  $('#content').bind('DOMSubtreeModified', function() {
+    $('.tabs-vertical .tab-items > li').each(function() {
+      if ($(this).hasClass('accordion-button')) return;
+      if ($(this).hasClass('separator')) {
+        if (hidden_titles.includes($(this).text())) $(this).hide();
+      } else {
+        if (hidden_modules.includes($(this).text())) $(this).closest('li').hide();
+      }
+    });
+  });
+</script>
+{% endif %}
+            ]]></add>
+        </operation>
+    </file>
+
+<!--  ############################# 5 ########################### -->
+    <file name="admin/controller/marketplace/modification.php">
+        <operation>
+            <search position="before"><![CDATA[
+            $this->response->redirect($this->url->link(!empty($data['redirect']) ? $data['redirect'] : 'marketplace/modification', 'user_token=' . $this->session->data['user_token'] . $url, true));
+            ]]></search>
+            <add><![CDATA[
+            if(isset($this->request->get['is_ajax'])) {
+                $this->session->data['success'] = '';
+                return;
+            }
+            ]]></add>
+        </operation>
+    </file>
+
+<!--  ############################# 6 ########################### -->
+    <file path="admin/controller/common/dashboard.php">
+        <operation>
+            <search><![CDATA[$data['security'] = $this->load->controller('common/security');]]></search>
+            <add position="replace"><![CDATA[$data['security'] = '';]]></add>
+        </operation>
+    </file>
+<!--  ############################################################# -->
+</modification>

@@ -1,0 +1,1249 @@
+{{ header }}{{ column_left }}
+<div id="content">
+
+	<div class="page-header">
+    	<div class="container-fluid">
+			<div class="pull-right">
+				{% if has_perm_cache == true %}
+					<button type="button" id="button-cache-setting" data-toggle="tooltip" title="{{ button_cache_settings }}" data-loading-text="{{ text_loading }}" class="btn btn-info"><i class="fa fa-cog"></i></button>
+				{% endif %}	
+				
+				<select class="oc_columns" multiple="multiple">
+					<option value="oc_code">{{ column_code }}</option>
+					<option value="oc_version">{{ column_version }}</option>
+					<option value="oc_type">{{ column_type }}</option>
+					<option value="oc_date">{{ column_date_added }}</option>
+					<option value="oc_edit">{{ column_modified }}</option>
+				</select>
+				
+				{% if has_perm_access == true %}
+					<a href="{{ settings }} " data-toggle="tooltip" title="{{ button_settings }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-success"><i class="fa fa-cog"></i></a>
+				{% endif %}
+				
+				{% if has_perm_edit == true %}
+					<a href="{{ add_xml }}" data-toggle="tooltip" title="{{ button_add_new }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></a>
+				{% endif %}
+				
+				{% if has_perm_install == true %}
+					<button type="button" id="install_modification" data-loading="{{ text_loading }}" data-toggle="tooltip" title="{{ button_install_modification }}" class="btn btn-primary" onclick="installMod();"><i class="fa fa-file-archive-o"></i></button>
+				{% endif %}
+				
+				<a href="{{ refresh }}" data-toggle="tooltip" title="{{ button_refresh_mods }}" class="btn btn-info" onclick="showOverlay('{{ text_ea_refreshing }}');"><i class="fa fa-refresh"></i></a>
+				<a href="{{ clear }}" data-toggle="tooltip" title="{{ button_clear_cache }}" class="btn btn-warning" onclick="showOverlay('{{ text_ea_clearing }}');"><i class="fa fa-eraser"></i></a>
+
+				{% if has_perm_delete == true %}
+					<button type="button" id="butdel" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+				{% endif %}
+			</div>
+      		<h1><i class="fa fa-puzzle-piece"></i>&nbsp;{% for breadcrumb in breadcrumbs %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endfor %}</h1>
+    	</div>
+  	</div>
+  
+  	<div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endif %}
+	
+    <div class="panel panel-default" style="margin-bottom:0; border-bottom: 0px solid #fff;">
+      <div class="panel-heading" id="heading-slider">
+		<h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+		<span class="pull-right btn btn-primary btn-sm clickable"><i class="fa fa-chevron-up" id="toggle-slider"></i><span>&nbsp;&nbsp;</span></span>
+      </div>
+      <div class="panel-body" id="panel-slider">
+		<form id="form-filter" method="get" class="well" style="margin-bottom:0; padding:10px;">
+		  <div class="row">
+			<div class="col-sm-3">
+			  <div class="form-group no-pad">
+				<input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+			  </div>
+			</div>
+			<div class="col-sm-3">
+			  <div class="form-group no-pad">
+				<input type="text" name="filter_author" value="{{ filter_author }}" placeholder="{{ entry_author }}" id="input-author" class="form-control" />
+			  </div>
+			</div>
+			<div class="col-sm-3">
+			  <div class="form-group no-pad">
+				<select name="filter_status" id="input-status" class="form-control">
+					<option value="">All Status</option>
+					{% if filter_status == '1' %}
+					<option value="1" selected="selected">{{ text_enabled }}</option>
+					{% else %}
+					<option value="1">{{ text_enabled }}</option>
+					{% endif %}
+					{% if filter_status == '0' %}
+					<option value="0" selected="selected">{{ text_disabled }}</option>
+					{% else %}
+					<option value="0">{{ text_disabled }}</option>
+					{% endif %}
+				</select>
+			  </div>
+			</div>
+			<div class="col-sm-3">
+			  <div class="form-group no-pad pull-right">
+				<button type="button" id="button-filter" onclick="filterModifications();" class="btn btn-primary" data-toggle="tooltip" title="{{ button_filter }}"><i class="fa fa-search"></i></button>
+				{% if (filter_name is not empty) or (filter_author is not empty) or (filter_status is not empty) %}<a href="{{ reset_url }}" id="button-filter" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-danger" data-toggle="tooltip" title="{{ button_reset }}"><i class="fa fa-times"></i></a>{% endif %}
+			  </div>
+			</div>
+		  </div>
+		</form>	  
+	  </div>
+	</div>  
+
+    <div class="panel panel-default" style="border-top: 0px solid #fff;" id="content_loader">
+      <div class="panel-body" id="panel-general">
+	  	<ul class="nav nav-tabs">
+          	<li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-tasks fa-lg"></i>&nbsp;&nbsp;{{ tab_general }}</a></li>	
+          	{% if modified_files %}<li><a href="#tab-modified" data-toggle="tab"><i class="fa fa-file fa-lg"></i>&nbsp;&nbsp;{{ tab_files }} ({{ ocfiles_count }})</a></li>{% endif %}		
+			{% if comments_count >= 1 %}<li><a data-toggle="tab" href="#tab-comments"><i class="fa fa fa-comment fa-lg"></i>&nbsp;&nbsp;{{ tab_comments }} ({{ comments_count }})</a></li>{% endif %}	
+          	<li><a href="#tab-log" data-toggle="tab"><i class="fa fa-list-ul fa-lg"></i>&nbsp;&nbsp;{{ tab_log }}</a></li>
+          	{% if error_log %}<li><a href="#tab-error" data-toggle="tab" class="highlight"><i class="fa fa-exclamation-triangle fa-lg"></i>&nbsp;&nbsp;{{ tab_error }}</a></li>{% endif %}
+
+			{% if has_perm_install == true and has_perm_upload == true %}
+			<span class="pull-right">				
+				<a href="{{ filelist }}" data-toggle="tooltip" title="{{ text_installed_files }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-primary btn-sm"><i class="fa fa-files-o"></i><span class="hidden-md">&nbsp;&nbsp;{{ button_installed_files }}</span></a>
+				<button type="button" id="dev_upload" data-toggle="tooltip" title="{{ text_upload_developer }}" class="btn btn-info btn-sm"><i class="fa fa-upload"></i><span class="hidden-md">&nbsp;&nbsp;{{ button_upload_dev_xml }}</span></button>
+				<a href="{{ reload }}" data-toggle="tooltip" title="{{ text_reload_developer }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-warning btn-sm"><i class="fa fa-retweet"></i><span class="hidden-md">&nbsp;&nbsp;{{ button_reload_mods }}</span></a>
+			</span>
+			{% endif %}
+		</ul>
+		
+        <div class="tab-content">
+          <div class="tab-pane active" id="tab-general">
+			<form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-modification">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped table-condensed" id="modtable">
+                  <thead>
+                    <tr>
+                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').trigger('click');" /></td>
+                      <td class="text-left">{% if sort == 'name' %}
+                          <a href="{{ sort_name }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_name }}</a>
+                        {% else %}
+                          <a href="{{ sort_name }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_name }}</a>
+                        {% endif %}</td>
+                      <td class="text-left">{% if sort == 'author' %}
+                          <a href="{{ sort_author }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_author }}</a>
+                        {% else %}
+                          <a href="{{ sort_author }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_author }}</a>
+                        {% endif %}</td>
+                      <td class="text-left oc_code">{% if sort == 'code' %}
+                          <a href="{{ sort_code }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_code }}</a>
+                        {% else %}
+                          <a href="{{ sort_code }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_code }}</a>
+                        {% endif %}</td>
+                      <td class="text-left oc_version">{% if sort == 'version' %}
+                          <a href="{{ sort_version }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_version }}</a>
+                        {% else %}
+                          <a href="{{ sort_version }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_version }}</a>
+                        {% endif %}</td>
+                      <td class="text-center">{% if sort == 'status' %}
+                          <a href="{{ sort_status }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_status }}</a>
+                        {% else %}
+                          <a href="{{ sort_status }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_status }}</a>
+                        {% endif %}</td>
+                      <td class="text-left oc_type">{% if sort == 'type' %}
+                          <a href="{{ sort_type }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_type }}<span class="pull-right" data-toggle="tooltip" title="{{ help_installed_development }}">&nbsp;</span></a>
+                        {% else %}
+                          <a href="{{ sort_type }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_type }}<span class="pull-right" data-toggle="tooltip" title="{{ help_installed_development }}">&nbsp;</span></a>
+                        {% endif %}</td>
+                      <td class="text-left oc_date">{% if sort == 'date_added' %}
+                          <a href="{{ sort_date_added }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_date_added }}</a>
+                        {% else %}
+                          <a href="{{ sort_date_added }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_date_added }}</a>
+                        {% endif %}</td>
+                      <td class="text-left oc_edit">{% if sort == 'date_modified' %}
+                          <a href="{{ sort_date_modified }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_modified }}</a>
+                        {% else %}
+                          <a href="{{ sort_date_modified }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_modified }}</a>
+                        {% endif %}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if modifications %}
+                      {% for modification in modifications %}
+                        <tr{% if modification.type != 'Installed' %} class="devmod"{% endif %}>
+                          	<td class="text-center">{% if modification.modification_id in selected %}
+                              <input type="checkbox" name="selected[]" value="{{ modification.modification_id }}" checked="checked"/>
+                            {% else %}
+                              <input type="checkbox" name="selected[]" value="{{ modification.modification_id }}"/>
+                            {% endif %}</td>
+							
+                          	<td class="text-left">							
+								{% if (modification.error) %}
+									<span class="text-danger"><strong>{{ modification.name }}</strong></span>
+									<span class="pull-right"><a data-toggle="tooltip" title="{{ text_xml_search }}" data-mod-id="{{ modification.modification_id }}" class="text-danger error_pop"><i class="fa fa-exclamation-triangle fa-lg"></i></a></span>
+								{% else %}
+									<strong>{{ modification.name }}</strong>
+								{% endif %}
+								<br />
+								{% if (modification.readable == true) %}
+									<span class="small">{{ modification.xml_name }}</span>	
+								{% else %}
+									<span class="small text-danger">{{ error_xml_error }}</span>									
+									<span class="text-danger pull-right" data-toggle="tooltip" title="{{ text_xml_error }}"><i class="fa fa-exclamation-circle fa-lg"></i></span>
+								{% endif %}
+							</td>
+							
+                          	<td class="text-left">{{ modification.author }}</td>
+                          	<td class="text-left oc_code">{{ modification.code }}</td>
+                          	<td class="text-left oc_version">{{ modification.version }}</td>
+                          	<td class="text-center">
+						  	{% if not modification.enabled %}
+                              {% if (modification.readable == true) %}
+							  	<a href="{{ modification.enable }}" data-toggle="tooltip" title="{{ button_enable }}" onclick="showOverlay('{{ text_ea_enable }}');" class="btn btn-danger btn-sm"><i class="fa fa-power-off fa-but-off"></i></a>
+							  {% else %}
+							  	<button type="button" data-toggle="tooltip" title="{{ error_xml_error }}" class="btn btn-danger btn-sm" disabled="disabled"><i class="fa fa-power-off fa-but-off"></i></button>
+							  {% endif %}
+                            {% else %}
+                              <a href="{{ modification.disable }}" data-toggle="tooltip" title="{{ button_disable }}" onclick="showOverlay('{{ text_ea_disable }}');" class="btn btn-success btn-sm"><i class="fa fa-power-off fa-but-on"></i></a>
+                            {% endif %}
+						  	</td>
+						  
+                          	<td class="text-left oc_type">{{ modification.type }}</td>
+						  
+                          	<td class="text-left oc_date">{{ modification.date_added }}</td>
+							
+							<td class="text-left oc_edit">
+								{{ modification.date_modified }}
+								{% if modification.username != '' %}<span class="text-info pull-right shared" data-toggle="tooltip" title="{{ column_modified }}: {{ modification.username }}"><i class="fa fa-info-circle fa-lg"></i></span>{% endif %}
+							</td>
+                          
+						  	<td class="text-right"> 
+								{% if modification.type == 'Installed' %}									
+									{% if ocmod_edit == true %}
+										{% if has_perm_edit == true %}
+											<a href="{{ modification.edit }}" data-toggle="tooltip" title="{{ button_edit_xml }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i></a>
+										{% endif %}
+									{% endif %} 
+									
+									<button type="button" data-btnid="{{ modification.modification_id }}" class="btn btn-warning btn-sm butcom" data-toggle="tooltip" title="{{ button_add_comment }}"><i class="fa fa-comment"></i></button>
+
+									{% if ocmod_download == true %}
+										{% if has_perm_download == true %}
+											<a href="{{ modification.download }}" data-toggle="tooltip" title="{{ button_download_xml }}" class="btn btn-info btn-sm"><i class="fa fa-download"></i></a>
+										{% endif %}
+									{% endif %}
+
+									{% if ocmod_upload == true %}
+										{% if has_perm_upload == true %}
+											<button type="button" data-btnid="{{ modification.modification_id }}" class="btn btn-info btn-sm butup" data-toggle="tooltip" title="{{ button_upload_xml }}"><i class="fa fa-upload"></i></button>
+										{% endif %}
+									{% endif %}									
+
+									{% if ocmod_contact == true %}
+										<a data-mod_id="{{ modification.modification_id }}" data-toggle="tooltip" title="{{ text_contact_dev }}" class="btn btn-success btn-sm" id="con_{{ modification.modification_id }}"><i class="fa fa-envelope"></i></a>
+									{% endif %}
+
+									{% if modification.link %}			
+									  <a href="{{ modification.link }}" data-toggle="tooltip" title="{{ button_link }}" class="btn btn-success btn-sm" target="_blank"><i class="fa fa-link"></i></a>
+									{% else %}
+									  <button type="button" class="btn btn-success btn-sm" disabled="disabled"><i class="fa fa-link"></i></button>
+									{% endif %}
+
+									{% if ocmod_uninstall == true %}
+										{% if has_perm_install == true %}
+											<button type="button" id="uninstall_button" data-loading="{{ text_uninstalling }}" data-toggle="tooltip" title="{{ button_uninstall }}" onclick="uninstallMod('{{ modification.install_id }}','{{ modification.modification_id }}');" class="btn btn-danger btn-sm"><i class="fa fa-exclamation-triangle"></i></button>
+										{% endif %}
+									{% endif %}
+
+								{% else %}	
+									{% if ocmod_edit == true %}
+										{% if has_perm_edit == true %}
+											{% if (modification.readable == true) %}
+												<a href="{{ modification.edit }}" data-toggle="tooltip" title="{{ button_edit_xml }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i></a>
+											{% else %}
+												<button type="button" data-toggle="tooltip" title="{{ error_xml_error }}" class="btn btn-primary btn-sm" disabled="disabled"><i class="fa fa-pencil"></i></button>
+											{% endif %}
+										{% endif %}
+									{% endif %} 
+									
+									<button type="button" data-btnid="{{ modification.modification_id }}" class="btn btn-warning btn-sm butcom" data-toggle="tooltip" title="{{ button_add_comment }}"><i class="fa fa-comment"></i></button>
+
+									{% if ocmod_download == true %}
+										{% if has_perm_download == true %}
+											<a href="{{ modification.download }}" data-toggle="tooltip" title="{{ button_download_xml }}" class="btn btn-info btn-sm"><i class="fa fa-download"></i></a>
+										{% endif %}
+									{% endif %}
+									
+									{% if ocmod_upload == true %}
+										{% if has_perm_upload == true %}
+											<button type="button" class="btn btn-info btn-sm" disabled="disabled"><i class="fa fa-upload"></i></button>
+										{% endif %}
+									{% endif %}
+									
+									{% if ocmod_contact == true %}
+										<button type="button" class="btn btn-success btn-sm" disabled="disabled"><i class="fa fa-envelope"></i></button>
+									{% endif %}	
+									
+									<button type="button" class="btn btn-success btn-sm" disabled="disabled"><i class="fa fa-link"></i></button>
+									
+									{% if ocmod_uninstall == true %}
+										{% if has_perm_install == true %}
+											<button type="button" id="uninstall_button" data-loading="{{ text_uninstalling }}" data-toggle="tooltip" title="{{ button_uninstall }}" onclick="uninstallMod('{{ modification.install_id }}','{{ modification.modification_id }}');" class="btn btn-danger btn-sm"><i class="fa fa-exclamation-triangle"></i></button>
+										{% endif %}
+									{% endif %}
+								{% endif %}
+							
+                            </td>
+                        </tr>
+                      {% endfor %}
+                    {% else %}
+                      <tr>
+                        <td class="text-center" colspan="10">{{ text_no_results }}</td>
+                      </tr>
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+
+          {% if modified_files %}
+          <div class="tab-pane" id="tab-modified">
+          	<div class="table-responsive">
+            <table id="files_table" class="table table-bordered table-hover table-striped table-condensed filestable">
+            	<thead><tr>
+            		<th class="text-left" width="60%">{{ column_filename }}</th>
+            		<th class="text-left">{{ column_modified }}</th>
+            	</tr></thead>
+            	<tbody>
+            	{% for modified_file in modified_files %}
+            	<tr>
+            		<td class="text-left" style="vertical-align:top">{{ modified_file.file }}</td>
+            		<td class="text-left">{% if modified_file.modifications %}
+                        {% for modified_file_modification in modified_file.modifications %}
+            				{% if loop.index > 1 %}<br />{% endif %}
+            				<b>{{ modified_file_modification.name }}</b>
+                        {% endfor %}
+            		{% endif %}</td>
+            	</tr>
+            	{% endfor %}
+            	</tbody>
+            </table>
+            </div>
+          </div>
+          {% endif %}
+
+		  {% if comments_count >= 1 %}
+			<div class="tab-pane" id="tab-comments">
+				<form method="post" enctype="multipart/form-data" id="form-del-comment" class="form-horizontal">
+					<table id="comments_table" class="table table-bordered table-striped table-hover commenttable" width="100%" cellpadding="0" cellspacing="0" border="0">
+						<thead>
+							<tr>
+								<th class="text-center vid" width="1%"></th>
+								<th width="250px">{{ column_name }}</th>
+								<th>{{ column_comment }}</th>
+								<th width="120px">{{ column_added }}</th>
+								<th class="text-center daction" width="50px">{{ column_action }}</th>
+							</tr>
+						</thead>
+					</table>
+				</form>
+			</div>		
+		  {% endif %}
+		  
+		  <div class="tab-pane" id="tab-log">
+            <div class="form-group" style="padding-top:0">
+              <p><textarea wrap="off" rows="15" class="form-control">{{ log }}</textarea></p>
+            </div>
+            <div class="text-center"><a href="{{ clear_log }}" class="btn btn-danger" onclick="showOverlay('{{ text_ea_clearing }}');"><i class="fa fa-eraser"></i> {{ button_clear }}</a></div>
+          </div>
+		  
+          {% if error_log %}
+          <div class="tab-pane" id="tab-error">
+            <p><textarea wrap="off" rows="15" class="form-control">{{ error_log }}</textarea></p>
+            <div class="text-right"><a href="{{ clear_log }}" class="btn btn-danger"><i class="fa fa-eraser"></i> {{ button_clear }}</a></div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay hidden" id="loading-overlay">
+	<div id="ea-loader"></div>  
+	<div id="ea-msg"></div>                           
+</div> 
+
+<a class="scrollup hidden" id="scrollup" href="#"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+
+<style>
+.no-pad {
+	padding:0;
+}
+.page-header {
+    vertical-align: middle;
+    margin: 10px 0 5px 0;
+    padding: 0;
+    border-bottom: 0px solid #e9e9e9;
+}
+.page-header h1 a, .page-header h1 a:hover, .page-header h1 a:visited, .page-header h1 a:active {color:#545454!important;}
+span.clickable {
+	margin-top:-5px;
+	cursor:pointer;
+}
+span.clickable span {font-family: 'Open Sans', sans-serif!important;}
+#panel-general {padding:0px 15px 15px 15px}
+
+.error_pop {
+	cursor:pointer;
+}
+
+#modal-ocmod-uninstall .panel-default {
+	box-shadow: 0 0 0 #ccc;
+	border: 1px solid #ccc;
+}
+#modal-ocmod-uninstall .container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+#content {
+    padding-bottom: 0px;
+}
+#modal-ocmod-uninstall .panel {
+    margin-bottom: 0px;
+}
+.modal-dialog {
+	margin: 50px auto;
+}
+#modal-ocmod-uninstall .form-horizontal .control-label {
+    padding-top: 0px;
+}
+
+#modal-ocmod-install .modal-wide {
+    width: 80%!important;
+}
+
+#modal-ocmod-error .modal-dialog {
+    width: 800px!important;
+}
+#modtable .btn-default.btn-sm {
+    padding: 5px 9px!important;
+}
+.btn-default {
+    padding: 8px 13px 9px 13px!important;
+}
+
+table.commenttable tbody > tr > td {
+    vertical-align: top;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+</style>
+
+{% if ocmod_contact == true %}
+<script type="text/javascript"><!--
+$(document).delegate('a[id^="con_"]', 'click', function(e) {
+	e.preventDefault();
+	$('body > .tooltip').remove();
+	$('#modal-ocmod-contact').remove();
+	var element = $(this);
+	var mod_id = $(element).attr('data-mod_id');
+	var ajaxUrl = 'index.php?route=extension/enhancement/ea_ocmod_manager/contact_developer&user_token={{ user_token }}&mod_id=' + mod_id;
+	$.ajax({
+		url: ajaxUrl,
+		dataType: 'html',
+		success: function(html) {
+			$('body').append('<div id="modal-ocmod-contact" class="modal fade modal-wide">' + html + '</div>');
+			$('#modal-ocmod-contact').modal('show');
+		},			
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+//--></script>
+{% endif %}
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	getColums();
+	getFilters();	
+	$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
+	$(document).ajaxStop(function() {
+		$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
+	});
+	
+	$('#heading-slider span.clickable').on("click", function (e) {
+		if ($(this).hasClass('panel-collapse')) {
+			$(this).parents('.panel').find('.panel-body').slideDown();
+			$('#panel-general').css('padding', '0px 15px 15px 15px');
+			$(this).removeClass('panel-collapse');
+			$('#toggle-slider').removeClass('fa fa-chevron-down').addClass('fa fa-chevron-up');
+			$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_hide_filters }}</span>');
+			localStorage.setItem('ocmodFilters', 'expanded');
+		} else {
+			$(this).parents('.panel').find('.panel-body').slideUp();
+			$('#panel-general').css('padding', '15px 15px 15px 15px');
+			$(this).addClass('panel-collapse');
+			$('#toggle-slider').removeClass('fa fa-chevron-up').addClass('fa fa-chevron-down');		
+			$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_show_filters }}</span>');
+			localStorage.setItem('ocmodFilters', 'collapsed');
+		}
+	});
+
+	$(window).scroll(function() {		
+		if ($(this).scrollTop() >= 200) {
+			$('.scrollup').removeClass('hidden');
+			$('.scrollup').fadeIn();
+		} else {
+		   $('.scrollup').fadeOut();
+		   $('.scrollup').addClass('hidden');
+		}
+	});			
+	$('.scrollup').click(function() {
+		$('html, body').animate({
+			scrollTop:0
+		},500);
+		return false;
+	});
+
+	var tablemod = $('#files_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{name: 'column_filename',visible: true,searchable: true,targets: [0]},
+            {name: 'column_modified',visible: true,searchable: true,targets: [1]}
+        ],
+		order: [[0, 'asc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: false,
+        serverSide: false,
+		conditionalPaging: true
+    });
+
+	var tablecom = $('#comments_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{data: 0,name: 'comment_id',visible: true,searchable: false,orderable: false,className: 'text-center',targets: [0]},
+            {data: 1,name: 'name',visible: true,searchable: true,targets: [1]},
+            {data: 2,name: 'comment',visible: true,searchable: false,targets: [2]},
+            {data: 3,name: 'date_added',visible: true,searchable: false,targets: [3]},
+			{data: 4,name: 'action',visible: true,searchable: false,orderable: false,width: '50px',className: 'text-center',targets: [4]}
+        ],
+		order: [[3, 'desc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: true,
+        serverSide: true,
+		conditionalPaging: true,
+		ajax:{
+			url : 'index.php?route=extension/enhancement/ea_ocmod_manager/getAllComments&user_token={{ user_token }}',
+			type: 'post',
+			error: function(){
+				$(".comments-error").html("");
+				$("#comments_table").append('<tbody class="comments-error"><tr><th colspan="5">{{ error_no_data }}</th></tr></tbody>');
+				$("#comments_processing").css("display","none");			
+			}
+		}
+    });
+
+	$('a[href="#tab-files"]').on('shown.bs.tab', function () {
+		tablemod.columns.adjust();
+	});
+
+	$('a[href="#tab-comments"]').on('shown.bs.tab', function () {
+		tablecom.columns.adjust();
+		$('#comments_table_filter input').attr('placeholder','{{ column_name }}');
+	});
+	
+	// Confirm Delete
+	$('#butdel').click(function () {
+		$('body > .tooltip').remove();
+		var form = $('#form-modification');
+		if ($(":checkbox[name^='selected']", form).is(":checked")) {		
+			$.confirm({
+				title: ' {{ text_ea_sure }}',
+				icon: 'fa fa-question-circle fa-lg',
+				content: '{{ text_ea_delete }}',
+				columnClass: 'col-md-5 col-md-offset-4',
+				draggable: true,
+				buttons: { 
+					ok: {
+						text: '{{ text_ea_yes }}',
+						btnClass: 'btn-success',
+						action: function() {
+							showOverlay('{{ text_ea_removeing }}');
+							$(form).submit();	
+						}
+					},
+					close: {
+						text: '{{ text_ea_no }}',
+						btnClass: 'btn-danger',
+						action: function(){}
+					}
+				}
+			});
+		} else {
+			$.alert({
+				title: '{{ text_pop_alert}}',
+				content: '{{ text_select_something }}',
+				icon: 'fa fa-exclamation-circle fa-lg',
+				columnClass: 'col-md-5 col-md-offset-4',
+				buttons: { 
+					ok: {
+						btnClass: 'btn-success'
+					}
+				}
+			});
+		}
+	});
+});
+
+$(document).delegate('#comments_table tbody button', 'click', function() {	
+	$('body > .tooltip').remove();
+	var dinput = $(this).parents('tr').find('.delinput');
+	var frow = $(this).parents('tr');			
+	var comment_id = $(dinput).val();
+	var url = 'index.php?route=extension/enhancement/ea_ocmod_manager&user_token={{ user_token }}';
+	$(dinput).attr("checked", true);
+	$(frow).addClass('shared');
+	$.confirm({
+		title: ' {{ text_ea_sure }}',			
+		content: '{{ text_ea_delete_comment }}',
+		icon: 'fa fa-question-circle fa-lg',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					$.ajax({
+						url: 'index.php?route=extension/enhancement/ea_ocmod_manager/deleteComment&user_token={{ user_token }}&comment_id=' + comment_id,
+						dataType: 'json',
+						beforeSend: function() {
+							showOverlay('{{ text_ea_removeing }}');
+						},
+						success: function(json) {
+							hideOverlay('{{ text_ea_removeing }}');
+							$('.alert-dismissible').remove();
+							if (json['error']) {
+								$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+							}
+
+							if (json['success']) {
+								$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+								reloadContent('{{ reload_url }}');
+							}						
+						},
+						error: function(xhr, ajaxOptions, thrownError) {
+							hideOverlay('{{ text_ea_removeing }}');
+							alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+						}
+					});
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function() {
+					$(dinput).attr("checked", false);
+					$(frow).removeClass('shared');
+				}
+			}
+		}
+	});	
+});
+
+$(document).delegate('.butcom', 'click', function() {
+	$('#modal-mod-comment').remove();
+	$('body > .tooltip').remove();
+	var modid = $(this).attr('data-btnid');
+	$.ajax({
+		url: 'index.php?route=extension/enhancement/ea_ocmod_manager/getFormComment&user_token={{ user_token }}&modification_id=' + modid,
+		dataType: 'html',
+		success: function(html) {
+			$('body').append('<div id="modal-mod-comment" class="modal fade modal-wide">' + html + '</div>');
+			$('#modal-mod-comment').modal({backdrop: 'static',keyboard: false});
+			$('#modal-mod-comment').modal('show');
+			setTimeout(function() {
+				$('#mod_comment').focus();
+			}, 500);
+		}
+	});
+});
+
+$(document).delegate('.error_pop', 'click', function() {
+	var modid = $(this).attr('data-mod-id');
+	$('body > .tooltip').remove();
+	$('#modal-ocmod-error').remove();
+	$.ajax({
+		url: 'index.php?route=extension/enhancement/ea_ocmod_manager/viewerror&user_token={{ user_token }}&modification_id='+modid,
+		dataType: 'json',
+		success: function(json) {			
+			var html = '<div class="modal-dialog">';
+				html += '	<div class="modal-content">';	
+				html += '		<div class="modal-header">';
+				html += '			<div class="pull-right">';
+				html += '				<a id="modal_edit" data-toggle="tooltip" title="{{ button_edit_xml }}" data-mod-id="'+modid+'" class="btn btn-primary btn-sm"><i class="fa fa-pencil"></i></a>';
+				html += '				<button type="button" data-toggle="tooltip" title="{{ button_close }}" class="btn btn-danger btn-sm" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>';
+				html += '			</div>';
+				html += '			<h4 class="modal-title"><span class="text-danger"><i class="fa fa-exclamation-triangle"></i> {{ text_ocmod_errors }}</span></h4>';
+				html += '		</div>';
+				html += '		<div class="modal-body">';
+				html += '			<form class="form-horizontal">';
+				html += '				<div class="form-group" style="padding-top:0;">';
+				html += '					<label class="col-sm-2 control-label" for="input-name">{{ entry_name }}:</label>';				
+				html += '					<div class="col-sm-10">';
+				html += '						<input type="text" name="name" value="'+json.name+'" id="input-name" class="form-control input-sm" readonly/>';
+				html += '					</div>';
+				html += '				</div>';				
+				html += '				<div class="form-group">';
+				html += '					<label class="col-sm-2 control-label" for="input-filename">{{ entry_xml }}:</label>';				
+				html += '					<div class="col-sm-10">';
+				html += '						<input type="text" name="filename" value="'+json.filename+'" id="input-filename" class="form-control input-sm" readonly/>';
+				html += '					</div>';
+				html += '				</div>';				
+				html += '				<div class="form-group" style="padding-bottom:0;">';
+				html += '					<label class="col-sm-2 control-label" for="input-name">{{ entry_error }}:</label>';				
+				html += '					<div class="col-sm-10">';
+				html += '						<div class="well well-sm" contenteditable="false">'+json.errSummary+'</div>';
+				html += '					</div>';
+				html += '				</div>';				
+				html += '			</form>';	   
+				html += '		</div>';
+				html += '	</div>';	   
+				html += '</div>';
+			
+			$('body').prepend('<div id="modal-ocmod-error" class="modal fade modal-wide">' + html + '</div>');
+			$('#modal-ocmod-error').modal('show');
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).delegate('#modal_edit', 'click', function() {
+	var modid = $(this).attr('data-mod-id');
+	$('#modal-ocmod-error').modal('hide');
+	$('body > .tooltip').remove();
+	showOverlay('{{ text_ea_loading }}');
+	location = 'index.php?route=extension/enhancement/ea_ocmod_manager/edit&user_token={{ user_token }}&modification_id='+modid;
+});
+
+// Confirm Upload Dev
+$(document).delegate('#dev_upload', 'click', function(e) {
+	$('body > .tooltip').remove();
+	var element = $(this);
+	$.confirm({
+		title: ' {{ text_ea_sure }}',
+		icon: 'fa fa-question-circle fa-lg',
+		content: '{{ text_ea_upload_dev }}',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					$('#form-upload-dev').remove();
+
+					$('body').prepend('<form enctype="multipart/form-data" id="form-upload-dev" style="display: none;"><input type="file" name="import_dev" accept=".ocmod.xml" /></form>');
+
+					$('#form-upload-dev input[name=\'import_dev\']').trigger('click');
+
+					if (typeof timer != 'undefined') {
+						clearInterval(timer);
+					}
+
+					timer = setInterval(function() {
+						if ($('#form-upload-dev input[name=\'import_dev\']').val() != '') {
+							clearInterval(timer);
+
+							$.ajax({
+								url: 'index.php?route=extension/enhancement/ea_ocmod_manager/uploadDev&user_token={{ user_token }}',
+								type: 'post',
+								dataType: 'json',
+								data: new FormData($('#form-upload-dev')[0]),
+								cache: false,
+								contentType: false,
+								processData: false,
+								beforeSend: function() {
+									$(element).button('loading');
+									showOverlay('{{ text_ea_uploading }}');
+								},
+								complete: function() {
+									$(element).button('reset');
+								},
+								success: function(json) {
+									$('.alert-dismissible').remove();
+									hideOverlay('{{ text_ea_uploading }}');
+
+									if (json['error']) {
+										$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['reload']) {
+										$('#content > .container-fluid').prepend('<div class="alert alert-info alert-dismissible"><i class="fa fa-info-circle"></i> ' + json['reload'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+
+									if (json['success']) {
+										$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									hideOverlay('{{ text_ea_uploading }}');
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+						}
+					}, 500);
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){}
+			}
+		}
+	});	
+});
+	
+// Confirm Upload
+$(document).delegate('.butup', 'click', function(e) {
+	$('body > .tooltip').remove();
+	var element = $(this);
+	var modification_id = $(element).attr('data-btnid');
+	$.confirm({
+		title: ' {{ text_ea_sure }}',
+		icon: 'fa fa-question-circle fa-lg',
+		content: '{{ text_ea_upload }}',			
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					$('#form-upload-xml').remove();
+
+					$('body').prepend('<form enctype="multipart/form-data" id="form-upload-xml" style="display: none;"><input type="file" name="import_xml" accept=".xml" /></form>');
+
+					$('#form-upload-xml input[name=\'import_xml\']').trigger('click');
+
+					if (typeof timer != 'undefined') {
+						clearInterval(timer);
+					}
+
+					timer = setInterval(function() {
+						if ($('#form-upload-xml input[name=\'import_xml\']').val() != '') {
+							clearInterval(timer);
+
+							$.ajax({
+								url: 'index.php?route=extension/enhancement/ea_ocmod_manager/uploadXml&user_token={{ user_token }}&modification_id=' + modification_id,
+								type: 'post',
+								dataType: 'json',
+								data: new FormData($('#form-upload-xml')[0]),
+								cache: false,
+								contentType: false,
+								processData: false,
+								beforeSend: function() {
+									$(element).button('loading');
+									showOverlay('{{ text_ea_uploading }}');
+								},
+								complete: function() {
+									$(element).button('reset');
+								},
+								success: function(json) {
+									$('.alert-dismissible').remove();
+
+									if (json['error']) {
+										$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+										hideOverlay('{{ text_ea_uploading }}');
+									}
+
+									if (json['success']) {
+										setTimeout(function() {
+											location = json['location'];
+										}, 1000);
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownError) {
+									hideOverlay('{{ text_ea_uploading }}');
+									alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+								}
+							});
+						}
+					}, 500);
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){}
+			}
+		}
+	});	
+});
+
+function installMod() {
+	$('[data-toggle=\'tooltip\']').tooltip('hide');
+	$('#modal-ocmod-install').remove();
+	
+	var html = '<div class="modal-dialog">';
+	   html += '	<div class="modal-content">';	
+	   html += '		<div class="modal-header">';
+	   html += '			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+	   html += '			<h4 class="modal-title"><i class="fa fa-puzzle-piece"></i> {{ text_upload_install }}</h4>';
+	   html += '		</div>';
+	   html += '		<div class="modal-body">';
+	   html += '			<div id="modal-loader"></div>'; 
+	   html += '			<iframe style="width:100%; height:210px; border:none;" src="index.php?route=extension/enhancement/ea_ocmod_manager/installPage&user_token={{ user_token }}"></iframe>'; 	   
+	   html += '		</div>';
+	   html += '	</div>';	   
+	   html += '</div>';
+
+	$('body').append('<div id="modal-ocmod-install" class="modal fade modal-wide">' + html + '</div>');
+	$('#modal-ocmod-install').modal({backdrop: 'static',keyboard: true});
+	$('#modal-ocmod-install').modal('show');
+	setTimeout(function() {
+		$('#modal-loader').remove();
+	}, 1000);
+}
+
+function uninstallMod(extension_install_id,modification_id) {
+	$('[data-toggle=\'tooltip\']').tooltip('hide');
+	$('#modal-ocmod-uninstall').remove();
+	
+	$extension_install_id = extension_install_id;
+	$modification_id = modification_id;
+	
+	var html = '<div class="modal-dialog">';
+	   html += '	<div class="modal-content">';	
+	   html += '		<div class="modal-body">';
+	   html += '			<div class="container-fluid">';
+	   html += '				<div class="panel panel-default">';
+	   html += '					<div class="panel-body">';
+	   html += '						<form class="form-horizontal">';	   
+	   html += '							<fieldset>';
+	   html += '							<legend><i class="fa fa-puzzle-piece"></i> {{ text_progress_uninstall }}</legend>';
+	   html += '							<div class="form-group mprogress" style="padding-bottom:0">';
+	   html += '								<label class="col-sm-2 control-label">{{ entry_progress }}</label>';
+	   html += '								<div class="col-sm-10">';
+	   html += '									<div class="progress progress-striped">';
+	   html += '										<div id="progress-bar" class="progress-bar" style="width: 0%;"></div>';
+	   html += '									</div>';
+	   html += '									<div id="progress-text"></div>';
+	   html += '								</div>';
+	   html += '							</div>';
+	   html += '							</fieldset>';
+	   html += '						</form>';	   
+	   html += '					</div>';
+	   html += '				</div>';
+	   html += '			</div>';
+	   html += '		</div>';
+	   html += '	</div>';	   
+	   html += '</div>';
+
+	$.confirm({
+		title: ' {{ text_ea_sure }}',
+		icon: 'fa fa-question-circle fa-lg',
+		content: '{{ text_ea_uninstall }}',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					$('[data-toggle=\'tooltip\']').tooltip('hide');
+					$('body').append('<div id="modal-ocmod-uninstall" class="modal fade modal-wide">' + html + '</div>');
+					$('#modal-ocmod-uninstall').modal({backdrop: 'static',keyboard: false});
+					$('#modal-ocmod-uninstall').modal('show');	
+					uninstallModContinue($extension_install_id,$modification_id)
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){}
+			}
+		}
+	});	
+}
+
+var refresh_location = window.location;
+
+function uninstallModContinue(extension_install_id,modification_id) {		
+	//$('[data-toggle=\'tooltip\']').tooltip('hide');
+	$extension_install_id = extension_install_id;
+	$modification_id = modification_id;
+	$('#progress-bar').css('width', '0%');
+	$('#progress-bar').removeClass('progress-bar-danger progress-bar-success');
+	$('#progress-text').html('');
+	$(document).ajaxStart();
+	$.ajax({
+		url: 'index.php?route=extension/enhancement/ea_ocmod_manager/uninstallMod&user_token={{ user_token }}&modification_id=' + $modification_id + '&extension_install_id=' + $extension_install_id,
+		dataType: 'json',
+		beforeSend: function() {
+			$('#uninstall_button').button('loading');			
+		},
+		complete: function() {
+			$('#uninstall_button').button('reset');
+		},
+		success: function(json) {					
+			$('[data-toggle=\'tooltip\']').tooltip('hide');
+			if (json['error']) {
+				$('.mprogress #progress-bar').addClass('progress-bar-danger');
+				$('.mprogress #progress-text').html('<span class="text-danger">' + json['error'] + '</span>');
+				setInterval(function() {
+					$('#modal-ocmod-uninstall').modal('hide');
+				}, 2000);
+			}
+
+			if (json['success']) {
+				refresh_location = json['location'];
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+			$('#modal-ocmod-uninstall').modal('hide');
+		}
+	});	
+	$(document).ajaxStop(function() {
+		$('.mprogress #progress-bar').css('width', '100%');
+		$('.mprogress #progress-bar').addClass('progress-bar-success');
+		$('.mprogress #progress-text').html('<span class="text-success"><i class="fa fa-check fa-lg"></i></span>&nbsp;&nbsp;<span class="text-danger">{{ text_success_uninstalled }}</span>');	
+		setTimeout(function() {
+			location = refresh_location;
+		}, 1000);
+	});	
+}
+
+$('#button-cache-setting').on('click', function() {
+	$('body > .tooltip').remove();
+	$.ajax({
+		url: 'index.php?route=common/developer&user_token={{ user_token }}',
+		dataType: 'html',
+		beforeSend: function() {
+			$('#button-cache-setting').button('loading');
+		},
+		complete: function() {
+			$('#button-cache-setting').button('reset');
+		},
+		success: function(html) {
+			$('#modal-developer').remove();
+			$('body').prepend('<div id="modal-developer" class="modal fade">' + html + '</div>');
+			$('#modal-developer').modal('show');
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$('input[name=\'filter_name\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager/autoCompleteName&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['modification_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_author\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager/autoCompleteAuthor&user_token={{ user_token }}&filter_author=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['author'],
+						value: item['modification_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_author\']').val(item['label']);
+	}
+});
+
+function getColums() {
+	$('.oc_columns').multiselect({
+		checkboxClass: 'column-toggler',
+		buttonText: function(options, select) {
+			return 'Show Columns';
+		},
+		buttonTitle: function(options, select) {
+			var labels = [];
+			options.each(function () {
+				labels.push($(this).text());
+			});
+			return labels.join(' - ');
+		}
+	});  
+	$("input.column-toggler").each(function() {
+		var column = $(this).attr("name");
+		if (localStorage.getItem(column) == 1) {
+			$("select.oc_columns").find("option[value="+column+"]").prop("selected", "selected");
+			$(this).attr("checked", true);
+			$("th." + column).show(250);
+			$("td." + column).show(250);
+        } else {
+            $("select.oc_columns").find("option[value="+column+"]").removeAttr("selected");
+			$(this).removeAttr("checked");
+			$("th." + column).hide(250);
+			$("td." + column).hide(250);
+        }
+		$(this).on("click", function() {
+			if ($(this).is(":checked") === true) {
+				$("select.oc_columns").find("option[value="+column+"]").prop("selected", "selected");
+				$("th." + column).show(250);
+				$("td." + column).show(250);
+				var value = 1;
+        		localStorage.setItem(column,value);	
+			} else {
+				$(this).removeAttr("checked");
+				$(".oc_columns").find("option[value="+column+"]").removeAttr("selected");
+				$("th." + column).hide(250);
+				$("td." + column).hide(250);
+				var value = 0;
+        		localStorage.setItem(column,value);	
+			}			
+		});	
+    });
+	$("select.oc_columns").multiselect('refresh');
+}
+
+function getFilters() {	
+	var ocmodFilters = localStorage.getItem('ocmodFilters');
+    if (ocmodFilters == 'collapsed') {
+		$('#panel-slider').slideUp();
+		$('#panel-general').css('padding', '15px 15px 15px 15px');
+		$('span.clickable').addClass('panel-collapse');
+		$('#toggle-slider').removeClass('fa fa-chevron-up').addClass('fa fa-chevron-down');		
+		$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_show_filters }}</span>');
+    } else {
+		$('#panel-slider').slideDown();
+		$('#panel-general').css('padding', '0px 15px 15px 15px');
+		$('span.clickable').removeClass('panel-collapse');
+ 		$('#toggle-slider').removeClass('fa fa-chevron-down').addClass('fa fa-chevron-up');
+		$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_hide_filters }}</span>');
+    }
+}
+
+function getTables() {
+	var tablemod = $('#files_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{name: 'column_filename',visible: true,searchable: true,targets: [0]},
+            {name: 'column_modified',visible: true,searchable: true,targets: [1]}
+        ],
+		order: [[0, 'asc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: false,
+        serverSide: false,
+		conditionalPaging: true
+    });
+	
+	var tablecom = $('#comments_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{data: 0,name: 'comment_id',visible: true,searchable: false,orderable: false,className: 'text-center',targets: [0]},
+            {data: 1,name: 'name',visible: true,searchable: true,targets: [1]},
+            {data: 2,name: 'comment',visible: true,searchable: false,targets: [2]},
+            {data: 3,name: 'date_added',visible: true,searchable: false,targets: [3]},
+			{data: 4,name: 'action',visible: true,searchable: false,orderable: false,width: '50px',className: 'text-center',targets: [4]}
+        ],
+		order: [[3, 'desc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: true,
+        serverSide: true,
+		conditionalPaging: true,
+		ajax:{
+			url : 'index.php?route=extension/enhancement/ea_ocmod_manager/getAllComments&user_token={{ user_token }}',
+			type: 'post',
+			error: function(){
+				$(".comments-error").html("");
+				$("#comments_table").append('<tbody class="comments-error"><tr><th colspan="5">{{ error_no_data }}</th></tr></tbody>');
+				$("#comments_processing").css("display","none");			
+			}
+		}
+    });
+}
+
+function filterModifications() {
+	showOverlay('{{ text_ea_loading }}');
+	var url = 'index.php?route=extension/enhancement/ea_ocmod_manager&user_token={{ user_token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_author = $('input[name=\'filter_author\']').val();
+	if (filter_author) {
+		url += '&filter_author=' + encodeURIComponent(filter_author);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+	if (filter_status != '*') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = url;
+
+	return false;
+}
+
+function reloadContent(url) {
+	var url = url;
+	$("#content_loader").load(url + " #content_loader > *", function() {
+		getColums();
+		getFilters();
+		getTables();
+		$('body > .tooltip').remove();		
+		$('[data-toggle=\'tooltip\']').tooltip({container: 'body', html: true});
+	});	
+}
+
+function showOverlay(msg) {
+	$('#ea-msg').html('');
+	html = '<div>'+ msg +'</div>';
+	$('#ea-msg').prepend(html);
+	$('#loading-overlay').removeClass('hidden');
+}
+
+function hideOverlay() {
+	$('#loading-overlay').addClass('hidden');
+}
+//--></script>
+
+{{ footer }}

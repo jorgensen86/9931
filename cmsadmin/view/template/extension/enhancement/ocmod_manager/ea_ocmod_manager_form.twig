@@ -1,0 +1,710 @@
+{{ header }} {{ column_left }}
+<div id="content">
+
+	<div class="page-header">
+    	<div class="container-fluid">
+			<div class="pull-right">
+        		{% if additional_count %}
+					<button type="button" id="export_mod" data-toggle="tooltip" title="{{ button_export_modification }}" class="btn btn-warning"><i class="fa fa-download"></i></button>
+				{% endif %}
+				{% if not mod_id %}
+					<button type="button" id="btndev" data-toggle="tooltip" title="{{ button_save_development }} " class="btn btn-warning"><i class="fa fa-save"></i></button>
+				{% endif %}
+				 &nbsp;&nbsp;&nbsp;&nbsp;
+				<button type="button" id="wide-screen" data-toggle="tooltip" title="{{ button_wide_screen }}" class="btn btn-success"><i class="fa fa-desktop"></i></button> 
+				<button type="button" id="small-screen" class="btn btn-success hidden"><i class="fa fa-undo"></i>&nbsp;&nbsp;{{ button_small_screen }}</button> &nbsp;&nbsp;&nbsp;&nbsp;
+				{% if mod_id %}
+					<button type="button" id="butcom" class="btn btn-warning" data-toggle="tooltip" title="{{ button_add_comment }}"><i class="fa fa-comment"></i></button>
+				{% endif %}
+				<button type="button" id="save-form" onclick="showOverlay('{{ text_ea_saving }}');$('#form-modification').attr('action', '{{ action }} ').submit();" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+				{% if refresh %} <button type="button" id="save-form-refresh" onclick="showOverlay('{{ text_ea_saving }}');$('#form-modification').attr('action', '{{ refresh }} ').submit();" data-toggle="tooltip" title="{{ button_save_refresh }}" class="btn btn-primary"><i class="fa fa-save"></i> + <i class="fa fa-refresh"></i></button>{% endif %}
+				<a href="{{ cancel }} " data-toggle="tooltip" title="{{ button_cancel }}" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-danger"><i class="fa fa-times"></i></a>
+			</div>
+			<h1><i class="fa fa-puzzle-piece"></i>&nbsp;
+				{% if mod_id %}
+					{% for breadcrumb in breadcrumbs %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endfor %}
+				{% else %}	
+					{% for breadcrumb in breadcrumbs %}{{ breadcrumb.text }}{% endfor %}
+				{% endif %}
+			</h1>
+  		</div>
+	</div>
+		
+	<div class="container-fluid">
+      	{% if error_warning %}
+      	<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+        	<button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      	{% endif %}
+      	{% if success %}
+        <div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{ success }}
+        	<button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      	{% endif %}
+
+		{% if ocfiles and ocfiles_count > 1 %}
+		<div id="path-bar">
+			<div class="handle"><i class="fa fa-link fa-lg"></i></div>
+			<h3><i class="fa fa-link"></i>&nbsp;&nbsp;{{ text_path_links }}</h3>
+			{% for ocfile in ocfiles %}
+				<a data-path="{{ ocfile.path }}">{{ ocfile.path }}</a>
+			{% endfor %}
+		</div>
+		{% endif %}
+	
+    	<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="pull-right">
+					<div class="checkbox" style="margin-top:-2px; margin-left:30px;">
+						<label class="checkbox-inline"><input type="checkbox" name="screen_mode" id="screen_mode" />&nbsp;&nbsp;<strong>{{ entry_dual_screen }}</strong></label>
+					</div>
+				</div>
+				<h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_form }} </h3>
+      		</div>
+      		<div class="panel-body">
+	  			<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-general" data-toggle="tab"><i class="fa fa-code"></i>&nbsp;&nbsp;{{ tab_general }}</a></li>
+				  	{% if ocfiles %}<li><a href="#tab-modified" data-toggle="tab"><i class="fa fa-file"></i>&nbsp;&nbsp;{{ tab_files }} ({{ ocfiles_count }})</a></li>{% endif %}	
+				  	{% if additional_files %}<li><a href="#tab-files" data-toggle="tab"><i class="fa fa-file-archive-o"></i>&nbsp;&nbsp;{{ tab_additional }} ({{ additional_count }})</a></li>{% endif %}
+					{% if comments_count >= 1 %}<li><a data-toggle="tab" href="#tab-comments"><i class="fa fa fa-comment fa-lg"></i>&nbsp;&nbsp;{{ tab_comments }} ({{ comments_count }})</a></li>{% endif %}
+				  	{% if error_log %}<li><a href="#tab-error" data-toggle="tab" class="highlight"><i class="fa fa-exclamation-triangle"></i>&nbsp;&nbsp;{{ tab_error }}</a></li>{% endif %}
+				</ul>		
+
+ 				<div class="tab-content">
+					<div class="tab-pane active" id="tab-general">
+						<form action="{{ action }} " method="post" enctype="multipart/form-data" id="form-modification" class="form-horizontal">
+						<div id="form-status">
+							<div class="form-group" style="padding-top:0;">
+								<label class="col-sm-4 control-label" for="input-xml-status">{{ entry_status }}</label>
+								<div class="col-sm-8">
+									<select name="xml_status" id="input-xml-status" class="form-control" {% if modification.code == 'enhanced_mod_manager' %}disabled{% endif %}>
+										{% if modification.status %}
+										<option value="1" selected="selected">{{ text_enabled }}</option>
+										<option value="0">{{ text_disabled }}</option>
+										{% else %}
+										<option value="1">{{ text_enabled }}</option>
+										<option value="0" selected="selected">{{ text_disabled }}</option>
+										{% endif %}
+									</select>
+								</div>
+							</div>
+						</div>
+
+						{% if mod_xml_error %}
+						<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ mod_xml_error }}
+						  <button type="button" class="close" data-dismiss="alert">&times;</button>
+						</div>
+						{% endif %}					
+					
+						<div class="form-group" style="padding:0">
+							<div class="col-sm-12">
+								<div class="ace-editor-container">
+									<div id="ace-editor" class="ace-editor">{{ modification.xml|escape }}</div>	
+								</div>					
+								<textarea name="xml" id="input-xml" class="form-control hidden">{{ modification.xml|escape }}</textarea>
+							</div>
+						</div>
+						</form>
+					</div>
+
+					{% if ocfiles %}
+					<div class="tab-pane" id="tab-modified">
+						<div class="table-responsive">
+							<table id="modified_table" class="table table-bordered table-hover table-striped table-condensed modifiedtable">
+								<thead>
+									<tr>
+										<th>{{ column_filename }}</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for ocfile in ocfiles %}
+									<tr>
+										<td class="text-left">{{ ocfile.path }}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+					{% endif %}
+
+					{% if additional_files %}
+					<div class="tab-pane" id="tab-files">
+						<div class="alert alert-info alert-dismissible"><i class="fa fa-info-circle"></i>&nbsp;&nbsp;{{ additional_file_name }}</div>
+						<form action="{{ del_file }}" method="post" enctype="multipart/form-data" id="form-del-file" class="form-horizontal">
+							<table id="filepaths" class="table table-bordered table-striped table-hover filetable" width="100%" cellpadding="0" cellspacing="0" border="0">
+								<thead>
+									<tr>
+										<th class="text-center" width="1%"></th>
+										<th>{{ column_filename }}</th>
+										<th class="text-center" width="50px">{{ column_action }}</th>
+									</tr>
+								</thead>
+							</table>
+						</form>
+					</div>		
+					{% endif %} 
+
+					{% if comments_count >= 1 %}
+					<div class="tab-pane" id="tab-comments">
+						<form method="post" enctype="multipart/form-data" id="form-del-comment" class="form-horizontal">
+							<table id="comments_table" class="table table-bordered table-striped table-hover commenttable" width="100%" cellpadding="0" cellspacing="0" border="0">
+								<thead>
+									<tr>
+										<th class="text-center vid" width="1%"></th>
+										<th>{{ column_comment }}</th>
+										<th width="120px">{{ column_date_added }}</th>
+										<th class="text-center" width="50px">{{ column_action }}</th>
+									</tr>
+								</thead>
+							</table>
+						</form>
+					</div>		
+					{% endif %}
+
+					{% if error_log %}
+						<div class="tab-pane" id="tab-error">
+							<p>
+							  <textarea wrap="off" rows="15" class="form-control">{{ error_log }}</textarea>
+							</p>
+						</div>
+					{% endif %}		  
+				</div>		
+    		</div>
+	
+  		</div>
+	</div>
+</div>
+
+<div class="loading-overlay hidden" id="loading-overlay">
+	<div id="ea-loader"></div>  
+	<div id="ea-msg"></div>                           
+</div> 
+
+<a class="scrollup hidden" id="scrollup" href="#"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+
+<script src="view/template/extension/enhancement/ocmod_manager/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/ocmod_manager/js/ace/{{ themejs }}.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/ocmod_manager/js/ace/mode-xml.js" type="text/javascript" charset="utf-8"></script>
+<script src="view/template/extension/enhancement/ocmod_manager/js/ace/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+
+<style type="text/css">
+.page-header h1 a, .page-header h1 a:hover, .page-header h1 a:visited, .page-header h1 a:active {color:#545454!important;}
+.pagination li:hover{
+    cursor: pointer;
+}
+#form-status {
+	position: absolute;
+	right:40px;
+	margin-top:-60px;
+	z-index:5;
+}
+
+.nav-tabs {
+    margin-bottom: 15px;
+}
+
+.ace-editor-container {}
+
+.ace-editor {
+    width: 100%;
+	/*min-height: 650px;*/
+    position: relative !important;
+}
+
+@media (min-width: 992px) {
+  .ace-editor { min-height: 500px; }
+}
+@media (min-width: 1200px) {
+  .ace-editor { min-height: 650px; }
+}
+
+.ace-editor.fullWidth {
+    height: 100% !important;
+	width: auto;
+	border: 0;
+	margin: 0;
+	position: fixed !important;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1100;	
+	overflow: hidden;
+	border-top:5px solid #ccc;
+}
+
+.ace_editor {font-size:14px!important}
+
+#small-screen {
+	z-index: 1150;
+	position: fixed !important;
+	top: 15px;
+	right: 30px;
+}
+.ace-cobalt .ace_marker-layer .ace_active-line {
+	background: #003F77!important;
+}
+.ace-cobalt .ace_gutter {
+	color: #fff!important;
+}
+.ace-cobalt .ace_gutter-active-line {
+	background-color: #003F77!important;
+}
+
+.errorline {
+    background: rgba(255, 50, 50, 0.5);
+    position: absolute;
+    width: 100% !important;
+    left: 0 !important;
+	z-index:999;
+}
+.searchline {
+    background: rgba(195,145,61,0.5);
+    position: absolute;
+    width: 100% !important;
+    left: 0 !important;
+	z-index:999;
+}
+
+table.filetable td {padding: 4px 8px!important;}
+table.commenttable tbody > tr > td {
+    vertical-align: top;
+}
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+</style>
+
+<script type="text/javascript"><!--
+var ace_editor = ace.edit("ace-editor");
+ace_editor.resize(true);
+var editorChanged;
+
+ace_editor.setOptions({
+	theme:  "ace/theme/{{ themename }}",
+	mode:  "ace/mode/xml",
+	selectionStyle: "text",
+	dragEnabled: false,
+	highlightActiveLine: true,
+	enableBasicAutocompletion: true,
+	autoScrollEditorIntoView: true,
+	showPrintMargin: false
+});
+
+ace_editor.renderer.setAnimatedScroll(true);
+
+ace_editor.getSession().on('change', function () {
+   $('#input-xml').val(ace_editor.getSession().getValue());
+});
+
+$('#wide-screen').click(function() {
+    $('.ace-editor').addClass('fullWidth');
+	$('#wide-screen').addClass('hidden');
+	$('#small-screen').removeClass('hidden');
+});
+
+$('#small-screen').click(function() {
+    $('.ace-editor').removeClass('fullWidth');
+	$('#wide-screen').removeClass('hidden');
+	$('#small-screen').addClass('hidden');
+});
+
+$('a[href="#tab-general"]').on('shown.bs.tab', function () {
+	$('#wide-screen').show(0);
+	$('#path-bar').show(0);
+});
+
+$('a[href="#tab-general"]').on('hidden.bs.tab', function () {
+	$('#wide-screen').hide(0);
+	$('#path-bar').hide(0);
+});
+
+$(document).ready(function() {
+	$("#path-bar a").click(function(){
+		$("#path-bar").slideReveal("hide");
+		var path = $(this).attr("data-path");
+		ace_editor.focus();
+		var searchResults = ace_editor.find(path,{
+			backwards: false,
+			wrap: true,
+			caseSensitive: false,
+			wholeWord: false,
+			regExp: false
+		});
+
+		if (searchResults) {
+			ace_editor.scrollToLine(searchResults.start.row-1);			
+			var Range = ace.require('ace/range').Range;
+			ace_editor.session.addMarker(new Range(searchResults.start.row, 0, searchResults.start.row, 1), "searchline", "fullLine");
+		}
+	});
+
+    var slider = $("#path-bar").slideReveal({
+		width: 400,
+		push: false,
+		position: "right",
+		trigger: $(".handle"),
+		autoEscape: false,
+		shown: function(obj) {
+			obj.find(".handle").html('<i class="fa fa-chevron-right fa-lg"></i>');
+			obj.addClass("left-shadow-overlay");
+		},
+		hidden: function(obj) {
+			obj.find(".handle").html('<i class="fa fa-link fa-lg"></i>');
+			obj.removeClass("left-shadow-overlay");
+		}
+    });
+
+	if (ace_editor) {
+		ace_editor.focus();
+		
+		editorChanged = false;
+
+		ace_editor.on('change', function() {
+			if (editorChanged == false) {
+				window.onbeforeunload = function() {
+					return '{{ text_ea_unsaved }}';
+				}
+			}
+
+			editorChanged = true;
+		});
+
+		$('#form-modification').bind('submit',function() {
+			if (editorChanged) {
+				window.onbeforeunload = null;
+			}
+		});
+	}
+
+	$(window).scroll(function() {		
+		if ($(this).scrollTop() >= 200) {
+			$('.scrollup').removeClass('hidden');
+			$('.scrollup').fadeIn();
+		} else {
+		   $('.scrollup').fadeOut();
+		   $('.scrollup').addClass('hidden');
+		}
+	});			
+	$('.scrollup').click(function() {
+		$('html, body').animate({
+			scrollTop:0
+		},500);
+		return false;
+	});
+
+    $('#screen_mode').change(function() {
+        if(this.checked) {			
+			if (editorChanged == false) {
+				window.onbeforeunload = null;
+				location = 'index.php?route=extension/enhancement/ea_ocmod_manager/updateConfig&user_token={{ user_token }}&modification_id={{ mod_id }}&screen_mode=2';
+			} else {
+				window.onbeforeunload = function() {
+					return '{{ text_ea_unsaved }}';
+				}
+				location = 'index.php?route=extension/enhancement/ea_ocmod_manager/updateConfig&user_token={{ user_token }}&modification_id={{ mod_id }}&screen_mode=2';
+				$('#screen_mode').prop('checked', false);
+			}
+			showOverlay('{{ text_ea_loading }}');
+        }       
+    });
+
+	var tablemod = $('#modified_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{name: 'column_filename',visible: true,searchable: true,targets: [0]}
+        ],
+		order: [[0, 'asc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: false,
+        serverSide: false,
+		conditionalPaging: true
+    });
+	
+	var tableadd = $('#filepaths').DataTable({
+        dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{data: 0,name: 'extension_path_id', className: 'text-center',visible: true,searchable: false,orderable: false,targets: [0]},
+            {data: 1,name: 'path',visible: true,searchable: true,targets: [1]},
+			{data: 2,name: 'action', className: 'text-center',visible: true,searchable: false,orderable: false,width: '50px',targets: [2]}
+        ],
+		order: [[1, 'asc']],
+        fixedColumns: true,
+		searching: true,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: true,
+        serverSide: true,
+		ajax:{
+			url : 'index.php?route=extension/enhancement/ea_ocmod_manager/getModFiles&user_token={{ user_token }}&modification_id={{ mod_id }}',
+			type: 'post',
+			error: function(){
+				$(".paths-error").html("");
+				$("#filepaths").append('<tbody class="paths-error"><tr><th colspan="3">{{ error_no_data }}</th></tr></tbody>');
+				$("#paths_processing").css("display","none");			
+			}
+		}
+    });
+
+	var tablecom = $('#comments_table').DataTable({
+		dom: '<"row"<"col-sm-5"f><"col-sm-7 text-right"l>>' + '<"row"<"col-sm-12"tr>>' + '<"row"<"col-sm-5"i><"col-sm-7"p>>',
+		columnDefs: [
+			{data: 0,name: 'comment_id',visible: true,searchable: false,orderable: false,className: 'text-center',targets: [0]},
+            {data: 1,name: 'comment',visible: true,searchable: false,targets: [1]},
+            {data: 2,name: 'date_added',visible: true,searchable: false,targets: [2]},
+			{data: 3,name: 'action',visible: true,searchable: false,orderable: false,width: '50px',className: 'text-center',targets: [3]}
+        ],
+		order: [[2, 'desc']],
+        fixedColumns: true,
+		searching: false,
+		lengthMenu: [[10, 20, 50, 100, 200, 250, 500],[10, 20, 50, 100, 200, 250, 500]],
+        processing: true,
+        serverSide: true,
+		conditionalPaging: true,
+		ajax:{
+			url : 'index.php?route=extension/enhancement/ea_ocmod_manager/getModComments&user_token={{ user_token }}&modification_id={{ mod_id }}',
+			type: 'post',
+			error: function(){
+				$(".comments-error").html("");
+				$("#comments_table").append('<tbody class="comments-error"><tr><th colspan="5">{{ error_no_data }}</th></tr></tbody>');
+				$("#comments_processing").css("display","none");			
+			}
+		}
+    });
+
+	$('a[href="#tab-modified"]').on('shown.bs.tab', function () {
+		$('#modified_table_filter input').attr('placeholder','{{ column_filename }}');
+	});
+
+	$('a[href="#tab-files"]').on('shown.bs.tab', function () {
+		tableadd.columns.adjust();
+		$('#filepaths_filter input').attr('placeholder','{{ column_filename }}');
+	});
+
+	$('a[href="#tab-comments"]').on('shown.bs.tab', function () {
+		tablecom.columns.adjust();
+	});
+
+	$('#filepaths tbody').on('click', 'button', function () {
+		var dinput = $(this).parents('tr').find('.delinput');
+		var frow = $(this).parents('tr');	
+		$(dinput).attr("checked", true);
+		$(frow).addClass('shared');
+		$.confirm({
+			title: ' {{ text_ea_sure }}',			
+			content: '{{ text_ea_delete_file }}',
+			icon: 'fa fa-question-circle fa-lg',
+			columnClass: 'col-md-5 col-md-offset-4',
+			draggable: true,
+			buttons: { 
+				ok: {
+					text: '{{ text_ea_yes }}',
+					btnClass: 'btn-success',
+					action: function() {
+						showOverlay('{{ text_ea_removeing }}');
+						$('#form-del-file').submit();
+					}
+				},
+				close: {
+					text: '{{ text_ea_no }}',
+					btnClass: 'btn-danger',
+					action: function() {
+						$(dinput).attr("checked", false);
+						$(frow).removeClass('shared');
+					}
+				}
+			}
+		});	
+	});	
+
+	$('#comments_table tbody').on('click', 'button', function () {
+		var dinput = $(this).parents('tr').find('.delcom');
+		var frow = $(this).parents('tr');				
+		var comment_id = $(dinput).val();
+		$(dinput).attr("checked", true);
+		$(frow).addClass('shared');
+		$.confirm({
+			title: ' {{ text_ea_sure }}',			
+			content: '{{ text_ea_delete_comment }}',
+			icon: 'fa fa-question-circle fa-lg',
+			columnClass: 'col-md-5 col-md-offset-4',
+			draggable: true,
+			buttons: { 
+				ok: {
+					text: '{{ text_ea_yes }}',
+					btnClass: 'btn-success',
+					action: function() {
+						$.ajax({
+							url: 'index.php?route=extension/enhancement/ea_ocmod_manager/deleteComment&user_token={{ user_token }}&comment_id=' + comment_id,
+							dataType: 'json',
+							beforeSend: function() {
+								showOverlay('{{ text_ea_removeing }}');
+							},
+							success: function(json) {
+								hideOverlay('{{ text_ea_removeing }}');
+								$('.alert-dismissible').remove();
+								if (json['error']) {
+									$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+								}
+
+								if (json['success']) {
+									$('#content > .container-fluid').prepend('<div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+									setTimeout(function() {
+										location.reload();
+									}, 500);
+								}						
+							},
+							error: function(xhr, ajaxOptions, thrownError) {
+								hideOverlay('{{ text_ea_removeing }}');
+								alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+							}
+						});
+					}
+				},
+				close: {
+					text: '{{ text_ea_no }}',
+					btnClass: 'btn-danger',
+					action: function() {
+						$(dinput).attr("checked", false);
+						$(frow).removeClass('shared');
+					}
+				}
+			}
+		});	
+	});	
+
+	$('#butcom').on('click', function () {
+		$('#modal-mod-comment').remove();
+		$.ajax({
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager/getFormComment&user_token={{ user_token }}&modification_id={{ mod_id }}',
+			dataType: 'html',
+			success: function(html) {
+				$('body').append('<div id="modal-mod-comment" class="modal fade modal-wide">' + html + '</div>');
+				$('#modal-mod-comment').modal({backdrop: 'static',keyboard: false});
+				$('#modal-mod-comment').modal('show');
+				setTimeout(function() {
+					$('#mod_comment').focus();
+				}, 500);
+			}
+		});
+	});	
+});
+
+$(document).on('hidden.bs.modal', function () {
+    showOverlay('{{ text_ea_refreshing }}');
+	window.location.reload(true);
+});
+function reloadContent(url) {}
+
+$('#export_mod').click(function() {
+	$.confirm({
+		title: ' {{ text_ea_sure }}',			
+		content: '{{ text_ea_export_mod }}',
+		icon: 'fa fa-question-circle fa-lg',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					showOverlay('{{ text_ea_exporting }}');					
+					$.ajax({
+						url: 'index.php?route=extension/enhancement/ea_ocmod_manager/exportMod&user_token={{ user_token }}&modification_id={{ mod_id }}',
+						dataType: 'json',
+						success: function(json) {
+							$('.alert-dismissible').remove();
+							hideOverlay();
+							
+							if (json['error']) {
+								$('#content > .container-fluid').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+							}
+							
+							if (!json['error']) {
+								if (json['zip_file']) {
+									location.href = json['zip_file'];
+									setTimeout(function() {
+										deleteZip(json['zip_name']);
+									}, 5000);
+								}
+							}
+						},			
+						error: function(xhr, ajaxOptions, thrownError) {
+							hideOverlay();
+							alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+						}
+					});
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){}
+			}
+		}
+	});	
+});
+
+function deleteZip(zipname) {
+	var zipname = zipname;
+	$.ajax({
+		url: 'index.php?route=extension/enhancement/ea_ocmod_manager/deleteZip&user_token={{ user_token }}&zip_file_name='+encodeURIComponent(zipname),	
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+}
+
+$('#btndev').click(function() {
+	$.confirm({
+		title: ' {{ text_ea_sure }}',			
+		content: '{{ text_ea_save_dev }}',
+		icon: 'fa fa-question-circle fa-lg',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					showOverlay('{{ text_ea_saving }}');
+					var formAction = 'index.php?route=extension/enhancement/ea_ocmod_manager/add&user_token={{ user_token }}&savedev=true';
+					$('#form-modification').attr('action', formAction).submit();
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){}
+			}
+		}
+	});	
+});
+
+function showOverlay(msg) {
+	$('#ea-msg').html('');
+	html = '<div>'+ msg +'</div>';
+	$('#ea-msg').prepend(html);
+	$('#loading-overlay').removeClass('hidden');
+}
+
+function hideOverlay() {
+	$('#loading-overlay').addClass('hidden');
+}
+//--></script>
+
+{% if mod_xml_error %}
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	ace_editor.focus();
+	var Range = ace.require('ace/range').Range;
+	ace_editor.session.addMarker(new Range('{{ error_line }}'-1, 0, '{{ error_line }}'-1, 1), "errorline", "fullLine");
+	ace_editor.scrollToLine('{{ error_line }}'-1);	
+	ace_editor.moveCursorTo('{{ error_line }}'-1, 0);
+});
+//--></script>
+{% endif %}
+
+{{ footer}} 

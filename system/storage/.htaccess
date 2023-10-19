@@ -1,0 +1,2 @@
+ErrorDocument 403 http://www.bnit.it
+Deny from all

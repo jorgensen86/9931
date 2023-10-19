@@ -1,0 +1,230 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_filter }}" onclick="$('#filter-appliance').toggleClass('hidden-sm hidden-xs');" class="btn btn-default hidden-md hidden-lg"><i class="fa fa-filter"></i></button>
+        <a href="{{ add }}" data-toggle="tooltip" title="{{ button_add }}" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+        <button type="submit" form="form-appliance" formaction="{{ copy }}" data-toggle="tooltip" title="{{ button_copy }}" class="btn btn-default"><i class="fa fa-copy"></i></button>
+        <button type="button" form="form-appliance" formaction="{{ delete }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-appliance').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">{% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="row">
+      <div id="filter-appliance" class="col-md-3 col-md-push-9 col-sm-12 hidden-sm hidden-xs">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-filter"></i> {{ text_filter }}</h3>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="control-label" for="input-code">{{ entry_model }}</label>
+              <input type="text" name="filter_code" value="{{ filter_code }}" placeholder="{{ entry_model }}" id="input-code" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-manufacturer">{{ entry_manufacturer }}</label>
+              <input type="text" name="filter_manufacturer" value="{{ filter_manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-category">{{ entry_category }}</label>
+              <input type="hidden" name="filter_category_id" value="{{ filter_category_id }}"/>
+              <input type="text" name="filter_category" value="{{ filter_category }}" placeholder="{{ entry_category }}" id="input-category" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="input-status">{{ entry_status }}</label>
+              <select name="filter_status" id="input-status" class="form-control">
+                <option value=""></option>
+                    {% if filter_status == '1' %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    {% endif %}
+                    {% if filter_status == '0' %}
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="0">{{ text_disabled }}</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="form-group text-right">
+              <button type="button" id="button-filter" class="btn btn-default"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9 col-md-pull-3 col-sm-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+          </div>
+          <div class="panel-body">
+            <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-appliance">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                      <td class="text-center">{{ column_image }}</td>
+                      <td class="text-left">{% if sort == 'a.code' %} <a href="{{ sort_code }}" class="{{ order|lower }}">{{ column_code }}</a> {% else %} <a href="{{ sort_code }}">{{ column_code }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'manufacturer' %} <a href="{{ sort_manufacturer }}" class="{{ order|lower }}">{{ column_manufacturer }}</a> {% else %} <a href="{{ sort_manufacturer }}">{{ column_manufacturer }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'category' %} <a href="{{ sort_category }}" class="{{ order|lower }}">{{ column_category }}</a> {% else %} <a href="{{ sort_category }}">{{ column_category }}</a> {% endif %}</td>
+                      <td class="text-left">{% if sort == 'a.status' %} <a href="{{ sort_status }}" class="{{ order|lower }}">{{ column_status }}</a> {% else %} <a href="{{ sort_status }}">{{ column_status }}</a> {% endif %}</td>
+                      <td class="text-right">{% if sort == 'a.sort_order' %} <a href="{{ sort_order }}" class="{{ order|lower }}">{{ column_sort_order }}</a> {% else %} <a href="{{ sort_order }}">{{ column_sort_order }}</a> {% endif %}</td>
+                      <td class="text-right">{{ column_action }}</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  
+                  {% if appliances %}
+                  {% for appliance in appliances %}
+                  <tr>
+                    <td class="text-center">{% if appliance.appliance_id in selected %}
+                      <input type="checkbox" name="selected[]" value="{{ appliance.appliance_id }}" checked="checked" />
+                      {% else %}
+                      <input type="checkbox" name="selected[]" value="{{ appliance.appliance_id }}" />
+                      {% endif %}</td>
+                    <td class="text-center">{% if appliance.image %} <img src="{{ appliance.image }}" alt="{{ appliance.name }}" class="img-thumbnail" /> {% else %} <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span> {% endif %}</td>
+                    <td class="text-left">{{ appliance.code }}</td>
+                    <td class="text-left">{{ appliance.manufacturer }}</td>
+                    <td class="text-left"><span data-toggle="tooltip" title="{{ appliance.path }}">{{ appliance.category }}</span></td>
+                    <td class="text-left">{{ appliance.status }}</td>
+                    <td class="text-right">{{ appliance.sort_order }}</td>
+                    <td class="text-right"><a href="{{ appliance.edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a></td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                  </tr>
+                  {% endif %}
+                    </tbody>
+                  
+                </table>
+              </div>
+            </form>
+            <div class="row">
+              <div class="col-sm-6 text-left">{{ pagination }}</div>
+              <div class="col-sm-6 text-right">{{ results }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	var url = '';
+
+	var filter_code = $('input[name=\'filter_code\']').val();
+
+	if (filter_code) {
+		url += '&filter_code=' + encodeURIComponent(filter_code);
+	}
+
+  var filter_manufacturer = $('input[name=\'filter_manufacturer\']').val();
+
+	if (filter_manufacturer) {
+		url += '&filter_manufacturer=' + encodeURIComponent(filter_manufacturer);
+	}
+
+  var filter_category_id = $('input[name=\'filter_category_id\']').val();
+  var filter_category = $('input[name=\'filter_category\']').val();
+
+	if (filter_category && filter_category_id) {
+		url += '&filter_category=' + encodeURIComponent(filter_category_id);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status !== '') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = 'index.php?route=catalog/appliance&user_token={{ user_token }}' + url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+// IE and Edge fix!
+$('button[form=\'form-appliance\']').on('click', function(e) {
+	$('#form-appliance').attr('action', $(this).attr('formaction'));
+});
+  
+
+$('input[name=\'filter_code\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/appliance/autocomplete&user_token={{ user_token }}&filter_code=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['code'],
+						value: item['appliance_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_code\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_manufacturer\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['manufacturer_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_manufacturer\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_category\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/category/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['category_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_category\']').val(item['label']);
+    $('input[name=\'filter_category_id\']').val(item['value']);
+	}
+});
+//--></script></div>
+{{ footer }} 

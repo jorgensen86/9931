@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <id>icop admin filemanager modifications</id>
+    <version>1.0</version>
+    <vqmver required="true">2.6.0</vqmver>
+    <author>Icop Web Services</author>
+
+<!--  1. Έλεγχος αν οι φωτογραφίες συμφωνούν με τις τιμές του module -->
+
+<!--  ############################# 1 ########################### -->   
+    <file name="admin/controller/common/filemanager.php" error="skip">
+        <operation>
+            <search position="after"><![CDATA[
+			foreach ($files as $file) {
+            ]]></search>
+            <add><![CDATA[
+            /* icop admin filemanager modifications */
+			if ($this->config->get('module_icop_status')) {
+
+				$this->load->language('extension/module/icop');
+
+				list($width_orig, $height_orig, $image_type) = getimagesize($file['tmp_name']);
+					
+				if ($this->config->get('module_icop_img_width') && ($this->config->get('module_icop_img_width') < $width_orig)) {
+					$json['error'] = sprintf($this->language->get('error_img_width'), $this->config->get('module_icop_img_width'));
+				}
+
+				if ($this->config->get('module_icop_img_height') && ($this->config->get('module_icop_img_height') < $height_orig)) {
+					$json['error'] = sprintf($this->language->get('error_img_height'), $this->config->get('module_icop_img_height'));
+				}
+
+				if ($this->config->get('module_icop_img_size') && ($this->config->get('module_icop_img_size') < $file['size'])) {
+					$json['error'] = sprintf($this->language->get('error_img_size'), ($this->config->get('module_icop_img_size') / 1000));
+				}
+
+				if ($this->config->get('module_icop_latin') && preg_match('/[^\\p{Common}\\p{Latin}]/u', $file['name'])) {
+					$json['error'] = $this->language->get('error_latin');
+				}
+			}
+			/* icop admin filemanager modifications */
+            ]]></add>
+        </operation>
+    </file>
+<!--  ############################################################# -->
+</modification>

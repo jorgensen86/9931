@@ -1,0 +1,627 @@
+{{ header }} {{ column_left }}
+<div id="content">
+
+	<div class="page-header">
+    	<div class="container-fluid">
+			<div class="pull-right">
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_return }}" class="btn btn-primary"><i class="fa fa-reply"></i></a>
+			
+				<select class="oc_file_columns" multiple="multiple">
+					<option value="oc_install">{{ column_install_id }}</option>
+					<option value="oc_date_added">{{ column_date_added }}</option>
+				</select>
+				
+				{% if has_perm_install == true %}
+					{% if has_perm_upload == true %}
+						<button type="button" id="dev_add" data-toggle="tooltip" title="{{ button_upload_files }}" class="btn btn-warning"><i class="fa fa-upload"></i></button>
+					{% endif %}
+				{% endif %}
+				
+				{% if has_perm_delete == true %}
+					<button type="button" id="delselected" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger"><i class="fa fa-trash-o"></i></button>
+				{% endif %}
+			</div>
+      		<h1><i class="fa fa-puzzle-piece"></i>&nbsp;{{ heading_title }}</h1>
+			<ul class="breadcrumb">
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
+			</ul>		
+  		</div>
+  	</div>
+	
+  	<div class="container-fluid">
+		{% if error_warning %}
+			<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+			  <button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+		{% if success %}
+			<div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{ success }}
+			  <button type="button" class="close" data-dismiss="alert">&times;</button>
+			</div>
+		{% endif %}
+	
+		<div class="panel panel-default" style="margin-bottom:0; border-bottom: 0px solid #fff;">
+			<div class="panel-heading" id="heading-slider">
+				<h3 class="panel-title"><i class="fa fa-files-o"></i> {{ heading_title_files }} </h3>				
+				<span class="pull-right btn btn-primary btn-sm clickable"><i class="fa fa-chevron-up" id="toggle-slider"></i><span>&nbsp;&nbsp;</span></span>
+
+				<span class="pull-right pagelimit">
+					<div class="form-group" style="padding:0">						
+						<label class="col-sm-5 control-label" for="input-limit-page">{{ entry_page_limit }}</label>
+						<div class="col-sm-5 text-right" style="padding-right:0">
+							<input type="text" name="page_limit" value="{{ per_page }}" id="input-limit-page" class="form-control input-sm" size="3" />
+						</div>
+						<div class="col-sm-2 text-left" style="padding:0">
+							<button type="button" class="btn btn-default btn-sm" id="per-page"><i class="fa fa-search"></i></button>
+						</div>						
+					</div>
+				</span>
+				
+				{% if shared_count > 0 %}
+				<span class="pull-right sharedfiles">
+					<div class="form-group" style="padding:0">						
+						<label class="col-sm-10 control-label" for="input-shared">{{ entry_show_shared }}</label>
+						<div class="col-sm-2 text-left" style="padding-left:0">
+							<input type="checkbox" name="filter_shared" id="input-shared" class="form-control" />
+						</div>						
+					</div>
+				</span>
+				{% endif %}
+			</div>
+
+			<div class="panel-body" id="panel-slider">				
+				<form id="form-filter" method="get" class="well" style="margin-bottom:0; padding:10px;">
+					<div class="row">
+						<div class="col-sm-3">
+							<div class="form-group no-pad">
+								<input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group no-pad">						
+								<select name="filter_path" id="input-paths" class="form-control">
+									<option value="*">{{ text_all_paths }}</option>
+									{% for path in paths %}
+										{% if path == filter_path %}
+											<option value="{{ path }}" selected="selected">{{ path }}</option>
+										{% else %}
+											<option value="{{ path }}">{{ path }}</option>
+										{% endif %}
+									{% endfor %}								
+								</select>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group no-pad">
+								<div class="input-group">
+									<input type="text" name="filter_date" value="{{ filter_date }}" placeholder="{{ entry_date_added }}" id="datetimepicker" class="form-control"/>
+									<div class="input-group-btn">
+										<button type="button" class="btn btn-default" id="cal_btn"><i class="fa fa-calendar"></i></button>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-3">
+							<div class="form-group no-pad pull-right">
+								<button type="button" id="button-filter" onclick="filterModifications();" class="btn btn-primary" data-toggle="tooltip" title="{{ button_filter }}"><i class="fa fa-search"></i></button>
+								{% if (filter_name is not empty) or (filter_path is not empty) or (filter_date is not empty) %}<a href="{{ reset_url }}" id="button-filter" onclick="showOverlay('{{ text_ea_loading }}');" class="btn btn-danger" data-toggle="tooltip" title="{{ button_reset }}"><i class="fa fa-times"></i></a>{% endif %}
+							</div>
+						</div>
+					</div>					
+				</form>			
+			</div>
+		</div>	
+		
+		<div class="panel panel-default" style="border-top: 0px solid #fff;">
+			<div class="panel-body" id="panel-general">	
+			
+				<ul class="nav nav-tabs">
+					<li class="active"><a href="#tab-files" data-toggle="tab"><i class="fa fa-files-o"></i>&nbsp;&nbsp;{{ tab_additional }}</a></li>
+					<li><a href="#tab-help" data-toggle="tab"><i class="fa fa-info-circle"></i>&nbsp;&nbsp;{{ tab_help }}</a></li>
+				</ul>
+				
+        		<div class="tab-content">
+          			<div class="tab-pane active" id="tab-files">
+						<form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-additional">
+							<div class="table-responsive">
+								<table class="table table-bordered table-hover table-striped filetable">
+									<thead>
+										<tr>
+											<th style="width: 1%;" class="text-center">
+												<input type="checkbox" onclick="$('input[name*=\'selected\']').trigger('click');" />
+											</th>
+											<th class="text-center oc_install">
+												{% if sort == 'install_id' %}<a href="{{ sort_id }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_id }}</a>
+												{% else %}<a href="{{ sort_id }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_id }}</a>{% endif %}
+											</th>
+											<th class="text-left">
+												{% if sort == 'name' %}<a href="{{ sort_name }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_name }}</a>
+												{% else %}<a href="{{ sort_name }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_name }}</a>{% endif %}
+											</th>
+											<th class="text-left">
+												{% if sort == 'ep.path' %}<a href="{{ sort_path }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_path }}</a>
+												{% else %}<a href="{{ sort_path }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_path }}</a>{% endif %}
+											</th>
+											<th class="text-right oc_date_added">
+												{% if sort == 'ep.date_added' %}<a href="{{ sort_date }}" class="{{ order|lower }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_date_added }}</a> {% else %}<a href="{{ sort_date }}" onclick="showOverlay('{{ text_ea_sorting }}');">{{ column_date_added }}</a>{% endif %}
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% if files %}
+											{% for file in files %}
+												<tr{% if file.file_shared == true %} class="shared"{% endif %}>
+													<td class="text-center">
+														{% if file.path_id in selected %}
+															<input type="checkbox" name="selected[]" value="{{ file.path_id }}" checked="checked"/>
+														{% else %}
+															<input type="checkbox" name="selected[]" value="{{ file.path_id }}"/>
+														{% endif %}
+													</td>
+													<td class="text-center oc_install">{{ file.install_id }}</td>
+													<td class="text-left">
+														<strong>{{ file.file_name }}</strong>
+														{% if file.type != 'Installed' %}<span class="text-warning pull-right devinstall" data-toggle="tooltip" title="{{ text_file_development }}"><i class="fa fa-info-circle fa-lg"></i></span>{% endif %}
+													</td>
+													<td class="text-left">
+														{{ file.file_path }}
+														{% if file.file_shared == true %}<span class="text-danger pull-right shared" data-toggle="tooltip" title="{{ text_file_shared }}"><i class="fa fa-exclamation-circle fa-lg"></i></span>{% endif %}
+													</td>
+													<td class="text-right oc_date_added">{{ file.date_added }}</td>
+												</tr>
+											{% endfor %}
+										{% else %}
+											<tr>
+												<td class="text-center" colspan="5">{{ text_no_results }}</td>
+											</tr>
+										{% endif %}
+									</tbody>
+								</table>
+							</div>
+						</form>
+						<div class="row">
+						  <div class="col-sm-6 text-left">{{ pagination }}</div>
+						  <div class="col-sm-6 text-right">{{ results }}</div>
+						</div>
+					</div>
+					
+					<div class="tab-pane" id="tab-help" style="min-height:500px;>
+						<form class="form-horizontal">
+          					<fieldset>
+								<legend id="faq-slider"><i class="fa fa-question-circle fa-lg"></i>&nbsp;&nbsp;{{ text_uploading_files }}</legend>
+								
+								<div class="panel panel-default">
+									<div class="panel-body" id="upload_text">
+										<p>To add additional files to a modification (Developent or Installed), you need to follow the same folder format when uploading modifications.</p>
+										<p>For example: If you want to add file(s) to the 'admin/view/template/extension' directory, the zip file you upload <strong>MUST</strong> be named <strong><span class="text-danger">'upload.zip'</span></strong> and that zip must contain the folder stucture below.</p>
+										<p><strong>Example file structure:</strong><br />
+											<ul>
+												<li>Upload
+												<ul>
+													<li>admin
+														<ul>	
+															<li>view														
+																<ul>
+																	<li>template																
+																		<ul>
+																			<li>extension/your_file.twig</li>
+																		</ul>
+																	</li>
+																</ul>
+															</li>
+														</ul>
+													</li>
+												</ul>
+												</li>
+											</ul>
+										</p>
+										<br />
+										<p><strong>Allowed directories extension files can be written to:</strong><br />
+										<ul>
+											<li><strong>Admin</strong>
+												<ul>
+													<li>admin/controller/extension/</li>
+													<li>admin/language/</li>
+													<li>admin/model/extension/</li>
+													<li>admin/view/image/</li>
+													<li>admin/view/javascript/</li>
+													<li>admin/view/stylesheet/</li>
+													<li>admin/view/template/extension/</li>
+												</ul>
+											</li>
+										</ul>
+
+										<ul>
+											<li><strong>Catalog</strong>
+												<ul>
+													<li>catalog/controller/extension/</li>
+													<li>catalog/language/</li>
+													<li>catalog/model/extension/</li>
+													<li>catalog/view/javascript/</li>
+													<li>catalog/view/theme/</li>
+												</ul>
+											</li>
+										</ul>
+
+										<ul>
+											<li><strong>System</strong>
+												<ul>
+													<li>system/config/</li>
+													<li>system/library/</li>
+												</ul>
+											</li>
+										</ul>
+
+										<ul>
+											<li><strong>Image</strong>
+												<ul>
+													<li>image/catalog/</li>
+												</ul>
+											</li>								
+										</ul>										
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+				</div>						
+						
+			</div>			
+		</div>
+		
+	</div>
+</div>
+
+<div class="loading-overlay hidden" id="loading-overlay">
+	<div id="ea-loader"></div>  
+	<div id="ea-msg"></div>                           
+</div> 
+
+<a class="scrollup hidden" id="scrollup" href="#"><i class="fa fa-chevron-up" aria-hidden="true"></i></a>
+
+<style type="text/css">
+.no-pad {
+	padding:0;
+}
+table.filetable th, table.filetable td {padding: 4px 8px!important;}
+span.pagelimit {
+	margin:-5px 0 0 0;
+}
+span.pagelimit label {
+	margin-top:5px;
+}
+span.pagelimit .btn-sm {
+    line-height: 1.55;
+}
+span.clickable {
+	margin:-5px 0 0 50px;
+	cursor:pointer;
+}
+span.clickable span {font-family: 'Open Sans', sans-serif!important;}
+
+span.toggle-faq {
+	margin:0;
+	cursor:pointer;
+}
+
+span.shared, span.devinstall {
+	cursor:pointer;
+}
+
+fieldset {
+	margin: 0px;
+}
+fieldset legend {
+	padding: 10px 15px;
+}
+legend {
+	margin-bottom:0px;
+	background-color: #515151;
+	color: #fff;
+	font-weight: 500;
+	font-size: 15px;
+	font-family: 'Open Sans', sans-serif;
+}
+
+#upload_text p {font-size: 14px!important;}
+#upload_slider {margin: 0px;}
+
+#panel-general {padding:0px 15px 15px 15px}
+</style>
+
+<script type="text/javascript"><!--
+$(document).ready(function() {
+	getColums();
+
+	if (getURLVar('filter_shared')) {
+        $('#input-shared').prop( "checked", true );
+    }
+
+	$('#cal_btn').click(function(){
+		$('#datetimepicker').datetimepicker({
+			format:'Y-m-d',
+			timepicker:false,
+			lang:'en-GB'
+		});
+		$('#datetimepicker').datetimepicker('show');
+	});
+
+	var ocfileFilters = localStorage.getItem('ocfileFilters');
+    if (ocfileFilters == 'collapsed') {
+		$('#panel-slider').slideUp();
+		$('span.clickable').addClass('panel-collapse');
+		$('#toggle-slider').removeClass('fa fa-chevron-up').addClass('fa fa-chevron-down');		
+		$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_show_filters }}</span>');
+		$('#panel-general').css('padding', '15px');
+    } else {
+		$('#panel-slider').slideDown();
+		$('span.clickable').removeClass('panel-collapse');
+ 		$('#toggle-slider').removeClass('fa fa-chevron-down').addClass('fa fa-chevron-up');
+		$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_hide_filters }}</span>');
+		$('#panel-general').css('padding', '0px 15px 15px 15px');
+    }
+	
+	$('#heading-slider span.clickable').on("click", function () {
+		if ($(this).hasClass('panel-collapse')) {
+			$(this).parents('.panel').find('.panel-body').slideDown();
+			$(this).removeClass('panel-collapse');
+			$('#toggle-slider').removeClass('fa fa-chevron-down').addClass('fa fa-chevron-up');
+			$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_hide_filters }}</span>');
+			$('#panel-general').css('padding', '0px 15px 15px 15px');
+			localStorage.setItem('ocfileFilters', 'expanded');
+		} else {
+			$(this).parents('.panel').find('.panel-body').slideUp();
+			$(this).addClass('panel-collapse');
+			$('#toggle-slider').removeClass('fa fa-chevron-up').addClass('fa fa-chevron-down');		
+			$('#toggle-slider').html('<span>&nbsp;&nbsp;{{ text_show_filters }}</span>');
+			$('#panel-general').css('padding', '15px');
+			localStorage.setItem('ocfileFilters', 'collapsed');
+		}
+	});
+	
+	$(window).scroll(function() {		
+		if ($(this).scrollTop() >= 200) {
+			$('.scrollup').removeClass('hidden');
+			$('.scrollup').fadeIn();
+		} else {
+		   $('.scrollup').fadeOut();
+		   $('.scrollup').addClass('hidden');
+		}
+	});			
+	$('.scrollup').click(function() {
+		$('html, body').animate({
+			scrollTop:0
+		},500);
+		return false;
+	});
+
+	// Confirm Delete
+	$('#delselected').click(function () {
+		var form = $('#form-additional');
+		if ($(":checkbox[name^='selected']", form).is(":checked")) {		
+			$.confirm({
+				title: ' {{ text_ea_sure }}',			
+				content: '{{ text_ea_delete_file }}',
+				icon: 'fa fa-question-circle fa-lg',
+				columnClass: 'col-md-5 col-md-offset-4',
+				draggable: true,
+				buttons: { 
+					ok: {
+						text: '{{ text_ea_yes }}',
+						btnClass: 'btn-success',
+						action: function() {
+							showOverlay('{{ text_ea_removeing }}');
+							$('#form-additional').submit();	
+						}
+					},
+					close: {
+						text: '{{ text_ea_no }}',
+						btnClass: 'btn-danger',
+						action: function(){}
+					}
+				}
+			});
+		} else {
+			$.alert({
+				title: 'Alert!',
+				content: '{{ text_select_something }}',
+				icon: 'fa fa-exclamation-circle fa-lg',
+				columnClass: 'col-md-5 col-md-offset-4',
+				buttons: { 
+					ok: {
+						btnClass: 'btn-success'
+					}
+				}
+			});
+		}
+	});
+});	
+
+// Confirm Upload Dev
+$(document).delegate('#dev_add', 'click', function() {
+	var element = $(this);
+	$('[data-toggle=\'tooltip\']').tooltip('hide');
+	$.confirm({
+		title: ' {{ text_ea_sure }}',
+		icon: 'fa fa-question-circle fa-lg',
+		content: '{{ text_ea_upload_files }}',
+		columnClass: 'col-md-5 col-md-offset-4',
+		draggable: true,
+		buttons: { 
+			ok: {
+				text: '{{ text_ea_yes }}',
+				btnClass: 'btn-success',
+				action: function() {
+					$('#modal-ocmod-files').remove();
+
+					var html = '<div class="modal-dialog">';
+					   html += '	<div class="modal-content">';	
+					   html += '		<div class="modal-header">';
+					   html += '			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+					   html += '			<h3 class="modal-title"><i class="fa fa-exclamation-triangle"></i> {{ text_upload_file }}</h3>';
+					   html += '		</div>';
+					   html += '		<div class="modal-body">';
+					   html += '			<div id="modal-loader"></div>'; 
+					   html += '			<iframe style="width:100%; height:250px; border:none;" src="index.php?route=extension/enhancement/ea_ocmod_manager_files/uploadPage&user_token={{ user_token }}"></iframe>'; 	   
+					   html += '		</div>';
+					   html += '	</div>';	   
+					   html += '</div>';
+
+					$('body').append('<div id="modal-ocmod-files" class="modal modal-wide">' + html + '</div>');
+					$('#modal-ocmod-files').modal({backdrop: 'static',keyboard: true});
+					$('#modal-ocmod-files').modal('show');
+					setTimeout(function() {
+						$('[data-toggle=\'tooltip\']').tooltip('hide');
+						$('#modal-loader').remove();
+					}, 1000);
+				}
+			},
+			close: {
+				text: '{{ text_ea_no }}',
+				btnClass: 'btn-danger',
+				action: function(){$('[data-toggle=\'tooltip\']').tooltip('hide');}
+			}
+		}
+	});	
+});
+
+function getColums() {
+	$('.oc_file_columns').multiselect({
+		checkboxClass: 'column-toggler',
+		buttonText: function(options, select) {
+			return 'Show Columns';
+		},
+		buttonTitle: function(options, select) {
+			var labels = [];
+			options.each(function () {
+				labels.push($(this).text());
+			});
+			return labels.join(' - ');
+		}
+	});  
+	$("input.column-toggler").each(function() {
+		var column = $(this).attr("name");
+		if (localStorage.getItem(column) == 1) {
+			$("select.oc_file_columns").find("option[value="+column+"]").prop("selected", "selected");
+			$(this).attr("checked", true);
+			$("th." + column).show(500);
+			$("td." + column).show(500);
+        } else {
+            $("select.oc_file_columns").find("option[value="+column+"]").removeAttr("selected");
+			$(this).removeAttr("checked");
+			$("th." + column).hide(500);
+			$("td." + column).hide(500);
+        }
+		$(this).on("click", function() {
+			if ($(this).is(":checked") === true) {
+				$("select.oc_file_columns").find("option[value="+column+"]").prop("selected", "selected");
+				$("th." + column).show(500);
+				$("td." + column).show(500);
+				var value = 1;
+        		localStorage.setItem(column,value);	
+			} else {
+				$(this).removeAttr("checked");
+				$(".oc_file_columns").find("option[value="+column+"]").removeAttr("selected");
+				$("th." + column).hide(500);
+				$("td." + column).hide(500);
+				var value = 0;
+        		localStorage.setItem(column,value);	
+			}			
+		});	
+    });
+	$("select.oc_file_columns").multiselect('refresh');
+}
+
+$('input[name=\'filter_name\']').autocomplete({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/enhancement/ea_ocmod_manager_files/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['extension_install_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+
+
+$(document).delegate('#input-limit-page', 'keydown', function(e) {
+    if (e.keyCode == 13) {
+        filterModifications();
+    }
+});
+
+$(document).delegate('#per-page', 'click', function() {
+	filterModifications();
+});
+
+$(document).delegate('#input-shared', 'click', function() {
+    if ($('#input-shared').is(":checked")) {
+        filtershared();
+    } else {
+		showOverlay('{{ text_ea_loading }}');
+		location = 'index.php?route=extension/enhancement/ea_ocmod_manager_files&user_token={{ user_token }}';
+	}
+});
+
+$(document).on("click", ".pagination a", function() {
+	showOverlay('{{ text_ea_loading }}');
+});
+
+function filterModifications() {
+	showOverlay('{{ text_ea_loading }}');
+	var url = 'index.php?route=extension/enhancement/ea_ocmod_manager_files&user_token={{ user_token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_path = $('select[name=\'filter_path\']').val();
+	if (filter_path != '*') {
+		url += '&filter_path=' + encodeURIComponent(filter_path);
+	}
+
+	var filter_date = $('input[name=\'filter_date\']').val();
+	if (filter_date) {
+		url += '&filter_date=' + encodeURIComponent(filter_date);
+	}
+
+	var page_limit = $('input[name=\'page_limit\']').val();
+	if (page_limit) {
+		url += '&page_limit=' + page_limit;
+	}
+
+	location = url;
+
+	return false;
+}
+
+function filtershared() {
+	showOverlay('{{ text_ea_loading }}');
+	location = 'index.php?route=extension/enhancement/ea_ocmod_manager_files&user_token={{ user_token }}&filter_shared=true';
+}
+
+function showOverlay(msg) {
+	$('#ea-msg').html('');
+	html = '<div>'+ msg +'</div>';
+	$('#ea-msg').prepend(html);
+	$('#loading-overlay').removeClass('hidden');
+}
+
+function hideOverlay() {
+	$('#loading-overlay').addClass('hidden');
+}
+//--></script>
+
+{{ footer}} 
