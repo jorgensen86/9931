@@ -1,3 +1,5 @@
+db.sql
+
 /image/cache/*
 !/image/cache/index.html
 
@@ -14,3 +16,6 @@
 
 /system/storage/modification/*
 !/system/storage/modification/*.html
+
+config.php
+/cmsadmin/config.php

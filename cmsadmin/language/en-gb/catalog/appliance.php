@@ -14,7 +14,7 @@ $_['text_default']           = 'Default';
 $_['text_keyword']           = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
 
 // Column
-$_['column_code']           = 'Model';
+$_['column_code']            = 'Code Web';
 $_['column_image']           = 'Image';
 $_['column_manufacturer']    = 'Brand';
 $_['column_category']        = 'Category';

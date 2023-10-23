@@ -14,7 +14,7 @@ $_['text_default']           = 'Προεπιλογή';
 $_['text_keyword']           = 'Μην χρησιμοποιείτε κενά διαστήματα. Αντικαταστήστε τα κενά μεταξύ των λέξεων με παύλες - και βεβαιωθείτε ότι η κάθε SEO διεύθυνση (URL) είναι μοναδική στο κατάστημα.';
 
 // Column
-$_['column_code']            = 'Κωδικός Συσκευσής';
+$_['column_code']            = 'Κωδικός Web';
 $_['column_image']           = 'Εικόνα';
 $_['column_manufacturer']    = 'Κατασκευαστής';
 $_['column_category']        = 'Κατηγορία Συσκευής';
@@ -24,7 +24,10 @@ $_['column_action']          = 'Ενέργεια';
 
 // Entry
 $_['entry_keyword']          = 'SEO URL';
-$_['entry_model']            = 'Κωδικός Συσκευής';
+$_['entry_code']             = 'Κωδικός Web';
+$_['entry_model']            = 'Model';
+$_['entry_serial']           = 'Serial Number';
+$_['entry_type']             = 'Type';
 $_['entry_image']            = 'Εικόνα';
 $_['entry_manufacturer']     = 'Κατασκευαστής';
 $_['entry_category']         = 'Κατηγορία';
