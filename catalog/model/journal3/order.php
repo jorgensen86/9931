@@ -6,6 +6,7 @@ use Journal3\Utils\Arr;
 class ModelJournal3Order extends Model {
 
 	public function load($order_id) {
+
 		$order_data = array();
 
 		$order_data['customer_id'] = 0;
@@ -178,6 +179,7 @@ class ModelJournal3Order extends Model {
 			$this->db->query("
 				INSERT INTO `" . DB_PREFIX . "order` 
 				SET 
+					preorder = '" . !$this->cart->hasStock() . "',
 					invoice_prefix = '" . $this->db->escape($data['invoice_prefix']) . "', 
 					store_id = '" . (int)$data['store_id'] . "', 
 					store_name = '" . $this->db->escape($data['store_name']) . "', 
@@ -241,6 +243,7 @@ class ModelJournal3Order extends Model {
 			$this->db->query("
 				INSERT INTO `" . DB_PREFIX . "order` 
 				SET 
+					preorder = '" . !$this->cart->hasStock() . "',
 					invoice_prefix = '" . $this->db->escape($data['invoice_prefix']) . "', 
 					store_id = '" . (int)$data['store_id'] . "', 
 					store_name = '" . $this->db->escape($data['store_name']) . "', 
@@ -347,6 +350,7 @@ class ModelJournal3Order extends Model {
 			$this->db->query("
 				UPDATE `" . DB_PREFIX . "order` 
 				SET 
+					preorder = '" . !$this->cart->hasStock() . "',
 					invoice_prefix = '" . $this->db->escape($data['invoice_prefix']) . "', 
 					store_id = '" . (int)$data['store_id'] . "', 
 					store_name = '" . $this->db->escape($data['store_name']) . "', 
@@ -410,6 +414,7 @@ class ModelJournal3Order extends Model {
 			$this->db->query("
 				UPDATE `" . DB_PREFIX . "order` 
 				SET 
+					preorder = '" . !$this->cart->hasStock() . "',
 					invoice_prefix = '" . $this->db->escape($data['invoice_prefix']) . "', 
 					store_id = '" . (int)$data['store_id'] . "', 
 					store_name = '" . $this->db->escape($data['store_name']) . "', 

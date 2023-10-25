@@ -7,6 +7,12 @@ class ModelExtensionDashboardSale extends Model {
 			$sql .= " AND DATE(date_added) = DATE('" . $this->db->escape($data['filter_date_added']) . "')";
 		}
 
+		if(isset($data['filter_preorder'])) {
+			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
+		} else {
+			$sql .= " AND preorder = '0'";
+		}
+
 		$query = $this->db->query($sql);
 
 		return $query->row['total'];

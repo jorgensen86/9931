@@ -72,6 +72,7 @@ class ModelSaleOrder extends Model {
 
 			return array(
 				'order_id'                => $order_query->row['order_id'],
+				'preorder'                => $order_query->row['preorder'],
 				'invoice_no'              => $order_query->row['invoice_no'],
 				'invoice_prefix'          => $order_query->row['invoice_prefix'],
 				'store_id'                => $order_query->row['store_id'],
@@ -188,6 +189,12 @@ class ModelSaleOrder extends Model {
 			$sql .= " AND o.total = '" . (float)$data['filter_total'] . "'";
 		}
 
+		if(isset($data['filter_preorder'])) {
+			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
+		} else {
+			$sql .= " AND preorder = '0'";
+		}
+
 		$sort_data = array(
 			'o.order_id',
 			'customer',
@@ -295,6 +302,12 @@ class ModelSaleOrder extends Model {
 
 		if (!empty($data['filter_total'])) {
 			$sql .= " AND total = '" . (float)$data['filter_total'] . "'";
+		}
+
+		if(isset($data['filter_preorder'])) {
+			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
+		} else {
+			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
 		}
 
 		$query = $this->db->query($sql);
