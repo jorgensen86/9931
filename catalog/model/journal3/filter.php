@@ -325,9 +325,7 @@ class ModelJournal3Filter extends Model {
 		";
 
 		if (is_numeric($filter_category_id = Arr::get(static::$filter_data, 'filter_category_id'))) {
-			// $sql .= " AND c.parent_id = '" . $this->db->escape($filter_category_id) . "'";
-			// Jorgensen  - filter category_id from path with category_id  1
-			$sql .= " AND c.parent_id = '1'";
+			$sql .= " AND c.parent_id = '" . $this->db->escape($filter_category_id) . "'";
 		}
 
 		$sql .= " 
