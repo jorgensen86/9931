@@ -337,6 +337,77 @@ class ModelJournal3Filter extends Model {
 		return $this->dbQuery($sql, 'CATEGORIES')->rows;
 	}
 
+	public function getApplianceCategories() {
+		$sql = "
+			SELECT
+				MAX(c.category_id) id, 
+				MAX(cd.name) value,
+				MAX(c.image) image,
+				COUNT(*) total 
+			FROM `{$this->dbPrefix('category')}` c 
+			LEFT JOIN `{$this->dbPrefix('category_description')}` cd ON (c.category_id = cd.category_id) 
+			LEFT JOIN `{$this->dbPrefix('category_to_store')}` c2s ON (c.category_id = c2s.category_id) 
+			LEFT JOIN `{$this->dbPrefix('product_to_category')}`p2c ON (c.category_id = p2c.category_id)  
+			LEFT JOIN `{$this->dbPrefix('product')}` p ON (p.product_id = p2c.product_id)
+		";
+
+		$sql .= $this->addFilters(static::$filter_data, 'category');
+
+		$sql .= " 
+			AND cd.language_id = '" . (int)$this->config_language_id . "' 
+			AND c2s.store_id = '" . (int)$this->config_store_id . "' 
+			AND c.status = '1'
+		";
+
+		if (is_numeric($filter_category_id = Arr::get(static::$filter_data, 'filter_category_id'))) {
+			$sql .= " AND c.parent_id = '1'";
+		}
+
+		$sql .= " 
+			GROUP BY c.category_id 
+			HAVING COUNT(*) > 0 
+			ORDER BY c.sort_order, LCASE(cd.name) ASC
+		";
+
+		return $this->dbQuery($sql, 'CATEGORIES')->rows;
+	}
+
+	public function getPartCategories() {
+		$sql = "
+			SELECT
+				MAX(c.category_id) id, 
+				MAX(cd.name) value,
+				MAX(c.image) image,
+				COUNT(*) total 
+			FROM `{$this->dbPrefix('category')}` c 
+			LEFT JOIN `{$this->dbPrefix('category_description')}` cd ON (c.category_id = cd.category_id) 
+			LEFT JOIN `{$this->dbPrefix('category_to_store')}` c2s ON (c.category_id = c2s.category_id) 
+			LEFT JOIN `{$this->dbPrefix('product_to_category')}`p2c ON (c.category_id = p2c.category_id)  
+			LEFT JOIN `{$this->dbPrefix('product')}` p ON (p.product_id = p2c.product_id)
+		";
+
+		$sql .= $this->addFilters(static::$filter_data, 'category');
+
+		$sql .= " 
+			AND cd.language_id = '" . (int)$this->config_language_id . "' 
+			AND c2s.store_id = '" . (int)$this->config_store_id . "' 
+			AND c.status = '1'
+		";
+
+		if (is_numeric($filter_category_id = Arr::get(static::$filter_data, 'filter_category_id'))) {
+			$sql .= " AND c.parent_id = '2'";
+		}
+
+		$sql .= " 
+			GROUP BY c.category_id 
+			HAVING COUNT(*) > 0 
+			ORDER BY c.sort_order, LCASE(cd.name) ASC
+		";
+
+		return $this->dbQuery($sql, 'CATEGORIES')->rows;
+	}
+	
+
 	/* Jorgensen  Appliance Filter */
 	public function getAppliances() {
 		$sql = "

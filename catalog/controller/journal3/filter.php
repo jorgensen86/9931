@@ -229,10 +229,95 @@ class ControllerJournal3Filter extends ModuleController {
 		}
 
 		// categories
-		if ($item = Arr::get($this->settings['items'], 'c')) {
+		if (!$item = Arr::get($this->settings['items'], 'c')) {
 			Profiler::start('journal3/filter/categories');
 
 			$categories = $this->model_journal3_filter->getCategories();
+
+			Profiler::end('journal3/filter/categories');
+
+			if ($categories) {
+				foreach ($categories as &$category) {
+					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
+
+					if ($item['display'] === 'text') {
+						$category['image'] = false;
+						$category['image2x'] = false;
+					} else {
+						$image = $category['image'];
+
+						if ($image) {
+							$category['image'] = $this->model_journal3_image->resize($image, $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+							$category['image2x'] = $this->model_journal3_image->resize($image, $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+						} else {
+							$category['image'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+							$category['image2x'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+						}
+					}
+				}
+
+				$item['items'] = $categories;
+
+				if (!$item['collapsed'] || isset($this->request->get['fc'])) {
+					$item['collapsed'] = false;
+					$item['classes'][] = 'panel-active';
+					$item['panel_classes'][] = 'in';
+				}
+
+				$items[] = $item;
+			}
+		}
+
+		// Appliance Categories
+		if ($item = Arr::get($this->settings['items'], 'c')) {
+			Profiler::start('journal3/filter/categories');
+
+			$categories = $this->model_journal3_filter->getApplianceCategories();
+
+			Profiler::end('journal3/filter/categories');
+
+			if ($categories) {
+				foreach ($categories as &$category) {
+					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
+
+					if ($item['display'] === 'text') {
+						$category['image'] = false;
+						$category['image2x'] = false;
+					} else {
+						$image = $category['image'];
+
+						if ($image) {
+							$category['image'] = $this->model_journal3_image->resize($image, $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+							$category['image2x'] = $this->model_journal3_image->resize($image, $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+						} else {
+							$category['image'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+							$category['image2x'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+						}
+					}
+				}
+
+				$item['items'] = $categories;
+
+				if (!$item['collapsed'] || isset($this->request->get['fc'])) {
+					$item['collapsed'] = false;
+					$item['classes'][] = 'panel-active';
+					$item['panel_classes'][] = 'in';
+				}
+
+				$items[] = $item;
+			}
+		}
+
+		// Part Categories
+		if ($item = Arr::get($this->settings['items'], 'c')) {
+			
+			$item['input'] = 'checkbox';
+			$item['title'] = 'Κατηγορίες Ανταλλακτικού';
+			$item['classes'][] = 'part-category';
+
+			Profiler::start('journal3/filter/categories');
+
+			$categories = $this->model_journal3_filter->getPartCategories();
 
 			Profiler::end('journal3/filter/categories');
 
