@@ -11,11 +11,10 @@ class ModelCatalogAppliance extends Model
 			$this->db->query("UPDATE " . DB_PREFIX . "appliance SET image = '" . $this->db->escape($data['image']) . "' WHERE appliance_id = '" . (int)$appliance_id . "'");
 		}
 
-		// SEO URL
-		if (isset($data['appliance_seo_url'])) {
-			foreach ($data['appliance_seo_url'] as $language_id => $keyword) {
-				if (!empty($keyword)) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '0', language_id = '" . (int)$language_id . "', query = 'appliance_id=" . (int)$appliance_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+		if(isset($data['appliance_codes'])) {
+			foreach ($data['appliance_codes'] as $key => $value) {
+				if(trim(($value))) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "appliance_codes SET appliance_id = '" . $appliance_id . "', code_id = '" . (int)$key . "', value = '" . $this->db->escape($value) . "'");
 				}
 			}
 		}
@@ -31,13 +30,12 @@ class ModelCatalogAppliance extends Model
 			$this->db->query("UPDATE " . DB_PREFIX . "appliance SET image = '" . $this->db->escape($data['image']) . "' WHERE appliance_id = '" . (int)$appliance_id . "'");
 		}
 
-		// SEO URL
-		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'appliance_id=" . (int)$appliance_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "appliance_codes WHERE appliance_id = '" . (int)$appliance_id . "'");
 
-		if (isset($data['appliance_seo_url'])) {
-			foreach ($data['appliance_seo_url'] as $language_id => $keyword) {
-				if (!empty($keyword)) {
-					$this->db->query("INSERT INTO " . DB_PREFIX . "seo_url SET store_id = '0', language_id = '" . (int)$language_id . "', query = 'appliance_id=" . (int)$appliance_id . "', keyword = '" . $this->db->escape($keyword) . "'");
+		if(isset($data['appliance_codes'])) {
+			foreach ($data['appliance_codes'] as $key => $value) {
+				if(trim(($value))) {
+					$this->db->query("INSERT INTO " . DB_PREFIX . "appliance_codes SET appliance_id = '" . $appliance_id . "', code_id = '" . (int)$key . "', value = '" . $this->db->escape($value) . "'");
 				}
 			}
 		}
@@ -49,8 +47,7 @@ class ModelCatalogAppliance extends Model
 
 		if ($query->num_rows) {
 			$data = $query->row;
-			
-			$data['keyword'] = '';
+
 			$data['status'] = '0';
 
 			$this->addAppliance($data);
@@ -60,7 +57,7 @@ class ModelCatalogAppliance extends Model
 	public function deleteAppliance($appliance_id)
 	{
 		$this->db->query("DELETE FROM " . DB_PREFIX . "appliance WHERE appliance_id = '" . (int)$appliance_id . "'");
-		$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query = 'appliance_id=" . (int)$appliance_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "appliance_codes WHERE appliance_id = '" . (int)$appliance_id . "'");
 	}
 
 	public function getAppliance($appliance_id)
@@ -72,9 +69,10 @@ class ModelCatalogAppliance extends Model
 
 	public function getAppliances($data = array())
 	{
-		// $sql = "SELECT a.*, m.name as manufacturer, (SELECT cd.name FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND c.category_id = a.category_id) as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE 1";
+		$sql = "SELECT a.*, m.name as manufacturer, (SELECT cd.name FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND c.category_id = a.category_id) as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE 1";
+
 		
-		$sql = "SELECT a.*, m.name as manufacturer, cd.name as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "category c ON (a.category_id = c.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		// $sql = "SELECT a.*, m.name as manufacturer, cd.name as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "category c ON (a.category_id = c.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
 
 		if (!empty($data['filter_code'])) {
 			$sql .= " AND a.code LIKE '" . $this->db->escape($data['filter_code']) . "%'";
@@ -138,19 +136,6 @@ class ModelCatalogAppliance extends Model
 		return $query->rows;
 	}
 
-
-	public function getApplianceSeoUrls($appliance_id) {
-		$appliance_seo_url_data = array();
-		
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE query = 'appliance_id=" . (int)$appliance_id . "'");
-
-		foreach ($query->rows as $result) {
-			$appliance_seo_url_data[$result['language_id']] = $result['keyword'];
-		}
-
-		return $appliance_seo_url_data;
-	}
-
 	public function getTotalAppliances($data = array())
 	{
 
@@ -175,6 +160,12 @@ class ModelCatalogAppliance extends Model
 		$query = $this->db->query($sql);
 
 		return $query->row['total'];
+	}
+
+	public function getApplianceCodes($appliance_id) {
+		$query = $this->db->query("SELECT ac.*, ct.name FROM " . DB_PREFIX . "appliance_codes ac LEFT JOIN " . DB_PREFIX . "code_type ct ON (ac.code_id = ct.code_id) WHERE ac.appliance_id = '" . (int)$appliance_id  . "' ORDER BY ct.sort_order ASC");
+
+		return $query->rows;
 	}
 
 	public function getTotalProductsByManufacturerId($manufacturer_id)

@@ -570,6 +570,14 @@ class ControllerCatalogAppliance extends Controller
 			$data['code'] = '';
 		}
 
+		if (isset($this->request->post['appliance_codes'])) {
+			$data['appliance_codes'] = $this->request->post['appliance_codes'];
+		} elseif (!empty($appliance_info)) {
+			$data['appliance_codes'] = $this->model_catalog_appliance->getApplianceCodes($this->request->get['appliance_id']);
+		} else {
+			$data['appliance_codes'] = true;
+		}
+
 		// Image
 		if (isset($this->request->post['image'])) {
 			$data['image'] = $this->request->post['image'];
@@ -602,19 +610,7 @@ class ControllerCatalogAppliance extends Controller
 			$data['manufacturer_id'] = 0;
 		}
 
-		if (isset($this->request->post['manufacturer'])) {
-			$data['manufacturer'] = $this->request->post['manufacturer'];
-		} elseif (!empty($appliance_info)) {
-			$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($appliance_info['manufacturer_id']);
-
-			if ($manufacturer_info) {
-				$data['manufacturer'] = $manufacturer_info['name'];
-			} else {
-				$data['manufacturer'] = '';
-			}
-		} else {
-			$data['manufacturer'] = '';
-		}
+		$data['manufacturers'] = $this->model_catalog_manufacturer->getManufacturers();
 
 		// Categories
 		$this->load->model('catalog/category');
@@ -654,15 +650,7 @@ class ControllerCatalogAppliance extends Controller
 		} elseif (!empty($appliance_info)) {
 			$data['sort_order'] = $appliance_info['sort_order'];
 		} else {
-			$data['sort_order'] = 1;
-		}
-
-		if (isset($this->request->post['appliance_seo_url'])) {
-			$data['appliance_seo_url'] = $this->request->post['appliance_seo_url'];
-		} elseif (isset($this->request->get['appliance_id'])) {
-			$data['appliance_seo_url'] = $this->model_catalog_appliance->getApplianceSeoUrls($this->request->get['appliance_id']);
-		} else {
-			$data['appliance_seo_url'] = array();
+			$data['sort_order'] = '';
 		}
 
 		$data['header'] = $this->load->controller('common/header');
@@ -688,26 +676,6 @@ class ControllerCatalogAppliance extends Controller
 
 		if (!$this->request->post['manufacturer_id']) {
 			$this->error['manufacturer'] = $this->language->get('error_manufacturer');
-		}
-
-		if ($this->request->post['appliance_seo_url']) {
-			$this->load->model('design/seo_url');
-			foreach ($this->request->post['appliance_seo_url'] as $language_id => $keyword) {
-				if (!empty($keyword)) {
-					if (count(array_keys($this->request->post['appliance_seo_url'], $keyword)) > 1) {
-						$this->error['keyword'][$language_id] = $this->language->get('error_unique');
-					}
-
-					$seo_urls = $this->model_design_seo_url->getSeoUrlsByKeyword($keyword);
-
-					foreach ($seo_urls as $seo_url) {
-						if (($seo_url['store_id'] == 0) && (!isset($this->request->get['appliance_id']) || (($seo_url['query'] != 'appliance_id=' . $this->request->get['appliance_id'])))) {
-							$this->error['keyword'][$language_id] = $this->language->get('error_keyword');
-							break;
-						}
-					}
-				}
-			}
 		}
 
 		if ($this->error && !isset($this->error['warning'])) {

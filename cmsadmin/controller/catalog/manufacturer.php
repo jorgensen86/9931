@@ -314,6 +314,34 @@ class ControllerCatalogManufacturer extends Controller {
 			$data['name'] = '';
 		}
 
+		if (isset($this->request->post['manufacturer_code_types'])) {
+			$data['manufacturer_code_types'] = $this->request->post['manufacturer_code_types'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$data['manufacturer_code_types'] = $this->model_catalog_manufacturer->getManufacturerCodeTypes($this->request->get['manufacturer_id']);
+		} else {
+			$data['manufacturer_code_types'] = array();
+		}
+
+		$this->load->model('catalog/code_type');
+
+		$data['code_types'] = array();
+	
+		foreach ($this->model_catalog_code_type->getCodeTypes() as $code_type) {
+			$data['code_types'][] = array(
+				'code_id' => $code_type['code_id'],
+				'name'     => $code_type['name']
+			);
+		}
+
+		if (isset($this->request->post['manufacturer_store'])) {
+			$data['manufacturer_store'] = $this->request->post['manufacturer_store'];
+		} elseif (isset($this->request->get['manufacturer_id'])) {
+			$data['manufacturer_store'] = $this->model_catalog_manufacturer->getManufacturerStores($this->request->get['manufacturer_id']);
+		} else {
+			$data['manufacturer_store'] = array(0);
+		}
+
+
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
@@ -468,6 +496,33 @@ class ControllerCatalogManufacturer extends Controller {
 		}
 
 		array_multisort($sort_order, SORT_ASC, $json);
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	public function getCodeTypes() {
+		$json = array();
+
+		if (isset($this->request->get['manufacturer_id'])) {
+			$this->load->model('catalog/manufacturer');
+			$this->load->model('catalog/code_type');
+
+			$results = $this->model_catalog_manufacturer->getManufacturerCodeTypes($this->request->get['manufacturer_id']);
+
+			foreach ($results as $key => $value) {
+				$json[] =  $this->model_catalog_code_type->getCodeType($value['code_id']);
+			}
+
+			$sort_order = array();
+	
+			foreach ($json as $key => $value) {
+				$sort_order[$key] = $value['sort_order'];
+			}
+	
+			array_multisort($sort_order, SORT_ASC, $json);
+		}
+
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));

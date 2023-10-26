@@ -44,6 +44,7 @@ $_['text_order']                = 'Παραγγελίες';
 $_['text_order_status']         = 'Κατάσταση Παραγγελίας';
 $_['text_online']               = 'Πελάτες Online';
 $_['text_product']              = 'Προϊόντα';
+$_['text_code_type']            = 'Τύποι Κωδικών';
 $_['text_reports']              = 'Αναφορές';
 $_['text_review']               = 'Αξιολογήσεις';
 $_['text_return']               = 'Επιστροφές';
