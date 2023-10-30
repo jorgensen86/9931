@@ -534,7 +534,9 @@ class ControllerJournal3Filter extends ModuleController {
 			Profiler::start('journal3/filter/appliances');
 	
 			$appliances = $this->model_journal3_filter->getAppliances();
-	
+			echo '<pre>'; 
+			 print_r($appliances); 
+			 echo '</pre>';
 			Profiler::end('journal3/filter/appliances');
 	
 			if ($appliances) {

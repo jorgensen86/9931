@@ -415,9 +415,11 @@ class ModelJournal3Filter extends Model {
 				MAX(a.appliance_id) id, 
 				MAX(a.code) value,
 				MAX(a.image) image,
+				(SELECT GROUP_CONCAT(ct.name, ':', ac.value) FROM `{$this->dbPrefix('appliance_codes')}`ac LEFT JOIN  `{$this->dbPrefix('code_type')}` ct ON (ac.code_id = ct.code_id) WHERE ac.appliance_id = a.appliance_id) as codes,
 				COUNT(*) total 
 			FROM `{$this->dbPrefix('appliance')}` a 
-			LEFT JOIN `{$this->dbPrefix('product_to_appliance')}`p2a ON (a.appliance_id = p2a.appliance_id)  
+			LEFT JOIN `{$this->dbPrefix('product_to_appliance')}`p2a ON (a.appliance_id = p2a.appliance_id)
+			LEFT JOIN `{$this->dbPrefix('appliance_codes')}`ac ON (a.appliance_id = ac.appliance_id)  
 			LEFT JOIN `{$this->dbPrefix('product')}` p ON (p.product_id = p2a.product_id)
 		";
 
