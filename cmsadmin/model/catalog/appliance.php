@@ -71,9 +71,6 @@ class ModelCatalogAppliance extends Model
 	{
 		$sql = "SELECT a.*, m.name as manufacturer, (SELECT cd.name FROM " . DB_PREFIX . "category c LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "' AND c.category_id = a.category_id) as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE 1";
 
-		
-		// $sql = "SELECT a.*, m.name as manufacturer, cd.name as category FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "category c ON (a.category_id = c.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
-
 		if (!empty($data['filter_code'])) {
 			$sql .= " AND a.code LIKE '" . $this->db->escape($data['filter_code']) . "%'";
 		}
@@ -139,7 +136,7 @@ class ModelCatalogAppliance extends Model
 	public function getTotalAppliances($data = array())
 	{
 
-		$sql = "SELECT COUNT(DISTINCT a.appliance_id) AS total FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "category c ON (a.category_id = c.category_id) LEFT JOIN " . DB_PREFIX . "category_description cd ON (c.category_id = cd.category_id) LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+		$sql = "SELECT COUNT(DISTINCT a.appliance_id) AS total FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE '1'";
 
 		if (!empty($data['filter_code'])) {
 			$sql .= " AND a.code LIKE '" . $this->db->escape($data['filter_code']) . "%'";

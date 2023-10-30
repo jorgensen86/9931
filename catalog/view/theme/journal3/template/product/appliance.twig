@@ -20,7 +20,9 @@
           <div class="appliance-info">
             <div class="left">
               <div class="appliance-image">
-                <img src="{{ thumb }}" {% if thumb2x %}srcset="{{ thumb }} 1x, {{ thumb2x }} 2x"{% endif %} alt="{{ heading_title }}" title="{{ heading_title }}" width="{{ j3.settings.get('image_dimensions_product.width') }}" height="{{ j3.settings.get('image_dimensions_product.height') }}"/>  
+                <a href="{{ popup }}">
+                  <img src="{{ thumb }}" {% if thumb2x %}srcset="{{ thumb }} 1x, {{ thumb2x }} 2x"{% endif %} alt="{{ heading_title }}" title="{{ heading_title }}" width="{{ j3.settings.get('image_dimensions_product.width') }}" height="{{ j3.settings.get('image_dimensions_product.height') }}"/>  
+                </a>
               </div>
             </div>
             <div class="right">

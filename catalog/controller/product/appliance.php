@@ -1,6 +1,14 @@
 <?php
 class ControllerProductAppliance extends Controller {
 	public function index() {
+
+		if (defined('JOURNAL3_ACTIVE')) {
+			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lightgallery.min.css');
+			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lg-transitions.min.css');
+			$this->journal3->document->addScript('catalog/view/theme/journal3/lib/lightgallery/js/lightgallery-all.js', 'footer');
+		}
+
+
 		$this->load->language('product/category');
 
         $this->load->model('catalog/category');
