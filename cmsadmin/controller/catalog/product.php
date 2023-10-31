@@ -638,7 +638,7 @@ class ControllerCatalogProduct extends Controller {
 		} elseif (!empty($product_info)) {
 			$data['isbn'] = $product_info['isbn'];
 		} else {
-			$data['isbn'] = '';
+			$data['isbn'] = 0;
 		}
 
 		if (isset($this->request->post['mpn'])) {
