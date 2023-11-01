@@ -385,10 +385,16 @@
               </div>
             </div>
             <div class="tab-pane" id="tab-links">
+              <input type="hidden" name="manufacturer_id" value="0">
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
                 <div class="col-sm-10">
-                  <input type="text" name="manufacturer" value="{{ manufacturer }}" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/> <input type="hidden" name="manufacturer_id" value="{{ manufacturer_id }}"/>
+                  <input type="text" name="manufacturer" value="" placeholder="{{ entry_manufacturer }}" id="input-manufacturer" class="form-control"/>
+                  <div id="product-manufacturer" class="well well-sm" style="height: 150px; overflow: auto;"> {% for product_manufacturer in product_manufacturers %}
+                      <div id="product-manufacturer{{ product_manufacturer.manufacturer_id }}"><i class="fa fa-minus-circle"></i> {{ product_manufacturer.name }}
+                        <input type="hidden" name="product_manufacturer[]" value="{{ product_manufacturer.manufacturer_id }}"/>
+                      </div>
+                    {% endfor %}</div>
                 </div>
               </div>
               <div class="form-group">
@@ -1143,17 +1149,12 @@
   <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
   <script type="text/javascript"><!--
   // Manufacturer
-  $('input[name=\'manufacturer\']').autocomplete({
+ $('input[name=\'manufacturer\']').autocomplete({
 	  'source': function(request, response) {
 		  $.ajax({
 			  url: 'index.php?route=catalog/manufacturer/autocomplete&user_token={{ user_token }}&filter_name=' + encodeURIComponent(request),
 			  dataType: 'json',
 			  success: function(json) {
-				  json.unshift({
-					  manufacturer_id: 0,
-					  name: '{{ text_none }}'
-				  });
-
 				  response($.map(json, function(item) {
 					  return {
 						  label: item['name'],
@@ -1164,9 +1165,16 @@
 		  });
 	  },
 	  'select': function(item) {
-		  $('input[name=\'manufacturer\']').val(item['label']);
-		  $('input[name=\'manufacturer_id\']').val(item['value']);
+		  $('input[name=\'manufacturer\']').val('');
+
+		  $('#product-manufacturer' + item['value']).remove();
+
+		  $('#product-manufacturer').append('<div id="product-manufacturer' + item['value'] + '"><i class="fa fa-minus-circle"></i> ' + item['label'] + '<input type="hidden" name="product_manufacturer[]" value="' + item['value'] + '" /></div>');
 	  }
+  });
+
+  $('#product-manufacturer').delegate('.fa-minus-circle', 'click', function() {
+	  $(this).parent().remove();
   });
 
   // Category

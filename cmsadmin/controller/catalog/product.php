@@ -840,27 +840,26 @@ class ControllerCatalogProduct extends Controller {
 		}
 
 		$this->load->model('catalog/manufacturer');
-
-		if (isset($this->request->post['manufacturer_id'])) {
-			$data['manufacturer_id'] = $this->request->post['manufacturer_id'];
-		} elseif (!empty($product_info)) {
-			$data['manufacturer_id'] = $product_info['manufacturer_id'];
+		
+		if (isset($this->request->post['product_manufacturer'])) {
+			$manufacturers = $this->request->post['product_manufacturer'];
+		} elseif (isset($this->request->get['product_id'])) {
+			$manufacturers = $this->model_catalog_product->getProductManufacturers($this->request->get['product_id']);
 		} else {
-			$data['manufacturer_id'] = 0;
+			$manufacturers = array();
 		}
 
-		if (isset($this->request->post['manufacturer'])) {
-			$data['manufacturer'] = $this->request->post['manufacturer'];
-		} elseif (!empty($product_info)) {
-			$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($product_info['manufacturer_id']);
+		$data['product_manufacturers'] = array();
+
+		foreach ($manufacturers as $manufacturer_id) {
+			$manufacturer_info = $this->model_catalog_manufacturer->getManufacturer($manufacturer_id);
 
 			if ($manufacturer_info) {
-				$data['manufacturer'] = $manufacturer_info['name'];
-			} else {
-				$data['manufacturer'] = '';
+				$data['product_manufacturers'][] = array(
+					'manufacturer_id' => $manufacturer_info['manufacturer_id'],
+					'name' => $manufacturer_info['name']
+				);
 			}
-		} else {
-			$data['manufacturer'] = '';
 		}
 
 		// Categories

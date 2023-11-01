@@ -458,7 +458,8 @@ class ModelJournal3Filter extends Model {
 				COUNT(*) total 
 			FROM `" . DB_PREFIX . "manufacturer` m 
 			LEFT JOIN `" . DB_PREFIX . "manufacturer_to_store` m2s ON (m.manufacturer_id = m2s.manufacturer_id) 
-			LEFT JOIN `" . DB_PREFIX . "product` p ON (p.manufacturer_id = m.manufacturer_id)
+			LEFT JOIN `" . DB_PREFIX . "product_to_manufacturer` p2m ON (p2m.manufacturer_id = m.manufacturer_id)
+			LEFT JOIN `" . DB_PREFIX . "product` p ON (p2m.product_id = p.product_id)
 		";
 
 		$sql .= $this->addFilters(static::$filter_data, 'manufacturer');
@@ -1024,6 +1025,10 @@ class ModelJournal3Filter extends Model {
 			}
 		}
 
+		if ($query !== 'manufacturer' && (Arr::get($filter_data, 'manufacturers') || Arr::get($filter_data, 'filter_manufacturer_id'))) {
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_manufacturer` p2m ON (p2m.product_id = p.product_id)";
+		}
+
 		if ($query !== 'appliance') {
 			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_appliance` p2a ON (p2a.product_id = p.product_id)";
 			$sql .= " LEFT JOIN `" . DB_PREFIX . "appliance` a ON (p2a.appliance_id = a.appliance_id)";
@@ -1058,15 +1063,15 @@ class ModelJournal3Filter extends Model {
 			}
 		}
 
-		// if (Arr::get($filter_data, 'appliance_id')) {
-		// 	$sql .= " AND p2a.appliance_id = '" . (int)$filter_data['appliance_id'] . "'";
-		// }
+		if (($query !== 'appliance') && Arr::get($filter_data, 'appliance_id')) {
+			$sql .= " AND p2a.appliance_id = '" . (int)$filter_data['appliance_id'] . "'";
+		}
 
 		if ($query !== 'manufacturer') {
 			if (Arr::get($filter_data, 'manufacturers')) {
-				$sql .= " AND p.manufacturer_id IN (" . implode(",", array_map('intval', $filter_data['manufacturers'])) . ")";
+				$sql .= " AND p2m.manufacturer_id IN (" . implode(",", array_map('intval', $filter_data['manufacturers'])) . ")";
 			} else if (Arr::get($filter_data, 'filter_manufacturer_id')) {
-				$sql .= " AND p.manufacturer_id = '" . (int)$filter_data['filter_manufacturer_id'] . "'";
+				$sql .= " AND p2m.manufacturer_id = '" . (int)$filter_data['filter_manufacturer_id'] . "'";
 			}
 		}
 

@@ -82,6 +82,12 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
+		if (isset($data['product_manufacturer'])) {
+			foreach ($data['product_manufacturer'] as $manufacturer_id) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_manufacturer SET product_id = '" . (int)$product_id . "', manufacturer_id = '" . (int)$manufacturer_id . "'");
+			}
+		}
+
 		if (isset($data['product_category'])) {
 			foreach ($data['product_category'] as $category_id) {
 				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_category SET product_id = '" . (int)$product_id . "', category_id = '" . (int)$category_id . "'");
@@ -231,6 +237,14 @@ class ModelCatalogProduct extends Model {
 			}
 		}
 
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_manufacturer WHERE product_id = '" . (int)$product_id . "'");
+
+		if (isset($data['product_manufacturer'])) {
+			foreach ($data['product_manufacturer'] as $manufacturer_id) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "product_to_manufacturer SET product_id = '" . (int)$product_id . "', manufacturer_id = '" . (int)$manufacturer_id . "'");
+			}
+		}
+
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
 
 		if (isset($data['product_category'])) {
@@ -314,6 +328,7 @@ class ModelCatalogProduct extends Model {
 			$data['product_related'] = $this->getProductRelated($product_id);
 			$data['product_reward'] = $this->getProductRewards($product_id);
 			$data['product_special'] = $this->getProductSpecials($product_id);
+			$data['product_manufacturer'] = $this->getProductManufacturers($product_id);
 			$data['product_category'] = $this->getProductCategories($product_id);
 			$data['product_download'] = $this->getProductDownloads($product_id);
 			$data['product_layout'] = $this->getProductLayouts($product_id);
@@ -337,6 +352,7 @@ class ModelCatalogProduct extends Model {
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_related WHERE related_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_reward WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_special WHERE product_id = '" . (int)$product_id . "'");
+		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_manufacturer WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_category WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_download WHERE product_id = '" . (int)$product_id . "'");
 		$this->db->query("DELETE FROM " . DB_PREFIX . "product_to_layout WHERE product_id = '" . (int)$product_id . "'");
@@ -441,6 +457,18 @@ class ModelCatalogProduct extends Model {
 		}
 
 		return $product_description_data;
+	}
+
+	public function getProductManufacturers($product_id) {
+		$product_manufacturer_data = array();
+
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "product_to_manufacturer WHERE product_id = '" . (int)$product_id . "'");
+
+		foreach ($query->rows as $result) {
+			$product_manufacturer_data[] = $result['manufacturer_id'];
+		}
+
+		return $product_manufacturer_data;
 	}
 
 	public function getProductCategories($product_id) {
