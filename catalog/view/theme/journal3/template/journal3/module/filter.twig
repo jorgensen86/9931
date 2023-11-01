@@ -98,7 +98,7 @@
                     {% for subitem in item.items %}
                         <label>
                           <a href="{{ subitem.link }}">
-                            <span class="links-text">{{ subitem.value }}</span>
+                            <span><span class="appliance-code">{{ subitem.value }}</span> - <span class="appliance-brand">{{ subitem.brand }}</span></span>
                             <span class="links-text">{{ subitem.codes }}</span>
                             <span class="count-badge">{{ subitem.total }}</span>
                           </a>

@@ -413,18 +413,21 @@ class ModelJournal3Filter extends Model {
 		$sql = "
 			SELECT
 				MAX(a.appliance_id) id, 
-				CONCAT(MAX(a.code),' - ',MAX(m.name)) value,
+				MAX(a.code) value,
+				MAX(am.name) brand,
 				MAX(a.image) image,
-				(SELECT GROUP_CONCAT(ct.name, ':', ac.value) FROM `{$this->dbPrefix('appliance_codes')}`ac LEFT JOIN  `{$this->dbPrefix('code_type')}` ct ON (ac.code_id = ct.code_id) WHERE ac.appliance_id = a.appliance_id) as codes,
+				(SELECT GROUP_CONCAT(ct.name, ':', ac.value SEPARATOR ',') FROM `{$this->dbPrefix('appliance_codes')}`ac LEFT JOIN  `{$this->dbPrefix('code_type')}` ct ON (ac.code_id = ct.code_id) WHERE ac.appliance_id = a.appliance_id) as codes,
 				COUNT(*) total 
 			FROM `{$this->dbPrefix('appliance')}` a 
 			LEFT JOIN `{$this->dbPrefix('product_to_appliance')}`p2a ON (a.appliance_id = p2a.appliance_id)
-			LEFT JOIN `{$this->dbPrefix('manufacturer')}`m ON (a.manufacturer_id = m.manufacturer_id)
+			LEFT JOIN `{$this->dbPrefix('manufacturer')}`am ON (a.manufacturer_id = am.manufacturer_id)
 			LEFT JOIN `{$this->dbPrefix('appliance_codes')}`ac ON (a.appliance_id = ac.appliance_id)  
+			LEFT JOIN `{$this->dbPrefix('code_type')}`ct ON (ct.code_id = ac.code_id)  
 			LEFT JOIN `{$this->dbPrefix('product')}` p ON (p.product_id = p2a.product_id)
 		";
 
-		$sql .= $this->addFilters(static::$filter_data);
+		$sql .= $this->addFilters(static::$filter_data, 'appliance');
+
 
 		$sql .= " 
 			AND a.status = '1'
@@ -436,7 +439,7 @@ class ModelJournal3Filter extends Model {
 			ORDER BY a.sort_order, LCASE(a.code) ASC
 			LIMIT 0,100
 		";
-
+		
 		return $this->dbQuery($sql, 'APPLIANCES')->rows;
 	}
 	/* Jorgensen  Appliance Filter */
@@ -983,7 +986,7 @@ class ModelJournal3Filter extends Model {
 		if ($limit) {
 			$sql .= " LIMIT {$this->dbEscapeNat($start)}, {$this->dbEscapeNat($limit)}";
 		}
-
+		
 		return $this->dbQuery($sql, 'PRODUCTS')->rows;
 	}
 
@@ -1021,6 +1024,14 @@ class ModelJournal3Filter extends Model {
 			}
 		}
 
+		if ($query !== 'appliance') {
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_appliance` p2a ON (p2a.product_id = p.product_id)";
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "appliance` a ON (p2a.appliance_id = a.appliance_id)";
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "manufacturer` am ON (a.manufacturer_id = am.manufacturer_id)";
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "appliance_codes` ac ON (a.appliance_id = ac.appliance_id)";
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "code_type` ct ON (ct.code_id = ac.code_id)";
+		}
+
 		$sql .= " 
 			LEFT JOIN `" . DB_PREFIX . "product_description` pd ON (p.product_id = pd.product_id)
 			LEFT JOIN `" . DB_PREFIX . "product_to_store` p2s ON (p.product_id = p2s.product_id)
@@ -1046,6 +1057,10 @@ class ModelJournal3Filter extends Model {
 				}
 			}
 		}
+
+		// if (Arr::get($filter_data, 'appliance_id')) {
+		// 	$sql .= " AND p2a.appliance_id = '" . (int)$filter_data['appliance_id'] . "'";
+		// }
 
 		if ($query !== 'manufacturer') {
 			if (Arr::get($filter_data, 'manufacturers')) {
@@ -1110,6 +1125,7 @@ class ModelJournal3Filter extends Model {
 				if ($implode) {
 					$sql .= " " . implode(" AND ", $implode) . "";
 				}
+				
 
 				if (isset($filter_data['description']) && $filter_data['description'] == 1) {
 					$sql .= " OR pd.description LIKE '%" . $this->db->escape($filter_data['filter_name']) . "%'";
@@ -1134,6 +1150,13 @@ class ModelJournal3Filter extends Model {
 				if ($implode) {
 					$sql .= " " . implode(" AND ", $implode) . "";
 				}
+			}
+
+			if (isset($filter_data['filter_name']) && strlen($filter_data['filter_name']) > 0) {
+				$sql .= " OR LCASE(a.code) LIKE '%" . $this->db->escape(utf8_strtolower($filter_data['filter_name'])) . "%'";
+				$sql .= " OR LCASE(am.name) LIKE '%" . $this->db->escape(utf8_strtolower($filter_data['filter_name'])) . "%'";
+				$sql .= " OR LCASE(ct.name) LIKE '%" . $this->db->escape(utf8_strtolower($filter_data['filter_name'])) . "%'";
+				$sql .= " OR LCASE(ac.value) LIKE '%" . $this->db->escape(utf8_strtolower($filter_data['filter_name'])) . "%'";
 			}
 
 			if (isset($filter_data['filter_name']) && strlen($filter_data['filter_name']) > 0) {

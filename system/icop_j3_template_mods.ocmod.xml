@@ -18,7 +18,7 @@
         </operation>
     </file>
 
-    <file path="catalog/controller/{product/*,information/*,account/*}.php" error="skip">
+    <!-- <file path="catalog/controller/{product/*,information/*,account/*}.php" error="skip">
         <operation info="hides home breadcrumb from pages">
             <search><![CDATA[
             'href' => $this->url->link('common/home')
@@ -27,7 +27,7 @@
             $data['breadcrumbs'] = array(); /* icop_j3_template_mods.ocmod.xml */
             ]]></add>
         </operation>
-    </file>
+    </file> -->
     <file path="catalog/view/theme/journal3/template/journal3/product_card.twig" error="skip">
         <operation info="hides stat 2 from product grid">
             <search><![CDATA[<span class="stat-2"><span class="stats-label">{{ product.stat2.label }}:</span> <span>{{ product.stat2.text }}</span></span>]]></search>

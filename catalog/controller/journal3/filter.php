@@ -40,7 +40,7 @@ class ControllerJournal3Filter extends ModuleController {
 		}
 
 		// check for products
-		if (!$this->model_journal3_filter->getTotalProducts() && !$this->model_journal3_filter->hasFilterData('price')) {
+		if (!$this->model_journal3_filter->getTotalProducts() && !$this->model_journal3_filter->hasFilterData('price') && !$this->model_journal3_filter->hasFilterData('filter_name')) {
 			return null;
 		}
 

@@ -86,6 +86,10 @@ class ControllerProductCatalog extends Controller {
 		$data['text_empty'] = $this->language->get('text_empty');
 		$data['button_continue'] = $this->language->get('button_continue');
 
+		if(($this->request->get['route'] === 'common/home') || empty($this->cache->get('route'))) {
+			$data['text_empty'] = $this->language->get('text_empty_home');
+		}
+
 		$data['products'] = array();
 
 		$filter_data = array(

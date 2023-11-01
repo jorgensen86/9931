@@ -660,7 +660,7 @@ jQuery(function ($) {
 	$(document).delegate('[data-gallery]', 'click', function () {
 		var $this = $(this);
 		var $gallery = $($this.data('gallery'));
-		console.log($gallery.data('images'));
+
 		var index = parseInt($this.data('index'), 10) || 0;
 
 		if ($gallery.data('lightGallery')) {

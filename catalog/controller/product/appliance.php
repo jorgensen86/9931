@@ -1,23 +1,56 @@
 <?php
 class ControllerProductAppliance extends Controller {
 	public function index() {
-
-		if (defined('JOURNAL3_ACTIVE')) {
-			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lightgallery.min.css');
-			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lg-transitions.min.css');
-			$this->journal3->document->addScript('catalog/view/theme/journal3/lib/lightgallery/js/lightgallery-all.js', 'footer');
-		}
-
-
-		$this->load->language('product/category');
-
-        $this->load->model('catalog/category');
+		$this->load->language('product/appliance');
 
 		$this->load->model('catalog/appliance');
 
 		$this->load->model('catalog/product');
 
 		$this->load->model('tool/image');
+
+		if (defined('JOURNAL3_ACTIVE')) {
+			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lightgallery.min.css');
+			$this->journal3->document->addStyle('catalog/view/theme/journal3/lib/lightgallery/css/lg-transitions.min.css');
+			$this->journal3->document->addScript('catalog/view/theme/journal3/lib/lightgallery/js/lightgallery-all.js', 'footer');
+			$this->load->model('journal3/image');
+		}
+
+		if (isset($this->request->get['sort'])) {
+			$sort = $this->request->get['sort'];
+		} else {
+			
+            if (defined('JOURNAL3_ACTIVE')) {
+                $sort = $this->journal3->settings->get('productSort');
+            } else {
+                $sort = 'p.sort_order';
+            }
+            
+		}
+
+		if (isset($this->request->get['order'])) {
+			$order = $this->request->get['order'];
+		} else {
+			
+            if (defined('JOURNAL3_ACTIVE')) {
+                $order = $this->journal3->settings->get('productOrder');
+            } else {
+                $order = 'ASC';
+            }
+            
+		}
+
+		if (isset($this->request->get['page'])) {
+			$page = max(1, (int)$this->request->get['page']); // Journal 3 fix
+		} else {
+			$page = 1;
+		}
+
+		if (isset($this->request->get['limit'])) {
+			$limit = (int)$this->request->get['limit'];
+		} else {
+			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
+		}
 
 		$data['breadcrumbs'] = array();
 
@@ -33,78 +66,112 @@ class ControllerProductAppliance extends Controller {
 		}
 
 		$appliance_info = $this->model_catalog_appliance->getAppliance($aid);
-       
 
 		if ($appliance_info) {
-			$data['heading_title'] = $appliance_info['manufacturer'] . '/' . $appliance_info['code'];
+			$heading_title = sprintf($this->language->get('heading_title'), $appliance_info['manufacturer']);
 			
-			$this->document->setTitle($data['heading_title']);
+			if($appliance_info['extra_codes']) {
+				$heading_title .= " / {$appliance_info['extra_codes']}";
+			}
+			
 
-			if ($appliance_info['image']) {
-				$data['popup'] = $this->model_tool_image->resize($appliance_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
-			} else {
-				$data['popup'] = '';
+			$this->document->setTitle($heading_title);
+			$this->document->setDescription($heading_title);
+
+			$data['heading_title'] = $heading_title;
+
+			if (defined('JOURNAL3_ACTIVE')) {
+                $data['text_compare'] = $this->journal3->countBadge($this->language->get('text_compare'), isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0);
+            } else {
+                $data['text_compare'] = sprintf($this->language->get('text_compare'), (isset($this->session->data['compare']) ? count($this->session->data['compare']) : 0));
+            }
+
+			if($appliance_info['category_id']) {
+				$categories = $this->model_catalog_appliance->getCategoryTree($appliance_info['category_id']);
+
+				$path = array();
+
+				foreach ($categories as $category) {
+					$path[] = $category['category_id'];
+
+					$data['breadcrumbs'][] = array(
+						'text' => $category['name'],
+						'href' => $this->url->link('product/category', 'path=' . implode('_', $path))
+					);
+				}
 			}
 
+			$data['breadcrumbs'][] = array(
+				'text' => $appliance_info['code'],
+				'href' => $this->url->link('product/appliance', 'aid=' . $this->request->get['aid'])
+			);
+
+			
 			if ($appliance_info['image']) {
-				$data['thumb'] = $this->model_tool_image->resize($appliance_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_thumb_height'));
+				$data['popup'] = $this->model_tool_image->resize($appliance_info['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height'));
+				$data['thumb'] =  $this->model_journal3_image->resize($appliance_info['image'], $this->journal3->settings->get('image_dimensions_category.width'), $this->journal3->settings->get('image_dimensions_category.height'), $this->journal3->settings->get('image_dimensions_category.resize'));
 			} else {
+				$data['popup'] = '';
 				$data['thumb'] = '';
 			}
 
 			$data['manufacturer'] = $appliance_info['manufacturer'];
-			$data['model'] = $appliance_info['code'];
+			$data['extra_codes'] = $this->model_catalog_appliance->getExtraCodes($aid);
+			
+			$data['compare'] = $this->url->link('product/compare');
+			
+			$url = '';
 
-            foreach ($this->model_catalog_appliance->getCategoryFullPath($appliance_info['category_id']) as $key => $value) {
-               
-                if($category_info = $this->model_catalog_category->getCategory($value['path_id'])) {
-                    $paths[] = $value['path_id'];
-                    
-                    $data['breadcrumbs'][] = array(
-                        'text' => $category_info['name'],
-                        'href' => $this->url->link('product/category', 'path=' . implode('_', $paths))
-                    );
-                }
-                  
-            }
+			if (isset($this->request->get['sort'])) {
+				$url .= '&sort=' . $this->request->get['sort'];
+			}
 
-            $data['column_left'] = $this->load->controller('common/column_left');
-			$data['column_right'] = $this->load->controller('common/column_right');
-			$data['content_top'] = $this->load->controller('common/content_top');
-			$data['content_bottom'] = $this->load->controller('common/content_bottom');
-			$data['footer'] = $this->load->controller('common/footer');
-			$data['header'] = $this->load->controller('common/header');
+			if (isset($this->request->get['order'])) {
+				$url .= '&order=' . $this->request->get['order'];
+			}
 
-			return $this->response->setOutput($this->load->view('product/appliance', $data));
-            // echo '<pre>'; 
-            //  print_r( $data['breadcrumbs']); 
-            //  echo '</pre>';
-            // echo '<pre>'; 
-            //  print_r($appliance_info['category_id']); 
-            //  echo '</pre>';
-            // echo '<pre>'; 
-            //  print_r($results); 
-            //  echo '</pre>';
-            // echo $data['thumb'];
-            // echo '<pre>'; 
-            // print_r($appliance_info); 
-            // echo '</pre>';
-            // die;
+			if (isset($this->request->get['limit'])) {
+				$url .= '&limit=' . $this->request->get['limit'];
+			}
 
 			$data['products'] = array();
 
 			$filter_data = array(
-				'filter_category_id' => $category_id,
-				'filter_filter'      => $filter,
+				'appliance_id'	     => $aid,
 				'sort'               => $sort,
 				'order'              => $order,
 				'start'              => ($page - 1) * $limit,
 				'limit'              => $limit
 			);
 
-			$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
+			if (defined('JOURNAL3_ACTIVE')) {
+                $this->load->model('journal3/filter');
 
-			$results = $this->model_catalog_product->getProducts($filter_data);
+                $filter_data = array_merge($this->model_journal3_filter->parseFilterData(), $filter_data);
+
+
+                $this->model_journal3_filter->setFilterData($filter_data);
+
+                \Journal3\Utils\Profiler::start('journal3/filter/total_products');
+
+                $product_total = $this->model_journal3_filter->getTotalProducts();
+
+                \Journal3\Utils\Profiler::end('journal3/filter/total_products');
+            } else {
+                $product_total = $this->model_catalog_product->getTotalProducts($filter_data);
+            }
+            
+
+			
+            if (defined('JOURNAL3_ACTIVE')) {
+                \Journal3\Utils\Profiler::start('journal3/filter/products');
+
+                $results = $this->model_journal3_filter->getProducts($filter_data);
+
+                \Journal3\Utils\Profiler::end('journal3/filter/products');
+            } else {
+                $results = $this->model_catalog_product->getProducts($filter_data);
+            }
 
 			foreach ($results as $result) {
 				if ($result['image']) {
@@ -303,7 +370,7 @@ class ControllerProductAppliance extends Controller {
 			$data['footer'] = $this->load->controller('common/footer');
 			$data['header'] = $this->load->controller('common/header');
 
-			$this->response->setOutput($this->load->view('product/category', $data));
+			$this->response->setOutput($this->load->view('product/appliance', $data));
 		} else {
 			$url = '';
 

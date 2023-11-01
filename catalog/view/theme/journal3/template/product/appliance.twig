@@ -1,3 +1,11 @@
+{% set galleryOptions = {
+  thumbWidth: j3.settings.get('image_dimensions_popup_thumb.width'),
+  thumbConHeight: j3.settings.get('image_dimensions_popup_thumb.height'),
+  addClass: 'lg-product-images',
+  mode: j3.settings.get(stylePrefix ~ 'GalleryMode'),
+  download: j3.settings.get(stylePrefix ~ 'GalleryDownload'),
+  fullScreen: j3.settings.get(stylePrefix ~ 'GalleryFullScreen')
+} %}
 {{ header }}
 <ul class="breadcrumb">
   {% for breadcrumb in breadcrumbs %}
@@ -19,15 +27,19 @@
         <div class="category-description">
           <div class="appliance-info">
             <div class="left">
-              <div class="appliance-image">
-                <a href="{{ popup }}">
-                  <img src="{{ thumb }}" {% if thumb2x %}srcset="{{ thumb }} 1x, {{ thumb2x }} 2x"{% endif %} alt="{{ heading_title }}" title="{{ heading_title }}" width="{{ j3.settings.get('image_dimensions_product.width') }}" height="{{ j3.settings.get('image_dimensions_product.height') }}"/>  
-                </a>
-              </div>
+                {% set gallery = [{src: popup, thumb: thumb, subHtml: heading_title}] %}
+                <div class="appliance-image" data-gallery=".lightgallery-product-images" data-index="0">
+                  <a href="javasctipt:void()">
+                    <img src="{{ thumb }}" {% if thumb2x %}srcset="{{ thumb }} 1x, {{ thumb2x }} 2x"{% endif %} data-largeimg="{{ popup }}" alt="{{ heading_title }}" title="{{ heading_title }}"  width="{{ j3.settings.get('image_dimensions_product.width') }}" height="{{ j3.settings.get('image_dimensions_product.height') }}"/>
+                  </a>
+                </div>
+                <div class="lightgallery lightgallery-product-images" data-images='{{ gallery|json_encode|e }}' data-options='{{ galleryOptions|json_encode(constant('JSON_FORCE_OBJECT')) }}'></div>
             </div>
             <div class="right">
                 <div class="appliance-brand">{{ manufacturer }}</div>
-                <div class="appliance-model"><span class="model-text">model(MOD):</span> {{ model }}</div>
+                {% for extra_code in extra_codes %}
+                <div class="appliance-codes"><span class="code-name {{ extra_code.bold ? 'bold' : null}}">{{ extra_code.name }}</span> : <span class="code-value">{{ extra_code.value }}</span></div>
+                {% endfor %}
             </div>
 
           </div>

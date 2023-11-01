@@ -236,6 +236,7 @@ jQuery(function ($) {
 
 	// handle reset button
 	$(document).delegate('.reset-filter', 'click', function () {
+		$('input[data-filter-search]').val('');
 		journal_filter(Journal['filterBase']);
 	});
 });

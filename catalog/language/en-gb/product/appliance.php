@@ -1,13 +1,9 @@
 <?php
-// Heading
-$_['heading_title']     = 'Find Your Favorite Brand';
-
 // Text
-$_['text_brand']        = 'Brand';
-$_['text_index']        = 'Brand Index:';
-$_['text_error']        = 'Brand not found!';
-$_['text_empty']        = 'There are no products to list.';
-$_['text_empty_home']   = 'There are no matches for your search criteria.';
+$_['heading_title']     = 'Parts for %s';
+$_['text_product']      = 'Products';
+$_['text_error']        = 'Category not found!';
+$_['text_empty']        = 'There are no products to list in this category.';
 $_['text_quantity']     = 'Qty:';
 $_['text_manufacturer'] = 'Brand:';
 $_['text_model']        = 'Product Code:';
