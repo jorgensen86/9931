@@ -173,9 +173,24 @@ class ControllerProductAppliance extends Controller {
                 $results = $this->model_catalog_product->getProducts($filter_data);
             }
 
+			if (defined('JOURNAL3_ACTIVE')) {
+                $this->load->model('journal3/product');
+
+                $data['image_width'] = $this->journal3->settings->get('image_dimensions_product.width');
+                $data['image_height'] = $this->journal3->settings->get('image_dimensions_product.height');
+
+                if ($this->journal3->settings->get('performanceLazyLoadImagesStatus')) {
+			        $data['dummy_image'] = $this->model_journal3_image->transparent($data['image_width'], $data['image_width']);
+                }
+            }
+
 			foreach ($results as $result) {
 				if ($result['image']) {
+						if (defined('JOURNAL3_ACTIVE')) {
+					$image = $this->model_journal3_image->resize($result['image'], $this->journal3->settings->get('image_dimensions_product.width'), $this->journal3->settings->get('image_dimensions_product.height'), $this->journal3->settings->get('image_dimensions_product.resize'));
+				} else {
 					$image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+				}
 				} else {
 					$image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
 				}
@@ -204,7 +219,41 @@ class ControllerProductAppliance extends Controller {
 					$rating = false;
 				}
 
+
+				if (defined('JOURNAL3_ACTIVE')) {
+					if ($result['image']) {
+						$image2x = $this->model_journal3_image->resize($result['image'], $this->journal3->settings->get('image_dimensions_product.width') * 2, $this->journal3->settings->get('image_dimensions_product.height') * 2, $this->journal3->settings->get('image_dimensions_product.resize'));
+					} else {
+						$image2x = $this->model_journal3_image->resize('placeholder.png', $this->journal3->settings->get('image_dimensions_product.width') * 2, $this->journal3->settings->get('image_dimensions_product.height') * 2, $this->journal3->settings->get('image_dimensions_product.resize'));
+					}
+
+					if ($this->journal3->document->isDesktop() && $this->journal3->settings->get('globalProductGridSecondImageStatus') && ($additional_image = $this->journal3->productSecondImage($result))) {
+						$second_image = $this->model_journal3_image->resize($additional_image, $this->journal3->settings->get('image_dimensions_product.width'), $this->journal3->settings->get('image_dimensions_product.height'), $this->journal3->settings->get('image_dimensions_product.resize'));
+						$second_image2x = $this->model_journal3_image->resize($additional_image, $this->journal3->settings->get('image_dimensions_product.width') * 2, $this->journal3->settings->get('image_dimensions_product.height') * 2, $this->journal3->settings->get('image_dimensions_product.resize'));
+					} else {
+						$second_image = false;
+						$second_image2x = false;
+					}
+				}
+            
 				$data['products'][] = array(
+
+                'classes'        => array(
+					defined('JOURNAL3_ACTIVE') ? $this->journal3->productExcludeButton($result, $price, $special) : null,
+				),
+                'quantity'       => defined('JOURNAL3_ACTIVE') ? $result['quantity'] : null,
+				'is_part'        => $result['isbn'],
+				'stock_status'   => defined('JOURNAL3_ACTIVE') ? $result['stock_status'] : null,
+				'thumb2x'        => defined('JOURNAL3_ACTIVE') ? $image2x : null,
+				'second_thumb'   => defined('JOURNAL3_ACTIVE') ? $second_image : null,
+				'second_thumb2x' => defined('JOURNAL3_ACTIVE') ? $second_image2x : null,
+				'labels'         => defined('JOURNAL3_ACTIVE') ? $this->journal3->productLabels($result, $price, $special) : null,
+				'extra_buttons'  => defined('JOURNAL3_ACTIVE') ? $this->journal3->productExtraButton($result, $price, $special) : null,
+				'date_end'       => defined('JOURNAL3_ACTIVE') ? $this->journal3->productCountdown($result) : null,
+				'price_value'    => defined('JOURNAL3_ACTIVE') ? ($result['special'] ? $result['special'] > 0 : $result['price'] > 0) : null,
+				'stat1'          => defined('JOURNAL3_ACTIVE') ? $this->journal3->productStat($result, $this->journal3->settings->get('globalProductStat1')) : null,
+				'stat2'          => defined('JOURNAL3_ACTIVE') ? $this->journal3->productStat($result, $this->journal3->settings->get('globalProductStat2')) : null,
+            
 					'product_id'  => $result['product_id'],
 					'thumb'       => $image,
 					'name'        => $result['name'],

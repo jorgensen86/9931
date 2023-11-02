@@ -11,6 +11,13 @@ class ControllerCommonSearch extends Controller {
 			$data['search'] = '';
 		}
 
+		if (isset($this->request->get['fs'])) {
+			$data['search'] = $this->request->get['fs'];
+		} else {
+			$data['search'] = '';
+		}
+		
+
 		/* Jorgensen - Replace Home Search Template */
 		if(!$this->request->get['route'] || $this->request->get['route'] === 'common/home') {
 			return $this->load->view('common/home_search', $data);

@@ -11,10 +11,6 @@ class ModelCatalogAppliance extends Model {
 	public function getAppliances() {
 		$sql = "SELECT DISTINCT a.*, m.name AS manufacturer FROM " . DB_PREFIX . "appliance a LEFT JOIN " . DB_PREFIX . "manufacturer m ON (a.manufacturer_id = m.manufacturer_id) WHERE a.status = '1'";
 
-		// if(!empty($data['filter_name'])) {
-		// 	$sql .= " AND "
-		// }
-
 		return $this->db->query($sql)->rows;
 	}
 

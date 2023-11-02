@@ -90,7 +90,7 @@
             ]]></add>
         </operation>  
     </file>
-    <file path="catalog/controller/product/{catalog,category,manufacturer,search,special}.php">
+    <file path="catalog/controller/product/{catalog,category,manufacturer,search,special,appliance}.php">
         <operation>
             <search><![CDATA[
             $data['products'][] = array(

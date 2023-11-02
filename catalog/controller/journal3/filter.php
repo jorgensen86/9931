@@ -17,6 +17,7 @@ class ControllerJournal3Filter extends ModuleController {
 		$this->load->model('catalog/manufacturer');
 		$this->load->model('catalog/product');
 		$this->load->model('journal3/filter');
+		$this->load->model('catalog/appliance');
 	}
 
 	public function index($args) {
@@ -540,10 +541,11 @@ class ControllerJournal3Filter extends ModuleController {
 			if ($appliances) {
 				foreach ($appliances as &$appliance) {
 					$appliance['image'] = false;
+					$appliance['extra_codes'] = $this->model_catalog_appliance->getExtraCodes($appliance['id']);
 					$appliance['image2x'] = false;
 					$appliance['link'] = $this->url->link('product/appliance', 'aid=' . $appliance['id'] , true);
 				}
-	
+
 				$item['items'] = $appliances;
 	
 				$item['collapsed'] = false;

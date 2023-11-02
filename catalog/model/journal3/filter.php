@@ -416,7 +416,6 @@ class ModelJournal3Filter extends Model {
 				MAX(a.code) value,
 				MAX(am.name) brand,
 				MAX(a.image) image,
-				(SELECT GROUP_CONCAT(ct.name, ':', ac.value SEPARATOR ',') FROM `{$this->dbPrefix('appliance_codes')}`ac LEFT JOIN  `{$this->dbPrefix('code_type')}` ct ON (ac.code_id = ct.code_id) WHERE ac.appliance_id = a.appliance_id) as codes,
 				COUNT(*) total 
 			FROM `{$this->dbPrefix('appliance')}` a 
 			LEFT JOIN `{$this->dbPrefix('product_to_appliance')}`p2a ON (a.appliance_id = p2a.appliance_id)
@@ -442,6 +441,7 @@ class ModelJournal3Filter extends Model {
 		
 		return $this->dbQuery($sql, 'APPLIANCES')->rows;
 	}
+	
 	/* Jorgensen  Appliance Filter */
 
 
