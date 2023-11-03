@@ -242,7 +242,6 @@ class ControllerProductAppliance extends Controller {
 					defined('JOURNAL3_ACTIVE') ? $this->journal3->productExcludeButton($result, $price, $special) : null,
 				),
                 'quantity'       => defined('JOURNAL3_ACTIVE') ? $result['quantity'] : null,
-				'is_part'        => $result['isbn'],
 				'stock_status'   => defined('JOURNAL3_ACTIVE') ? $result['stock_status'] : null,
 				'thumb2x'        => defined('JOURNAL3_ACTIVE') ? $image2x : null,
 				'second_thumb'   => defined('JOURNAL3_ACTIVE') ? $second_image : null,

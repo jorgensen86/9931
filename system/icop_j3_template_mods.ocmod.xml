@@ -112,6 +112,20 @@
             ]]></add>
         </operation>
     </file>
+    <file path="catalog/controller/product/product.php">
+        <operation>
+            <search><![CDATA[
+            $data['model']
+            ]]></search>
+            <add position="before"><![CDATA[
+                if($product_info['jan']) {
+                    $data['price_per_type'] =  $product_info['jan'] == 1 ? $this->language->get('text_unit') : $this->language->get('text_set');
+                } else {
+                    $data['price_per_type'] = '';
+                }
+            ]]></add>
+        </operation>
+    </file>
     <file path="catalog/language/en-gb/en-gb.php" error="skip">
         <operation info="" error="skip">
             <search><![CDATA[$_['button_cart']]]></search>
@@ -134,9 +148,15 @@
         </operation>
 	</file>
     <file path="catalog/view/theme/journal3/template/journal3/product_card.twig" error="skip">
-        <operation info="hides stat 2 from product grid">
+        <operation>
             <search><![CDATA[{{ product.price }}</span>]]></search>
             <add position="after"><![CDATA[ {% if product.price_per_type %}<span class="price-per-type"><span class="price-seperator">/</span><span>{{ product.price_per_type }}</span>{# icop_j3_template_mods.ocmod.xml #} {% endif %} ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/journal3/template/product/product.twig" error="skip">
+        <operation>
+            <search><![CDATA[{{ price }}</div>]]></search>
+            <add position="after"><![CDATA[ {% if price_per_type %}<div class="price-per-type"><span class="price-seperator">/</span><span>{{ price_per_type }}</div>{# icop_j3_template_mods.ocmod.xml #} {% endif %} ]]></add>
         </operation>
     </file>
 </modification>

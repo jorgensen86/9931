@@ -228,9 +228,9 @@ class ControllerJournal3Filter extends ModuleController {
 				$items[] = $item;
 			}
 		}
-
+		if(isset($this->request->get['route']) && ($this->request->get['route'] !== 'common/home')) {
 		// categories
-		if (!$item = Arr::get($this->settings['items'], 'c')) {
+		if ($item = Arr::get($this->settings['items'], 'c')) {
 			Profiler::start('journal3/filter/categories');
 
 			$categories = $this->model_journal3_filter->getCategories();
@@ -268,19 +268,20 @@ class ControllerJournal3Filter extends ModuleController {
 				$items[] = $item;
 			}
 		}
-
+	}
+		if(!isset($this->request->get['route']) || ($this->request->get['route'] === 'common/home')) {
 		// Appliance Categories
 		if ($item = Arr::get($this->settings['items'], 'c')) {
 			Profiler::start('journal3/filter/categories');
 
 			$categories = $this->model_journal3_filter->getApplianceCategories();
-
+	
 			Profiler::end('journal3/filter/categories');
 
 			if ($categories) {
 				foreach ($categories as &$category) {
 					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
-
+					
 					if ($item['display'] === 'text') {
 						$category['image'] = false;
 						$category['image2x'] = false;
@@ -310,6 +311,9 @@ class ControllerJournal3Filter extends ModuleController {
 		}
 
 		// Part Categories
+		
+
+
 		if ($item = Arr::get($this->settings['items'], 'c')) {
 			
 			$item['input'] = 'checkbox';
@@ -353,7 +357,7 @@ class ControllerJournal3Filter extends ModuleController {
 				$items[] = $item;
 			}
 		}
-
+	}
 		// manufacturers
 		if ($item = Arr::get($this->settings['items'], 'm')) {
 			Profiler::start('journal3/filter/manufacturers');

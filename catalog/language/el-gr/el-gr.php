@@ -19,6 +19,8 @@ $_['text_all_zones']        = 'Όλες οι Ζώνες';
 $_['text_pagination']       = 'Εμφάνιση %d έως %d από %d (%d Σελ.)';
 $_['text_loading']          = 'Φόρτωση...';
 $_['text_no_results']       = 'Χωρίς αποτελέσματα!';
+$_['title_parts']           = 'Ανταλλακτικά';
+$_['title_consumables']     = 'Αναλώσιμα';
 
 // Buttons
 $_['button_address_add']    = 'Προσθήκη Διεύθυνσης';

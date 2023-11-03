@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>icop_product_grid_partition</id>
+	<version>3.1</version>
+	<vqmver>2.6.2</vqmver>
+	<author>Jorgensen</author>
+    
+    <file path="catalog/view/theme/journal3/template/product/appliance.twig">
+        <operation info="add title for parts" error="skip">
+            <search position="before"><![CDATA[
+                <div class="main-products product-{{ j3.settings.get('globalProductView') }}">
+            ]]></search>
+            <add><![CDATA[  
+                {# icop_product_grid_partition.xml #}
+                 <h3>{{ title_parts }}</h3>
+                {# icop_product_grid_partition.xml #}
+            ]]></add>
+        </operation>
+        <operation info="includes product_part_card.twig" error="skip">
+            <search position="before"><![CDATA[
+                <div class="row pagination-results">
+            ]]></search>
+            <add><![CDATA[  
+                {# icop_product_grid_partition.xml #}
+                 <h3>{{ title_consumables }}</h3>
+                <div class="main-products product-{{ j3.settings.get('globalProductView') }}">
+                  {% set display = j3.settings.get('globalProductView') %}
+                  {% include "journal3/template/journal3/product_part_card.twig" %}
+                </div>
+                  {# icop_product_grid_partition.xml #}
+            ]]></add>
+        </operation>
+	</file>
+
+    <file path="catalog/controller/product/appliance.php">
+        <operation info="init parts array" error="skip">
+            <search position="after"><![CDATA[
+                $data['products'] = array();
+            ]]></search>
+            <add><![CDATA[     
+                $data['parts'] = array(); /* icop_product_grid_partition.xml */
+            ]]></add>
+        </operation>
+        <operation info="partition products array" error="skip">
+            <search position="replace"><![CDATA[
+                $data['products'][]
+            ]]></search>
+            <add><![CDATA[     
+                /* icop_product_grid_partition.xml */
+                $data[$result['isbn'] ? 'parts' : 'products'][]
+            ]]></add>
+        </operation>
+	</file>
+</modification>

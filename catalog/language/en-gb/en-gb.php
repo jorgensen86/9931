@@ -19,6 +19,8 @@ $_['text_all_zones']        = 'All Zones';
 $_['text_pagination']       = 'Showing %d to %d of %d (%d Pages)';
 $_['text_loading']          = 'Loading...';
 $_['text_no_results']       = 'No results!';
+$_['title_parts']           = 'Parts';
+$_['title_consumables']     = 'Consumables';
 
 // Buttons
 $_['button_address_add']    = 'Add Address';
