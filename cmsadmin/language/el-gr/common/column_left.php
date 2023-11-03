@@ -41,6 +41,7 @@ $_['text_manufacturer']         = 'Κατασκευαστές';
 $_['text_navigation']           = 'Πλοήγηση';
 $_['text_option']               = 'Επιλογές';
 $_['text_order']                = 'Παραγγελίες';
+$_['text_preorder']             = 'Προπαραγγελίες';
 $_['text_order_status']         = 'Κατάσταση Παραγγελίας';
 $_['text_online']               = 'Πελάτες Online';
 $_['text_product']              = 'Προϊόντα';

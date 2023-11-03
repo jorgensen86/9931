@@ -72,6 +72,7 @@ $_['column_product']             = 'Προϊόν';
 $_['column_model']               = 'Κωδικός Προϊόντος';
 $_['column_quantity']            = 'Ποσότητα';
 $_['column_price']               = 'Τιμή Μονάδας';
+$_['column_days_of_delivery']    = 'Παράδοση σε ημέρες';
 $_['column_comment']             = 'Σχόλια';
 $_['column_notify']              = 'Ενημερώθηκε ο Πελάτης';
 $_['column_location']            = 'Τοποθεσία';

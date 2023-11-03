@@ -41,6 +41,7 @@ $_['text_manufacturer']         = 'Manufacturers';
 $_['text_navigation']           = 'Navigation';
 $_['text_option']               = 'Options';
 $_['text_order']                = 'Orders';
+$_['text_preorder']             = 'Preorders';
 $_['text_order_status']         = 'Order Statuses';
 $_['text_online']               = 'Who\'s Online';
 $_['text_product']              = 'Products';

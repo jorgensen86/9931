@@ -10,7 +10,6 @@ class ControllerApiCart extends Controller {
 		} else {
 			if (isset($this->request->post['product'])) {
 				$this->cart->clear();
-
 				foreach ($this->request->post['product'] as $product) {
 					if (isset($product['option'])) {
 						$option = $product['option'];
@@ -18,7 +17,13 @@ class ControllerApiCart extends Controller {
 						$option = array();
 					}
 
-					$this->cart->add($product['product_id'], $product['quantity'], $option);
+					if (isset($product['price'])) {
+						$price = $product['price'];
+					} else {
+						$price = 0;
+					}
+
+					$this->cart->add($product['product_id'], $product['quantity'], $option, 0, $price);
 				}
 
 				$json['success'] = $this->language->get('text_success');
@@ -176,6 +181,8 @@ class ControllerApiCart extends Controller {
 					'quantity'   => $product['quantity'],
 					'stock'      => $product['stock'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 					'shipping'   => $product['shipping'],
+					'days_of_delivery'   => $product['days_of_delivery'],
+					'final_price' => $product['price'],
 					'price'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
 					'total'      => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']),
 					'reward'     => $product['reward']

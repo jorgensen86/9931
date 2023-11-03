@@ -258,6 +258,12 @@ class ControllerCommonColumnLeft extends Controller {
 					'name'	   => $this->language->get('text_order'),
 					'href'     => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'], true),
 					'children' => array()		
+				);
+
+				$sale[] = array(
+					'name'	   => $this->language->get('text_preorder'),
+					'href'     => $this->url->link('sale/order', 'user_token=' . $this->session->data['user_token'] . '&filter_preorder=1', true),
+					'children' => array()		
 				);	
 			}
 			

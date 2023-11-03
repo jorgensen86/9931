@@ -72,6 +72,7 @@ $_['column_product']             = 'Product';
 $_['column_model']               = 'Model';
 $_['column_quantity']            = 'Quantity';
 $_['column_price']               = 'Unit Price';
+$_['column_days_of_delivery']    = 'Days of Delivery';
 $_['column_comment']             = 'Comment';
 $_['column_notify']              = 'Customer Notified';
 $_['column_location']            = 'Location';

@@ -45,6 +45,10 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
 		}
 
+		if (isset($this->request->get['filter_preorder'])) {
+			$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
+		}
+
 		if (isset($this->request->get['filter_customer'])) {
 			$url .= '&filter_customer=' . urlencode(html_entity_decode($this->request->get['filter_customer'], ENT_QUOTES, 'UTF-8'));
 		}
@@ -89,6 +93,12 @@ class ControllerSaleOrder extends Controller {
 			$filter_order_id = $this->request->get['filter_order_id'];
 		} else {
 			$filter_order_id = '';
+		}
+
+		if (isset($this->request->get['filter_preorder'])) {
+			$filter_preorder = $this->request->get['filter_preorder'];
+		} else {
+			$filter_preorder = 0;
 		}
 
 		if (isset($this->request->get['filter_customer'])) {
@@ -151,6 +161,10 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
 		}
 
+		if (isset($this->request->get['filter_preorder'])) {
+			$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
+		}
+
 		if (isset($this->request->get['filter_customer'])) {
 			$url .= '&filter_customer=' . urlencode(html_entity_decode($this->request->get['filter_customer'], ENT_QUOTES, 'UTF-8'));
 		}
@@ -208,6 +222,7 @@ class ControllerSaleOrder extends Controller {
 
 		$filter_data = array(
 			'filter_order_id'        => $filter_order_id,
+			'filter_preorder'   	 => $filter_preorder,
 			'filter_customer'	     => $filter_customer,
 			'filter_order_status'    => $filter_order_status,
 			'filter_order_status_id' => $filter_order_status_id,
@@ -266,6 +281,10 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
 		}
 
+		if (isset($this->request->get['filter_preorder'])) {
+			$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
+		}
+
 		if (isset($this->request->get['filter_customer'])) {
 			$url .= '&filter_customer=' . urlencode(html_entity_decode($this->request->get['filter_customer'], ENT_QUOTES, 'UTF-8'));
 		}
@@ -311,6 +330,10 @@ class ControllerSaleOrder extends Controller {
 
 		if (isset($this->request->get['filter_order_id'])) {
 			$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
+		}
+
+		if (isset($this->request->get['filter_preorder'])) {
+			$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
 		}
 
 		if (isset($this->request->get['filter_customer'])) {
@@ -410,6 +433,10 @@ class ControllerSaleOrder extends Controller {
 			$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
 		}
 
+		if (isset($this->request->get['filter_preorder'])) {
+			$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
+		}
+
 		if (isset($this->request->get['filter_customer'])) {
 			$url .= '&filter_customer=' . urlencode(html_entity_decode($this->request->get['filter_customer'], ENT_QUOTES, 'UTF-8'));
 		}
@@ -468,6 +495,7 @@ class ControllerSaleOrder extends Controller {
 
 		if (!empty($order_info)) {
 			$data['order_id'] = $this->request->get['order_id'];
+			$data['preorder'] = $order_info['preorder'];
 			$data['store_id'] = $order_info['store_id'];
 			$data['store_url'] = $this->request->server['HTTPS'] ? HTTPS_CATALOG : HTTP_CATALOG;
 
@@ -684,6 +712,10 @@ class ControllerSaleOrder extends Controller {
 		$this->load->model('user/api');
 
 		$api_info = $this->model_user_api->getApi($this->config->get('config_api_id'));
+		
+		if($data['preorder']) {
+			$api_info = $this->model_user_api->getApi(2);
+		}
 
 		if ($api_info && $this->user->hasPermission('modify', 'sale/order')) {
 			$session = new Session($this->config->get('session_engine'), $this->registry);
@@ -731,6 +763,10 @@ class ControllerSaleOrder extends Controller {
 
 			if (isset($this->request->get['filter_order_id'])) {
 				$url .= '&filter_order_id=' . $this->request->get['filter_order_id'];
+			}
+
+			if (isset($this->request->get['filter_preorder'])) {
+				$url .= '&filter_preorder=' . $this->request->get['filter_preorder'];
 			}
 
 			if (isset($this->request->get['filter_customer'])) {
