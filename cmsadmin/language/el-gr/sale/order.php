@@ -60,6 +60,7 @@ $_['text_commission_removed']    = 'Επιτυχία: Η προμήθεια αφ
 $_['text_restock']               = 'Επιτυχία: Το απόθεμα των προϊόντων έχει ανανεωθεί!';
 $_['text_upload']                = 'Το αρχείο σας έχει ανέβει με επιτυχία!';
 $_['text_picklist']              = 'Δελτίο αποστολής';
+$_['text_out_of_stock']          = 'Κατόπιν Επικοινωνίας';
 
 // Column
 $_['column_order_id']            = 'Αριθμός Παραγγελίας';
@@ -68,6 +69,7 @@ $_['column_status']              = 'Κατάσταση';
 $_['column_date_added']          = 'Ημερομηνία Προσθήκης';
 $_['column_date_modified']       = 'Ημερομηνία Επεξεργασίας';
 $_['column_total']               = 'Σύνολο';
+$_['column_type']                = 'Τύπος';
 $_['column_product']             = 'Προϊόν';
 $_['column_model']               = 'Κωδικός Προϊόντος';
 $_['column_quantity']            = 'Ποσότητα';

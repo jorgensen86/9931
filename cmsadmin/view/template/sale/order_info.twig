@@ -2,7 +2,12 @@
 <div id="content">
   <div class="page-header">
     <div class="container-fluid">
-      <div class="pull-right"><a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></a> <a href="{{ shipping }}" target="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></a> <a href="{{ edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <div class="pull-right">
+        {# jorgensen - preorders #}
+        {% if order_status_id != 17 %}
+        <a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="btn btn-info"><i class="fa fa-print"></i></a> <a href="{{ shipping }}" target="_blank" data-toggle="tooltip" title="{{ button_shipping_print }}" class="btn btn-info"><i class="fa fa-truck"></i></a> 
+        {% endif %}
+        <a href="{{ edit }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a> <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
       <h1>{{ heading_title }}</h1>
       <ul class="breadcrumb">
         {% for breadcrumb in breadcrumbs %}
@@ -145,6 +150,7 @@
           <thead>
             <tr>
               <td class="text-left">{{ column_product }}</td>
+              <td class="text-left">{{ column_type }}</td>
               <td class="text-left">{{ column_model }}</td>
               <td class="text-right">{{ column_quantity }}</td>
               <td class="text-right">{{ column_price }}</td>
@@ -155,7 +161,8 @@
 
             {% for product in products %}
               <tr>
-                <td class="text-left"><a href="{{ product.href }}">{{ product.name }}</a> {% for option in product.option %}
+                <td class="text-left"><a href="{{ product.href }}">{{ product.name }}</a>
+                  {% for option in product.option %}
                     <br/>
                     {% if option.type != 'file' %}
                       &nbsp;
@@ -163,6 +170,7 @@
                       &nbsp;
                       <small> - {{ option.name }}: <a href="{{ option.href }}">{{ option.value }}</a></small> {% endif %}
                   {% endfor %}</td>
+                <td class="text-left"><strong class="text-danger">{{ product.type }}</strong></td>
                 <td class="text-left">{{ product.model }}</td>
                 <td class="text-right">{{ product.quantity }}</td>
                 <td class="text-right">{{ product.price }}</td>
@@ -180,7 +188,7 @@
             {% endfor %}
             {% for total in totals %}
               <tr>
-                <td colspan="4" class="text-right">{{ total.title }}</td>
+                <td colspan="5" class="text-right">{{ total.title }}</td>
                 <td class="text-right">{{ total.text }}</td>
               </tr>
             {% endfor %}
@@ -202,6 +210,8 @@
           </table>
         {% endif %} </div>
     </div>
+    {# jorgensen - preorders #}
+    {% if order_status_id != 17 %}
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><i class="fa fa-comment-o"></i> {{ text_history }}</h3>
@@ -374,6 +384,7 @@
           {% endfor %} </div>
       </div>
     </div>
+    {% endif %}
   </div>
   <script type="text/javascript"><!--
   $(document).delegate('#button-invoice', 'click', function() {

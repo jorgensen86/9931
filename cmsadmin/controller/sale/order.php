@@ -713,6 +713,7 @@ class ControllerSaleOrder extends Controller {
 
 		$api_info = $this->model_user_api->getApi($this->config->get('config_api_id'));
 		
+		// Use another api_id for preorders - jorgensen
 		if($data['preorder']) {
 			$api_info = $this->model_user_api->getApi(2);
 		}
@@ -978,11 +979,13 @@ class ControllerSaleOrder extends Controller {
 					'model'    		   => $product['model'],
 					'option'   		   => $option_data,
 					'quantity'		   => $product['quantity'],
+					'type'	   		   => $product['out_of_stock'] ? $this->language->get('text_out_of_stock') : null ,
 					'price'    		   => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'total'    		   => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),
 					'href'     		   => $this->url->link('catalog/product/edit', 'user_token=' . $this->session->data['user_token'] . '&product_id=' . $product['product_id'], true)
 				);
 			}
+			
 
 			$data['vouchers'] = array();
 

@@ -23,7 +23,7 @@ class ControllerApiCart extends Controller {
 						$price = 0;
 					}
 
-					$this->cart->add($product['product_id'], $product['quantity'], $option, 0, $price);
+					$this->cart->add($product['product_id'], $product['quantity'], $option, 0, $price, $product['days_of_delivery']);
 				}
 
 				$json['success'] = $this->language->get('text_success');

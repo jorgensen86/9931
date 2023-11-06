@@ -330,6 +330,12 @@
                         <input type="text" name="quantity" value="1" id="input-quantity" class="form-control" />
                       </div>
                     </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="input-days_of_delivery">{{ column_days_of_delivery }}</label>
+						<div class="col-sm-10">
+						  <input type="text" name="days_of_delivery" value="20" id="input-days_of_delivery" class="form-control" />
+						</div>
+					  </div>
                     <div id="option"></div>
                   </fieldset>
                   <div class="text-right">
@@ -844,6 +850,14 @@
               </div>
               <fieldset>
                 <legend>{{ text_order_detail }}</legend>
+				<div class="form-group">
+					<label class="col-sm-2 control-label" for="input-notify">{{ entry_notify }}</label>
+					<div class="col-sm-10">
+					  <div class="checkbox">
+						<input type="checkbox" name="notify" value="1" id="input-notify"/>
+					  </div>
+					</div>
+				  </div>
                 <div class="form-group required">
                   <label class="col-sm-2 control-label" for="input-shipping-method">{{ entry_shipping_method }}</label>
                   <div class="col-sm-10">

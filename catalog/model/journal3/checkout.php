@@ -487,6 +487,7 @@ class ModelJournal3Checkout extends Model {
 				'subtract'   => $product['subtract'],
 				'price'      => $product['price'],
 				'total'      => $product['total'],
+				'has_stock'  => $product['stock'],
 				'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
 				'reward'     => $product['reward'],
 			);

@@ -25,3 +25,9 @@ $_['text_total']            = 'Total';
 $_['text_download']         = 'Once your payment has been confirmed you can click on the link below to access your downloadable products:';
 $_['text_comment']          = 'The comments for your order are:';
 $_['text_footer']           = 'Please reply to this e-mail if you have any questions.';
+
+// Jorgensen - preorder
+$_['text_preorder_subject'] = '%s - Preorder with Id: %s';
+$_['text_preorder_greeting']= '<strong>This email is not order. <br>You will soon receive an email with the valid prices and delivery time for the unavailable products,
+so that you can decide on the completion of the order.</strong>';
+$_['text_preorder_order_detail'] = 'Preorder Details';

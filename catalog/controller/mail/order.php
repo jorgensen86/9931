@@ -65,6 +65,7 @@ class ControllerMailOrder extends Controller {
 		$data['title'] = sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']);
 
 		$data['text_greeting'] = sprintf($language->get('text_greeting'), $order_info['store_name']);
+
 		$data['text_link'] = $language->get('text_link');
 		$data['text_download'] = $language->get('text_download');
 		$data['text_order_detail'] = $language->get('text_order_detail');
@@ -105,6 +106,14 @@ class ControllerMailOrder extends Controller {
 		$data['email'] = $order_info['email'];
 		$data['telephone'] = $order_info['telephone'];
 		$data['ip'] = $order_info['ip'];
+
+		// Jorgensen - change texts for preorder
+		if (!$this->cart->hasStock()) {
+			$data['title'] = sprintf($language->get('text_preorder_subject'), $order_info['store_name'], $order_info['order_id']);
+			$data['text_greeting'] = $language->get('text_preorder_greeting');
+			$data['text_order_detail'] = $language->get('text_preorder_order_detail');
+			$data['customer_id'] = 0;
+		}
 
 		$order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$order_info['language_id'] . "'");
 	
@@ -271,6 +280,13 @@ class ControllerMailOrder extends Controller {
 		$mail->setFrom($from);
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+
+		// Jorgensen - change texts for preorder
+		if (!$this->cart->hasStock()) {
+			$mail->setSubject(html_entity_decode(sprintf($language->get('text_preorder_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+
+		}
+
 		$mail->setHtml($this->load->view('mail/order_add', $data));
 		$mail->send();
 	}

@@ -298,6 +298,11 @@ class ModelCheckoutOrder extends Model {
 				}
 			}
 
+			// Preorder id - jorgensen
+			if(!$this->cart->hasStock()) {
+				$order_status_id = 17;
+			}
+						
 			// If current order status is not processing or complete but new status is processing or complete then commence completing the order
 			if (!in_array($order_info['order_status_id'], array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status'))) && in_array($order_status_id, array_merge($this->config->get('config_processing_status'), $this->config->get('config_complete_status')))) {
 				// Redeem coupon, vouchers and reward points
@@ -341,11 +346,6 @@ class ModelCheckoutOrder extends Model {
 			}
 
 			// Update the DB with the new statuses
-			// Preorder id - jorgensen
-			if(!$this->cart->hasStock()) {
-				$order_status_id = 17;
-			}
-			
 			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
 			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', date_added = NOW()");
