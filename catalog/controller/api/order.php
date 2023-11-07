@@ -557,7 +557,7 @@ class ControllerApiOrder extends Controller {
 
 					// Products
 					$order_data['products'] = array();
-
+					
 					foreach ($this->cart->getProducts() as $product) {
 						$option_data = array();
 
@@ -583,6 +583,7 @@ class ControllerApiOrder extends Controller {
 							'subtract'   => $product['subtract'],
 							'price'      => $product['price'],
 							'total'      => $product['total'],
+							'days_of_delivery' => $product['days_of_delivery'],
 							'tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),
 							'reward'     => $product['reward']
 						);
@@ -684,8 +685,14 @@ class ControllerApiOrder extends Controller {
 					} else {
 						$order_status_id = $this->config->get('config_order_status_id');
 					}
+
+					if (isset($this->request->get['preorder']) && isset($this->request->post['notify'])) {
+						$notify = true;
+					} else {
+						$notify = false;
+					}
 					
-					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id);
+					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, '', $notify);
 				}
 			} else {
 				$json['error'] = $this->language->get('error_not_found');

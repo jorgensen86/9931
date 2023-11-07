@@ -35,7 +35,9 @@ class ControllerMailOrder extends Controller {
 			} 
 			
 			// If order status is not 0 then send update text email
-			if ($order_info['order_status_id'] && $order_status_id && $notify) {
+			if ($order_info['order_status_id'] && $order_status_id && $notify && isset($this->request->get['preorder'])) {
+				$this->preorder($order_info, $comment);
+			} elseif ($order_info['order_status_id'] && $order_status_id && $notify) {
 				$this->edit($order_info, $order_status_id, $comment, $notify);
 			}		
 		}
@@ -343,6 +345,45 @@ class ControllerMailOrder extends Controller {
 		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
 		$mail->setText($this->load->view('mail/order_edit', $data));
+		$mail->send();
+	}
+
+	public function preorder($order_info, $comment) {
+		$language = new Language($order_info['language_code']);
+		$language->load($order_info['language_code']);
+		$language->load('mail/preorder');
+
+		$data['text_link'] = $language->get('text_link');
+		$data['text_comment'] = $language->get('text_comment');
+		$data['text_footer'] = $language->get('text_footer');
+
+		$link = $order_info['store_url'] . 'index.php?route=checkout/cart/preorder&order_id=' . $order_info['order_id'];
+		
+		$data['link'] = get_tiny_url($link) ? : ($link);
+	
+		$data['comment'] = strip_tags($comment);
+
+		$this->load->model('setting/setting');
+		
+		$from = $this->model_setting_setting->getSettingValue('config_email', $order_info['store_id']);
+		
+		if (!$from) {
+			$from = $this->config->get('config_email');
+		}
+		
+		$mail = new Mail($this->config->get('config_mail_engine'));
+		$mail->parameter = $this->config->get('config_mail_parameter');
+		$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+		$mail->smtp_username = $this->config->get('config_mail_smtp_username');
+		$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+		$mail->smtp_port = $this->config->get('config_mail_smtp_port');
+		$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+		$mail->setTo($order_info['email']);
+		$mail->setFrom($from);
+		$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
+		$mail->setSubject(html_entity_decode(sprintf($language->get('text_subject'), $order_info['store_name'], $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+		$mail->setText($this->load->view('mail/preorder', $data));
 		$mail->send();
 	}
 	

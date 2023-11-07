@@ -28,3 +28,5 @@ define('DB_PASSWORD', '');
 define('DB_DATABASE', '9931');
 define('DB_PORT', '3306');
 define('DB_PREFIX', '1c0p_');
+
+define('PREORDER_ID', '17');

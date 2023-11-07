@@ -59,7 +59,7 @@ class ControllerApiCart extends Controller {
 					}
 
 					if (!isset($json['error']['option'])) {
-						$this->cart->add($this->request->post['product_id'], $quantity, $option);
+						$this->cart->add($this->request->post['product_id'], $quantity, $option, 0, 0, $this->request->post['days_of_delivery']);
 
 						$json['success'] = $this->language->get('text_success');
 

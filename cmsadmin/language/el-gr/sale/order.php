@@ -112,6 +112,7 @@ $_['entry_amount']               = 'Ποσό';
 $_['entry_affiliate']            = 'Συνεργάτης';
 $_['entry_order_status']         = 'Κατάσταση Παραγγελίας';
 $_['entry_notify']               = 'Ενημέρωση Πελάτη';
+$_['entry_preorder_notify']      = 'Προώθηση Προπαραγγελίας';
 $_['entry_override']             = 'Παράκαμψη';
 $_['entry_comment']              = 'Σχόλια';
 $_['entry_currency']             = 'Νόμισμα';

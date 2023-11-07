@@ -1,6 +1,7 @@
 <?php
 class ControllerCheckoutCart extends Controller {
 	public function index() {
+		
 		$this->load->language('checkout/cart');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -474,5 +475,32 @@ class ControllerCheckoutCart extends Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	public function preorder() {
+		if(isset($this->request->get['order_id'])) {
+			$order_id = $this->request->get['order_id'];
+		} else {
+			$order_id = 0;
+		}
+
+		$this->load->model('checkout/order'); 
+
+		$order_info = $this->model_checkout_order->getOrder($order_id);
+
+		if(!isset($this->session->data['preorder']) && $order_info && ($order_info['order_status_id'] === PREORDER_ID)) {
+
+			$this->session->data['preorder'] = $order_id;
+			
+			$order_products = $this->model_checkout_order->getOrderProducts($order_id);
+
+			foreach ($order_products as $product) {
+				$this->request->post['product_id'] = $product['product_id'];
+				$this->request->post['quantity'] = $product['quantity'];
+				$this->add();
+			}
+		}
+		
+		$this->response->redirect($this->url->link('checkout/cart'));
 	}
 }

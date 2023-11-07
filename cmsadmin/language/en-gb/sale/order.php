@@ -112,6 +112,7 @@ $_['entry_amount']               = 'Amount';
 $_['entry_affiliate']            = 'Affiliate';
 $_['entry_order_status']         = 'Order Status';
 $_['entry_notify']               = 'Notify Customer';
+$_['entry_preorder_notify']      = 'Preorder Forwarding';
 $_['entry_override']             = 'Override';
 $_['entry_comment']              = 'Comment';
 $_['entry_currency']             = 'Currency';
