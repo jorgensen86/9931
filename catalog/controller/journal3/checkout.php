@@ -601,7 +601,7 @@ class ControllerJournal3Checkout extends \Journal3\Opencart\Controller {
 			}
 
 			// jorgensen - preorders
-			if (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity'])) {
+			if (isset($this->session->data['preorder']) && (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity']))) {
 				return false;
 			}
 

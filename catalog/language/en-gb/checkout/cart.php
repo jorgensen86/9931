@@ -33,6 +33,7 @@ $_['column_availability']      = 'Availability';
 $_['column_quantity']          = 'Quantity';
 $_['column_price']             = 'Unit Price';
 $_['column_total']             = 'Total';
+$_['column_days_of_delivery']  = 'Delivery time (days)';
 
 // Error
 $_['error_stock']              = 'Products marked with *** are not available in the desired quantity or not in stock!';

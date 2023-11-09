@@ -48,6 +48,32 @@
       {% endif %}
       {{ content_top }}
       <div class="cart-page">
+        {% if po_products %}
+          <h5>Αλλαγές τιμών και χρόνου παράδοσης μη διαθέσιμων προϊόντων</h5>
+          <div class="cart-table">
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                <tr>
+                  <td class="text-center td-model">{{ column_model }}</td>
+                  <td class="text-center td-qty">{{ column_quantity }}</td>
+                  <td class="text-center td-qty">{{ column_days_of_delivery }}</td>
+                </tr>
+                </thead>
+                <tbody>
+    
+                {% for product in po_products %}
+                  <tr>
+                    <td class="text-center td-model">{{ product.model }}</td>
+                    <td class="text-center td-qty">{{ product.quantity }}</td>
+                    <td class="text-center td-qty">{{ product.days_of_delivery }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        {% endif %}
         <form action="{{ action }}" method="post" enctype="multipart/form-data" class="cart-table">
           <div class="table-responsive">
             <table class="table table-bordered">

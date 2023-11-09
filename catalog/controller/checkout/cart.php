@@ -16,7 +16,7 @@ class ControllerCheckoutCart extends Controller {
 			'href' => $this->url->link('checkout/cart'),
 			'text' => $this->language->get('heading_title')
 		);
-
+		
 		// jorgensen - preorders 
 		if (!isset($this->session->data['preorder']) && isset($this->request->get['preorder'])) {
 			$this->cart->clear();
@@ -37,6 +37,7 @@ class ControllerCheckoutCart extends Controller {
 					$this->add(true);
 
 					$this->session->data['po_products'][$product['product_id']] = array(
+						'model'	=> $product['model'],
 						'quantity' => $product['quantity'],
 						'price' => $product['price'],
 						'days_of_delivery' => $product['days_of_delivery']
@@ -109,7 +110,7 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				// jorgensen - preorders
-				if (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity'])) {
+				if (isset($this->session->data['preorder']) && (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity']))) {
 					$data['error_preorder'] = "Το καλάθι σας περιέχει ανταλλακτικά διαφορετικά από αυτά της προπαραγγελίας. Μπορείτε να πατήσετε το κουμπί 'ΑΡΧΙΚΟΠΟΙΗΣΗ ΠΡΟΠΑΡΑΓΓΕΛΙΑΣ' και να συνεχίσετε στην μετατροπή της σε παραγγελία ή να πατήσετε το κουμπί 'ΑΔΕΙΑΣΜΑ ΚΑΛΑΘΙΟΥ' και να επιλέξετε τα ανταλλακτικά που επιθυμείτε από την αρχή";
 				}
 
@@ -292,6 +293,12 @@ class ControllerCheckoutCart extends Controller {
 				}
 			}
 
+			if(isset($this->session->data['preorder']) && isset($this->session->data['po_products'])) {
+				$data['po_products'] = $this->session->data['po_products'];
+			} else {
+				$data['po_products'] = [];
+			}
+
 			$data['column_left'] = $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
@@ -349,6 +356,8 @@ class ControllerCheckoutCart extends Controller {
 			// jorgensen - preorder
 			if (isset($this->request->post['price'])) {
 				$price = (int)$this->request->post['price'];
+			} elseif (isset($this->session->data['preorder']) && (isset($this->session->data['po_products'][$product_id]))) {
+				$price = $this->session->data['po_products'][$product_id]['price'];
 			} else {
 				$price = null;
 			}
