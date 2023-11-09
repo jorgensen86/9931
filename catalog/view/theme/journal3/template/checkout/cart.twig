@@ -56,6 +56,7 @@
                 <td class="text-center td-image">{{ column_image }}</td>
                 <td class="text-left td-name">{{ column_name }}</td>
                 <td class="text-center td-model">{{ column_model }}</td>
+                <td class="text-left td-availability">{{ column_availability }}</td>
                 <td class="text-center td-qty">{{ column_quantity }}</td>
                 <td class="text-center td-price">{{ column_price }}</td>
                 <td class="text-center td-total">{{ column_total }}</td>
@@ -76,6 +77,7 @@
                       {% if product.recurring %} <br />
                         <span class="label label-info">{{ text_recurring_item }}</span> <small>{{ product.recurring }}</small> {% endif %}</td>
                   <td class="text-center td-model">{{ product.model }}</td>
+                  <td class="text-left td-availability">{% if not product.stock %} <span class="text-danger">{{ product.availability }}</span> {% endif %}</td>
                   <td class="text-center td-qty">
                     <div class="input-group btn-block">
                       <div class="stepper">
@@ -136,6 +138,10 @@
               </table>
             </div>
           </div>
+          {% if error_preorder %}
+          <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_preorder }}
+          </div>
+          {% endif %}
           <div class="buttons clearfix">
             <div class="pull-left"><a href="{{ continue }}" class="btn btn-default"><span>{{ button_shopping }}</span></a></div>
             <div class="pull-right"><a href="{{ checkout }}" class="btn btn-primary"><span>{{ button_checkout }}</span></a></div>

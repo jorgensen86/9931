@@ -216,7 +216,7 @@ class ControllerEventActivity extends Controller {
 			$this->load->model('checkout/order');
 			
 			$order_info = $this->model_checkout_order->getOrder($args[0]);
-
+			
 			if ($order_info && !$order_info['order_status_id'] && $args[1]) {
 				$this->load->model('account/activity');
 	
@@ -226,15 +226,26 @@ class ControllerEventActivity extends Controller {
 						'name'        => $order_info['firstname'] . ' ' . $order_info['lastname'],
 						'order_id'    => $args[0]
 					);
+
+					// Jorgensen - preorders
+					if(!$this->cart->hasStock() && (!isset($this->session->data['preorder']))) {
+						$this->model_account_activity->addActivity('preorder_account', $activity_data);
+					} else {
+						$this->model_account_activity->addActivity('order_account', $activity_data);
+					}
 	
-					$this->model_account_activity->addActivity('order_account', $activity_data);
 				} else {
 					$activity_data = array(
 						'name'     => $order_info['firstname'] . ' ' . $order_info['lastname'],
 						'order_id' => $args[0]
 					);
-	
-					$this->model_account_activity->addActivity('order_guest', $activity_data);
+
+					// Jorgensen - preorders
+					if(!$this->cart->hasStock() && (!isset($this->session->data['preorder']))) {
+						$this->model_account_activity->addActivity('preorder_guest', $activity_data);
+					} else {
+						$this->model_account_activity->addActivity('order_guest', $activity_data);
+					}
 				}
 			}
 		}

@@ -5,6 +5,10 @@ class ControllerSaleOrder extends Controller {
 	public function index() {
 		$this->load->language('sale/order');
 
+		if(isset($this->request->get['filter_preorder'])) {
+			$this->language->set('heading_title', $this->language->get('heading_title2'));
+		}
+
 		$this->document->setTitle($this->language->get('heading_title'));
 
 		$this->load->model('sale/order');
@@ -379,6 +383,7 @@ class ControllerSaleOrder extends Controller {
 		$data['results'] = sprintf($this->language->get('text_pagination'), ($order_total) ? (($page - 1) * $this->config->get('config_limit_admin')) + 1 : 0, ((($page - 1) * $this->config->get('config_limit_admin')) > ($order_total - $this->config->get('config_limit_admin'))) ? $order_total : ((($page - 1) * $this->config->get('config_limit_admin')) + $this->config->get('config_limit_admin')), $order_total, ceil($order_total / $this->config->get('config_limit_admin')));
 
 		$data['filter_order_id'] = $filter_order_id;
+		$data['filter_preorder'] = $filter_preorder;
 		$data['filter_customer'] = $filter_customer;
 		$data['filter_order_status'] = $filter_order_status;
 		$data['filter_order_status_id'] = $filter_order_status_id;
@@ -414,6 +419,7 @@ class ControllerSaleOrder extends Controller {
 
 			$data['api_token'] = $session->getId();
 		} else {
+
 			$data['api_token'] = '';
 		}
 
@@ -713,11 +719,6 @@ class ControllerSaleOrder extends Controller {
 
 		$api_info = $this->model_user_api->getApi($this->config->get('config_api_id'));
 		
-		// Use another api_id for preorders - jorgensen
-		if($data['preorder']) {
-			$api_info = $this->model_user_api->getApi(2);
-		}
-
 		if ($api_info && $this->user->hasPermission('modify', 'sale/order')) {
 			$session = new Session($this->config->get('session_engine'), $this->registry);
 			
@@ -754,6 +755,10 @@ class ControllerSaleOrder extends Controller {
 
 		if ($order_info) {
 			$this->load->language('sale/order');
+
+			if($order_info['preorder']) {
+				$this->language->set('heading_title', $this->language->get('heading_title2'));
+			}
 
 			$this->document->setTitle($this->language->get('heading_title'));
 
@@ -843,6 +848,8 @@ class ControllerSaleOrder extends Controller {
 			}
 
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
+
+			$data['preorder'] = $order_info['preorder'];
 
 			$data['firstname'] = $order_info['firstname'];
 			$data['lastname'] = $order_info['lastname'];

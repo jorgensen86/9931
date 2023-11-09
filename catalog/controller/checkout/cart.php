@@ -1,7 +1,6 @@
 <?php
 class ControllerCheckoutCart extends Controller {
-	public function index() {
-		
+	public function index() {		
 		$this->load->language('checkout/cart');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -18,8 +17,39 @@ class ControllerCheckoutCart extends Controller {
 			'text' => $this->language->get('heading_title')
 		);
 
+		// jorgensen - preorders 
+		if (!isset($this->session->data['preorder']) && isset($this->request->get['preorder'])) {
+			$this->cart->clear();
+
+			$this->load->model('checkout/order');
+
+			$order_info = $this->model_checkout_order->getOrder($this->request->get['preorder']);
+
+			if ($order_info  && ($order_info['order_status_id'] === PREORDER_ID)) {
+
+				$order_products = $this->model_checkout_order->getOrderProducts($order_info['order_id']);
+
+				foreach ($order_products as $product) {
+					$this->request->post['product_id'] = $product['product_id'];
+					$this->request->post['quantity'] = $product['quantity'];
+					$this->request->post['price'] = $product['price'];
+					$this->request->post['days_of_delivery'] = $product['days_of_delivery'];
+					$this->add(true);
+
+					$this->session->data['po_products'][$product['product_id']] = array(
+						'quantity' => $product['quantity'],
+						'price' => $product['price'],
+						'days_of_delivery' => $product['days_of_delivery']
+					);
+				}
+
+				$this->session->data['preorder'] = $order_info['order_id'];
+			}
+		}
+		// end jorgensen - preorders
+		
 		if ($this->cart->hasProducts() || !empty($this->session->data['vouchers'])) {
-			if (!$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
+			if (!isset($this->session->data['preorder']) && !$this->cart->hasStock() && (!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning'))) {
 				$data['error_warning'] = $this->language->get('error_stock');
 			} elseif (isset($this->session->data['error'])) {
 				$data['error_warning'] = $this->session->data['error'];
@@ -41,6 +71,13 @@ class ControllerCheckoutCart extends Controller {
 				unset($this->session->data['success']);
 			} else {
 				$data['success'] = '';
+			}
+
+			// jorgensen - preorders
+			if (isset($this->session->data['preorder']) && (count($this->session->data['po_products']) !== count($this->cart->getProducts()))) {
+				$data['error_preorder'] = "Το καλάθι σας περιέχει ανταλλακτικά διαφορετικά από αυτά της προπαραγγελίας. Μπορείτε να πατήσετε το κουμπί 'ΑΡΧΙΚΟΠΟΙΗΣΗ ΠΡΟΠΑΡΑΓΓΕΛΙΑΣ' και να συνεχίσετε στην μετατροπή της σε παραγγελία ή να πατήσετε το κουμπί 'ΑΔΕΙΑΣΜΑ ΚΑΛΑΘΙΟΥ' και να επιλέξετε τα ανταλλακτικά που επιθυμείτε από την αρχή";
+			} else {
+				$data['error_preorder'] = '';
 			}
 
 			$data['action'] = $this->url->link('checkout/cart/edit', '', true);
@@ -69,6 +106,11 @@ class ControllerCheckoutCart extends Controller {
 
 				if ($product['minimum'] > $product_total) {
 					$data['error_warning'] = sprintf($this->language->get('error_minimum'), $product['name'], $product['minimum']);
+				}
+
+				// jorgensen - preorders
+				if (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity'])) {
+					$data['error_preorder'] = "Το καλάθι σας περιέχει ανταλλακτικά διαφορετικά από αυτά της προπαραγγελίας. Μπορείτε να πατήσετε το κουμπί 'ΑΡΧΙΚΟΠΟΙΗΣΗ ΠΡΟΠΑΡΑΓΓΕΛΙΑΣ' και να συνεχίσετε στην μετατροπή της σε παραγγελία ή να πατήσετε το κουμπί 'ΑΔΕΙΑΣΜΑ ΚΑΛΑΘΙΟΥ' και να επιλέξετε τα ανταλλακτικά που επιθυμείτε από την αρχή";
 				}
 
 				if ($product['image']) {
@@ -130,12 +172,18 @@ class ControllerCheckoutCart extends Controller {
 						$recurring .= sprintf($this->language->get('text_payment_cancel'), $this->currency->format($this->tax->calculate($product['recurring']['price'] * $product['quantity'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']), $product['recurring']['cycle'], $frequencies[$product['recurring']['frequency']], $product['recurring']['duration']);
 					}
 				}
+			
+				// jorgensen - preorder
+				if(isset($this->session->data['preorder'])) {
+					$product['stock'] = true;
+				}
 
 				$data['products'][] = array(
 					'cart_id'   => $product['cart_id'],
 					'thumb'     => $image,
 					'name'      => $product['name'],
 					'model'     => $product['model'],
+					'availability' => $product['stock_status'],
 					'option'    => $option_data,
 					'recurring' => $recurring,
 					'quantity'  => $product['quantity'],
@@ -218,6 +266,16 @@ class ControllerCheckoutCart extends Controller {
 
 			$data['checkout'] = $this->url->link('checkout/checkout', '', true);
 
+			// Jorgensen - preorders
+			if($data['error_preorder']) {
+				$this->language->set('button_shopping', $this->language->get('button_init_preorder'));
+				$data['continue'] = $this->url->link('checkout/cart/initPreorder', '', true);
+
+				$this->language->set('button_checkout', $this->language->get('button_clear_cart'));				
+				$data['checkout'] = $this->url->link('checkout/cart/clear', '', true);
+
+			}
+
 			$this->load->model('setting/extension');
 
 			$data['modules'] = array();
@@ -260,7 +318,7 @@ class ControllerCheckoutCart extends Controller {
 		}
 	}
 
-	public function add() {
+	public function add($preorder = false) {
 		$this->load->language('checkout/cart');
 
 		$json = array();
@@ -287,6 +345,20 @@ class ControllerCheckoutCart extends Controller {
 			} else {
 				$option = array();
 			}
+
+			// jorgensen - preorder
+			if (isset($this->request->post['price'])) {
+				$price = (int)$this->request->post['price'];
+			} else {
+				$price = null;
+			}
+
+			if (isset($this->request->post['days_of_delivery'])) {
+				$days_of_delivery = (int)$this->request->post['days_of_delivery'];
+			} else {
+				$days_of_delivery = 0;
+			}
+			// end jorgensen - preorder
 
 			$product_options = $this->model_catalog_product->getProductOptions($this->request->post['product_id']);
 
@@ -317,7 +389,12 @@ class ControllerCheckoutCart extends Controller {
 			}
 
 			if (!$json) {
-				$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
+				// jorgensen - preorder
+				if(!is_null($price)) {
+					$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id, $price, $days_of_delivery);
+				} else {
+					$this->cart->add($this->request->post['product_id'], $quantity, $option, $recurring_id);
+				}
 
 				$json['success'] = sprintf($this->language->get('text_success'), $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']), $product_info['name'], $this->url->link('checkout/cart'));
 
@@ -376,6 +453,8 @@ class ControllerCheckoutCart extends Controller {
 				$json['redirect'] = str_replace('&amp;', '&', $this->url->link('product/product', 'product_id=' . $this->request->post['product_id']));
 			}
 		}
+
+		if($preorder) return; 
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
@@ -477,30 +556,27 @@ class ControllerCheckoutCart extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function preorder() {
-		if(isset($this->request->get['order_id'])) {
-			$order_id = $this->request->get['order_id'];
-		} else {
-			$order_id = 0;
-		}
+	public function initPreorder() {
+		$preorder_id = $this->session->data['preorder'];
 
-		$this->load->model('checkout/order'); 
+		unset($this->session->data['preorder']);
+		unset($this->session->data['po_products']);
 
-		$order_info = $this->model_checkout_order->getOrder($order_id);
+		$this->response->redirect($this->url->link('checkout/cart', 'preorder=' . $preorder_id , true));
+	}
 
-		if(!isset($this->session->data['preorder']) && $order_info && ($order_info['order_status_id'] === PREORDER_ID)) {
+	public function clear() {
 
-			$this->session->data['preorder'] = $order_id;
-			
-			$order_products = $this->model_checkout_order->getOrderProducts($order_id);
-
-			foreach ($order_products as $product) {
-				$this->request->post['product_id'] = $product['product_id'];
-				$this->request->post['quantity'] = $product['quantity'];
-				$this->add();
-			}
-		}
+		unset($this->session->data['preorder']);
+		unset($this->session->data['po_products']);
+		unset($this->session->data['shipping_method']);
+		unset($this->session->data['shipping_methods']);
+		unset($this->session->data['payment_method']);
+		unset($this->session->data['payment_methods']);
+		unset($this->session->data['reward']);
 		
-		$this->response->redirect($this->url->link('checkout/cart'));
+		$this->cart->clear();
+
+		$this->response->redirect($this->url->link('checkout/cart', '', true));
 	}
 }

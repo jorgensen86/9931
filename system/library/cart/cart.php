@@ -191,6 +191,14 @@ class Cart {
 					$price = $cart['price'];
 				}
 
+				$stock_ststus_query = $this->db->query("SELECT `name` FROM " . DB_PREFIX . "stock_status WHERE stock_status_id = '" . (int)$product_query->row['stock_status_id'] . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+				if($stock_ststus_query->row) {
+					$stock_status = $stock_ststus_query->row['name'];
+				} else {
+					$stock_status = '';
+				}
+
 				// Reward Points
 				$product_reward_query = $this->db->query("SELECT points FROM " . DB_PREFIX . "product_reward WHERE product_id = '" . (int)$cart['product_id'] . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
 
@@ -249,6 +257,7 @@ class Cart {
 					'option'          => $option_data,
 					'download'        => $download_data,
 					'quantity'        => $cart['quantity'],
+					'stock_status'	  => $stock_status,
 					'minimum'         => $product_query->row['minimum'],
 					'subtract'        => $product_query->row['subtract'],
 					'stock'           => $stock,

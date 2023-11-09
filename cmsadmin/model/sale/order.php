@@ -307,7 +307,7 @@ class ModelSaleOrder extends Model {
 		if(isset($data['filter_preorder'])) {
 			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
 		} else {
-			$sql .= " AND preorder = '" . (int)$data['filter_preorder'] . "'";
+			$sql .= " AND preorder = '0'";
 		}
 
 		$query = $this->db->query($sql);

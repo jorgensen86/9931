@@ -18,7 +18,9 @@ $_['text_activity_address_delete'] = '<a href="customer_id=%d">%s</a> διέγρ
 $_['text_activity_return_account'] = '<a href="customer_id=%d">%s</a> υπέβαλε αίτηση <a href="return_id=%d">επιστροφής</a> προϊόντος.';
 $_['text_activity_return_guest']   = '%s υπέβαλε αίτηση <a href="return_id=%d">επιστροφής</a> προϊόντος.';
 $_['text_activity_order_account']  = '<a href="customer_id=%d">%s</a> δημιούργησε μία <a href="order_id=%d">νέα παραγγελία</a>.';
+$_['text_activity_preorder_account'] = '<a href="customer_id=%d">%s</a> δημιούργησε μία <a href="order_id=%d&filter_preorder=1">νέα προπαραγγελία</a>.';
 $_['text_activity_order_guest']    = '%s δημιούργησε μία <a href="order_id=%d">νέα παραγγελία</a>.';
+$_['text_activity_preorder_guest'] = '%s δημιούργησε μία <a href="order_id=%d&filter_preorder=1">νέα προπαραγγελία</a>.';
 $_['text_activity_affiliate_add']  = '<a href="customer_id=%d">%s</a> δημιούργησε νέο λογαριασμό συνεργάτη.';
 $_['text_activity_affiliate_edit'] = '<a href="customer_id=%d">%s</a> ενημέρωσε τα στοιχεία συνεργάτη.';
 $_['text_activity_transaction']    = '<a href="customer_id=%d">%s</a> έλαβε προμήθεια από μία νέα <a href="order_id=%d">παραγγελία</a>.';

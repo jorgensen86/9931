@@ -357,7 +357,7 @@ class ControllerMailOrder extends Controller {
 		$data['text_comment'] = $language->get('text_comment');
 		$data['text_footer'] = $language->get('text_footer');
 
-		$link = $order_info['store_url'] . 'index.php?route=checkout/cart/preorder&order_id=' . $order_info['order_id'];
+		$link = $order_info['store_url'] . 'index.php?route=checkout/cart&preorder=' . $order_info['order_id'];
 		
 		$data['link'] = get_tiny_url($link) ? : ($link);
 	

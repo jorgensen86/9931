@@ -54,9 +54,10 @@
             ]]></search>
             <add position="replace"><![CDATA[
                 /* icop_custom_labels_j3.xml */
-                    // $results = $this->model_journal3_product->getProduct($parser->getSetting('filter.products'));
                     if ($module_id == 31 || $module_id == 284) {
                         $results = $this->model_journal3_product->getProduct($this->model_journal3_product->getLocationLabelProducts($module_id));
+                    } else {
+                        $results = $this->model_journal3_product->getProduct($parser->getSetting('filter.products'));
                     }
             ]]></add>
         </operation>

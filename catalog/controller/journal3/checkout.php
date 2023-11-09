@@ -584,6 +584,11 @@ class ControllerJournal3Checkout extends \Journal3\Opencart\Controller {
 			return false;
 		}
 
+		// jorgensen - preorders
+		if (isset($this->session->data['preorder']) && (count($this->session->data['po_products']) !== count($this->cart->getProducts()))) {
+			return false;
+		}
+
 		$products = $this->cart->getProducts();
 
 		foreach ($products as $product) {
@@ -593,6 +598,11 @@ class ControllerJournal3Checkout extends \Journal3\Opencart\Controller {
 				if ($product_2['product_id'] == $product['product_id']) {
 					$product_total += $product_2['quantity'];
 				}
+			}
+
+			// jorgensen - preorders
+			if (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity'])) {
+				return false;
 			}
 
 			if ($product['minimum'] > $product_total) {

@@ -6,6 +6,11 @@ class ControllerCheckoutCheckout extends Controller {
 			$this->response->redirect($this->url->link('checkout/cart'));
 		}
 
+		// jorgensen - preorders
+		if (isset($this->session->data['preorder']) && (count($this->session->data['po_products']) !== count($this->cart->getProducts()))) {
+			$this->response->redirect($this->url->link('checkout/cart'));
+		}
+
 		// Validate minimum quantity requirements.
 		$products = $this->cart->getProducts();
 
@@ -19,6 +24,11 @@ class ControllerCheckoutCheckout extends Controller {
 			}
 
 			if ($product['minimum'] > $product_total) {
+				$this->response->redirect($this->url->link('checkout/cart'));
+			}
+
+			// jorgensen - preorders
+			if (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity'])) {
 				$this->response->redirect($this->url->link('checkout/cart'));
 			}
 		}

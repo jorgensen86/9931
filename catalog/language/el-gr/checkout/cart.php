@@ -29,6 +29,7 @@ $_['text_payment_cancel']      = '%s κάθε %d %s έως να ακυρωθεί
 $_['column_image']             = 'Εικόνα';
 $_['column_name']              = 'Όνομα Προϊόντος';
 $_['column_model']             = 'Κωδικός Προϊόντος';
+$_['column_availability']      = 'Διαθεσιμότητα';
 $_['column_quantity']          = 'Ποσότητα';
 $_['column_price']             = 'Τιμή Μονάδας';
 $_['column_total']             = 'Σύνολο';

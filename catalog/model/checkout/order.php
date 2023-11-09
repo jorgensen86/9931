@@ -300,7 +300,7 @@ class ModelCheckoutOrder extends Model {
 
 			// Preorder id - jorgensen
 			if(!$this->cart->hasStock()) {
-				$order_status_id = 17;
+				$order_status_id = PREORDER_ID;
 			}
 						
 			// If current order status is not processing or complete but new status is processing or complete then commence completing the order

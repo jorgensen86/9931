@@ -59,6 +59,8 @@ $_['button_quote']          = 'Εκτίμηση';
 $_['button_list']           = 'Λίστα';
 $_['button_grid']           = 'Πλέγμα';
 $_['button_map']            = 'Εμφάνιση Χάρτη Google';
+$_['button_init_preorder']  = 'Αρχικοποιηση προπαραγγελιας';
+$_['button_clear_cart']     = 'Αδειασμα καλαθιου';
 
 // Error
 $_['error_exception']       = 'Κωδικός Σφάλματος(%s): %s στο %s στη γραμμή %s';

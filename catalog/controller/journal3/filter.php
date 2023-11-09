@@ -279,8 +279,11 @@ class ControllerJournal3Filter extends ModuleController {
 			Profiler::end('journal3/filter/categories');
 
 			if ($categories) {
+				$item['pc'] = true;
 				foreach ($categories as &$category) {
 					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
+
+					$category['items'] = $this->model_journal3_filter->getCategoryTree($category['id']);
 					
 					if ($item['display'] === 'text') {
 						$category['image'] = false;

@@ -443,24 +443,24 @@ class ModelJournal3Filter extends Model {
 	}
 
 
-	// function getCategoryTree($parent_category_id) {
-	// 	$category_data = array();
-	// 	$subcategories_tree = array();
+	function getCategoryTree($parent_category_id) {
+		$category_data = array();
+		$subcategories_tree = array();
 
-	// 	// Query subcategories of the parent category
-	// 	$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category c left join " . DB_PREFIX . "category_description cd on c.category_id = cd.category_id WHERE parent_id = '" . (int)$parent_category_id . "' AND language_id = '2'");
+		// Query subcategories of the parent category
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category c left join " . DB_PREFIX . "category_description cd on c.category_id = cd.category_id WHERE parent_id = '" . (int)$parent_category_id . "' AND language_id = '2'");
 	
-	// 	foreach ($query->rows as $subcategory) {
-	// 		// For each subcategory, fetch its subcategories recursively
-	// 		$subcategories_tree[] = array(
-	// 			'id' => $subcategory['category_id'],
-	// 			'value' => $subcategory['name'],
-	// 			'subcategories' => $this->getCategoryTree($subcategory['category_id']) // Recursive call for subcategories
-	// 		);
-	// 	}
+		foreach ($query->rows as $subcategory) {
+			// For each subcategory, fetch its subcategories recursively
+			$subcategories_tree[] = array(
+				'id' => $subcategory['category_id'],
+				'value' => $subcategory['name'],
+				'items' => $this->getCategoryTree($subcategory['category_id']) // Recursive call for subcategories
+			);
+		}
 	
-	// 	return $subcategories_tree;
-	// }
+		return $subcategories_tree;
+	}
 	
 	/* Jorgensen  Appliance Filter */
 

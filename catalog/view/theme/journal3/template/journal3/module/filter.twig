@@ -1,3 +1,36 @@
+{% macro renderAccordionMenu(j3, item) %}
+  {% import _self as self %}
+  <li class="menu-item accordion-menu-item accordion-menu-item-1">
+    {% set id = j3.uniqueId('collapse-') %}
+    <label>
+      <a>
+      <input type="radio" data-filter-trigger name="c" value="{{ item.id }}" {% if item.checked %}checked{% endif %}>
+      <span class="links-text" class="open-menu" data-toggle="collapse" data-target="#{{ id }}" aria-expanded="true" role="heading">{{ item.value }}</span>
+    </a>
+    </label>
+      <!-- <a>
+        {{ j3.countBadge(item.value, item.link.total, item.link.classes) }}
+        {% if item.items %}
+          {% if item.isOpen %}
+            <span class="open-menu" data-toggle="collapse" data-target="#{{ id }}" aria-expanded="true" role="heading"><i class="fa fa-plus"></i></span>
+          {% else %}
+            <span class="open-menu collapsed" data-toggle="collapse" data-target="#{{ id }}" role="heading"><i class="fa fa-plus"></i></span>
+          {% endif %}
+        {% endif %}
+      </a> -->
+    {% if item.items %}
+      <div class="collapse {% if item.isOpen %}in{% endif %}" id="{{ id }}">
+        <ul class="j-menu">
+          {% for subitem in item.items %}
+            {{ self.renderAccordionMenu(j3, subitem) }}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </li>
+{% endmacro %}
+
+
 <div class="{{ j3.classes(classes) }}">
   <h3 class="title module-title">
     <span>{{ title }}</span>
@@ -70,6 +103,16 @@
               {% else %}
                 {% if (item_input == 'checkbox') or (item_input == 'radio') %}
                 <div class="filter-{{ item_input }}">
+                  {% if item.pc is defined %}
+                  {% import _self as self %}
+                  <div class="accordion-menu accordion-menu-19">
+                    <ul class="j-menu">
+                      {% for subitem in item.items %}
+                        {{ self.renderAccordionMenu(j3, subitem) }}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                  {% else %}
                   {% for subitem in item.items %}
                       <label>
                         <input type="{{ item_input }}" data-filter-trigger name="{{ item.key }}" value="{{ subitem.id }}" {% if subitem.checked %}checked{% endif %}>
@@ -80,6 +123,7 @@
                         <span class="count-badge">{{ subitem.total }}</span>
                       </label>
                   {% endfor %}
+                  {% endif %}
                 </div>
                 {% elseif item_input == 'select' %}
                   <div class="{{ item_input }}">

@@ -1,6 +1,7 @@
 <?php
 // Heading
 $_['heading_title']              = 'Orders';
+$_['heading_title2']             = 'Preorders';
 
 // Text
 $_['text_success']               = 'Success: You have modified orders!';

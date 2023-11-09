@@ -59,6 +59,8 @@ $_['button_quote']          = 'Get Quotes';
 $_['button_list']           = 'List';
 $_['button_grid']           = 'Grid';
 $_['button_map']            = 'View Google Map';
+$_['button_init_preorder']  = 'Init Preorder';
+$_['button_clear_cart']     = 'Clear Cart';
 
 // Error
 $_['error_exception']       = 'Error Code(%s): %s in %s on line %s';
