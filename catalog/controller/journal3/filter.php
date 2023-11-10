@@ -273,17 +273,17 @@ class ControllerJournal3Filter extends ModuleController {
 		// Appliance Categories
 		if ($item = Arr::get($this->settings['items'], 'c')) {
 			Profiler::start('journal3/filter/categories');
+			
+			$categories = $this->model_journal3_filter->getCategories(1);
 
-			$categories = $this->model_journal3_filter->getApplianceCategories();
-	
 			Profiler::end('journal3/filter/categories');
 
 			if ($categories) {
-				$item['pc'] = true;
+				// $item['pc'] = true;
 				foreach ($categories as &$category) {
 					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
-
-					$category['items'] = $this->model_journal3_filter->getCategoryTree($category['id']);
+					
+					// $category['items'] = $this->model_journal3_filter->getCategoryTree($category['id']);
 					
 					if ($item['display'] === 'text') {
 						$category['image'] = false;
@@ -325,7 +325,7 @@ class ControllerJournal3Filter extends ModuleController {
 
 			Profiler::start('journal3/filter/categories');
 
-			$categories = $this->model_journal3_filter->getPartCategories();
+			$categories = $this->model_journal3_filter->getCategories(2);
 
 			Profiler::end('journal3/filter/categories');
 
