@@ -41,3 +41,5 @@ $_['error_minimum']            = 'Minimum order amount for %s is %s!';
 $_['error_required']           = '%s required!';
 $_['error_product']            = 'Warning: There are no products in your cart!';
 $_['error_recurring_required'] = 'Please select a payment recurring!';
+$_['error_confirm_preorder']   = 'Pre-order is no longer available!';
+$_['error_preorder']           = 'Your cart contains parts different from those of the pre-order. You can press the INIT PREORDER button and continue converting it to an order or press the CLEAR CART button and select the parts you want from the beginning!';

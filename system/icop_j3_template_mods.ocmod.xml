@@ -38,7 +38,7 @@
             <add position="before"><![CDATA[
                 {# icop_j3_template_mods.ocmod.xml #}
                 <div class="stats">
-                    <span class="stat-2"><span class="stats-label">{{ product.quantity ? product.stat2.label : text_delivery }}:</span> <span class="{{ product.quantity == 0 ? 'out-of-stock' : null }}">{{ product.quantity ? product.stat2.text : product.stock_status }}</span></span>
+                    <span class="stat-2"><span class="stats-label">{{ product.quantity > 0 ? product.stat2.label : text_delivery }}:</span> <span class="{{ product.quantity <= 0 ? 'out-of-stock' : null }}">{{ product.quantity > 0 ? product.stat2.text : product.stock_status }}</span></span>
                 </div>
             ]]></add>
         </operation>

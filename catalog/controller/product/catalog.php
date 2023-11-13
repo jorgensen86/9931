@@ -91,7 +91,7 @@ class ControllerProductCatalog extends Controller {
 		}
 
 		$data['products'] = array();
-
+		
 		$filter_data = array(
 			'filter_category_id' => 0,
 			'sort'               => $sort,
@@ -99,6 +99,10 @@ class ControllerProductCatalog extends Controller {
 			'start'              => ($page - 1) * $limit,
 			'limit'              => $limit,
 		);
+		
+		if(!isset($this->request->get['route']) || ($this->request->get['route'] === 'common/home')) {
+			$filter_data['filter_ean'] = 1; 
+		}
 
 		$product_total = $this->model_catalog_product->getTotalProducts($filter_data);
 

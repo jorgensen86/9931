@@ -1143,7 +1143,7 @@ class ModelJournal3Filter extends Model {
 				$implode = array();
 
 				$words = explode(' ', trim(preg_replace('/\s\s+/', ' ', $filter_data['filter_name'])));
-
+				
 				foreach ($words as $word) {
 					$implode[] = " pd.name LIKE '%" . $this->db->escape($word) . "%'";
 				}
@@ -1157,6 +1157,10 @@ class ModelJournal3Filter extends Model {
 					$sql .= " OR pd.description LIKE '%" . $this->db->escape($filter_data['filter_name']) . "%'";
 				} else if (isset($filter_data['filter_description']) && $filter_data['filter_description']) {
 					$sql .= " OR pd.description LIKE '%" . $this->db->escape($filter_data['filter_name']) . "%'";
+				}
+
+				if (isset($filter_data['filter_ean']) && $filter_data['filter_ean'] == 1) {
+					$sql .= " OR LCASE(p.ean) LIKE '%" . $this->db->escape(utf8_strtolower($filter_data['filter_name'])) . "%'";
 				}
 			}
 

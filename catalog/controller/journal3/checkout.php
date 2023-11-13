@@ -470,7 +470,12 @@ class ControllerJournal3Checkout extends \Journal3\Opencart\Controller {
 	}
 
 	public function payment() {
-		$this->response->setOutput($this->load->controller('extension/payment/' . Arr::get($this->session->data, 'payment_method.code')));
+		// jorgensen - if has no stock skip payment redirection
+		if(!$this->cart->hasStock()) {
+			$this->response->setOutput($this->load->controller('extension/payment/preorder'));
+		} else {
+			$this->response->setOutput($this->load->controller('extension/payment/' . Arr::get($this->session->data, 'payment_method.code')));
+		}
 	}
 
 	private function totals($totals) {
@@ -556,6 +561,11 @@ class ControllerJournal3Checkout extends \Journal3\Opencart\Controller {
 			} else {
 				$thumb = '';
 				$thumb2x = '';
+			}
+
+			// jorgensen - preorder
+			if(isset($this->session->data['preorder'])) {
+				$product['stock'] = true;
 			}
 
 			$result[] = array(

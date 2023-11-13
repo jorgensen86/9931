@@ -18,14 +18,18 @@ class ControllerCheckoutCart extends Controller {
 		);
 		
 		// jorgensen - preorders 
+
+		$error_confirm_preorder = false;
+
 		if (!isset($this->session->data['preorder']) && isset($this->request->get['preorder'])) {
-			$this->cart->clear();
 
 			$this->load->model('checkout/order');
 
 			$order_info = $this->model_checkout_order->getOrder($this->request->get['preorder']);
 
 			if ($order_info  && ($order_info['order_status_id'] === PREORDER_ID)) {
+
+				$this->cart->clear();
 
 				$order_products = $this->model_checkout_order->getOrderProducts($order_info['order_id']);
 
@@ -45,6 +49,8 @@ class ControllerCheckoutCart extends Controller {
 				}
 
 				$this->session->data['preorder'] = $order_info['order_id'];
+			} else {
+				$error_confirm_preorder = true;
 			}
 		}
 		// end jorgensen - preorders
@@ -58,6 +64,11 @@ class ControllerCheckoutCart extends Controller {
 				unset($this->session->data['error']);
 			} else {
 				$data['error_warning'] = '';
+			}
+
+			// jorgensen - preorder not available
+			if($error_confirm_preorder) {
+				$data['error_warning'] = $this->language->get('error_confirm_preorder');
 			}
 
 			if ($this->config->get('config_customer_price') && !$this->customer->isLogged()) {
@@ -76,7 +87,7 @@ class ControllerCheckoutCart extends Controller {
 
 			// jorgensen - preorders
 			if (isset($this->session->data['preorder']) && (count($this->session->data['po_products']) !== count($this->cart->getProducts()))) {
-				$data['error_preorder'] = "Το καλάθι σας περιέχει ανταλλακτικά διαφορετικά από αυτά της προπαραγγελίας. Μπορείτε να πατήσετε το κουμπί 'ΑΡΧΙΚΟΠΟΙΗΣΗ ΠΡΟΠΑΡΑΓΓΕΛΙΑΣ' και να συνεχίσετε στην μετατροπή της σε παραγγελία ή να πατήσετε το κουμπί 'ΑΔΕΙΑΣΜΑ ΚΑΛΑΘΙΟΥ' και να επιλέξετε τα ανταλλακτικά που επιθυμείτε από την αρχή";
+				$data['error_preorder'] = $this->language->get('error_preorder');
 			} else {
 				$data['error_preorder'] = '';
 			}
@@ -111,7 +122,7 @@ class ControllerCheckoutCart extends Controller {
 
 				// jorgensen - preorders
 				if (isset($this->session->data['preorder']) && (!isset($this->session->data['po_products'][$product['product_id']]) || ($product_total != $this->session->data['po_products'][$product['product_id']]['quantity']))) {
-					$data['error_preorder'] = "Το καλάθι σας περιέχει ανταλλακτικά διαφορετικά από αυτά της προπαραγγελίας. Μπορείτε να πατήσετε το κουμπί 'ΑΡΧΙΚΟΠΟΙΗΣΗ ΠΡΟΠΑΡΑΓΓΕΛΙΑΣ' και να συνεχίσετε στην μετατροπή της σε παραγγελία ή να πατήσετε το κουμπί 'ΑΔΕΙΑΣΜΑ ΚΑΛΑΘΙΟΥ' και να επιλέξετε τα ανταλλακτικά που επιθυμείτε από την αρχή";
+					$data['error_preorder'] = $this->language->get('error_preorder');
 				}
 
 				if ($product['image']) {
