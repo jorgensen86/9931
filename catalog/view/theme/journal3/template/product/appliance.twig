@@ -48,7 +48,7 @@
       {% endif %}
       {{ content_top }}
       <div class="main-products-wrapper">
-      {% if products %}
+        {% if products or parts %}
         {% if j3.settings.get('sortBarStatus') %}
         <div class="products-filter">
           <div class="grid-list">
@@ -93,7 +93,7 @@
           <div class="col-sm-6 text-right">{{ results }}</div>
         </div>
       {% endif %}
-      {% if not categories and not products %}
+      {% if not parts and not products %}
         <p>{{ text_empty }}</p>
         <div class="buttons">
           <div class="pull-right"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
