@@ -1,13 +1,17 @@
 {% macro renderAccordionMenu(j3, subitem, item_input, key) %}
   {% import _self as self %}
-  <label>
-    <input type="{{ item_input }}" data-filter-trigger name="{{ key }}" value="{{ subitem.id }}" {% if subitem.checked %}checked{% endif %}>
-    <span class="links-text">{{ subitem.value }}</span>
-  </label>
+  <li>
+    <label>
+      <input type="{{ item_input }}" data-filter-trigger name="{{ key }}" value="{{ subitem.id }}" {% if subitem.checked %}checked{% endif %}>
+      <span class="links-text">{{ subitem.value }}</span>
+    </label>
+  </li>
     {% if subitem.items %}
+    <ul>
     {% for subitem in subitem.items %}
       {{ self.renderAccordionMenu(j3, subitem, item_input, key) }}
     {% endfor %}
+    </ul>
     {% endif%}
 {% endmacro %}
 
@@ -86,9 +90,11 @@
                 <div class="filter-{{ item_input }}">
                   {% if item.pc is defined %}
                     {% import _self as self %}
-                    {% for subitem in item.items %}
-                      {{ self.renderAccordionMenu(j3, subitem, item_input, item.key) }}
-                    {% endfor %}
+                    <ul>
+                      {% for subitem in item.items %}
+                        {{ self.renderAccordionMenu(j3, subitem, item_input, item.key) }}
+                      {% endfor %}
+                    </ul>
                   {% else %}
                   {% for subitem in item.items %}
                       <label>

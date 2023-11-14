@@ -228,6 +228,7 @@ class ControllerJournal3Filter extends ModuleController {
 				$items[] = $item;
 			}
 		}
+
 		if(isset($this->request->get['route']) && ($this->request->get['route'] !== 'common/home')) {
 		// categories
 		if ($item = Arr::get($this->settings['items'], 'c')) {
@@ -236,10 +237,14 @@ class ControllerJournal3Filter extends ModuleController {
 			$categories = $this->model_journal3_filter->getCategories();
 
 			Profiler::end('journal3/filter/categories');
-
 			if ($categories) {
+
 				foreach ($categories as &$category) {
 					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
+
+					if($category['checked']) {
+						$category['items'] = $this->getSubCategories($category['id']);
+					}
 
 					if ($item['display'] === 'text') {
 						$category['image'] = false;
@@ -269,7 +274,8 @@ class ControllerJournal3Filter extends ModuleController {
 			}
 		}
 	}
-		if(!isset($this->request->get['route']) || ($this->request->get['route'] === 'common/home')) {
+
+	if(!isset($this->request->get['route']) || ($this->request->get['route'] === 'common/home')) {
 		// Appliance Categories
 		if ($item = Arr::get($this->settings['items'], 'c')) {
 			Profiler::start('journal3/filter/categories');
@@ -279,11 +285,14 @@ class ControllerJournal3Filter extends ModuleController {
 			Profiler::end('journal3/filter/categories');
 
 			if ($categories) {
-				// $item['pc'] = true;
-				foreach ($categories as &$category) {
-					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
-					
-					// $category['items'] = $this->model_journal3_filter->getCategoryTree($category['id']);
+				$item['pc'] = true;
+
+				foreach ($categories as &$category) {					
+					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']) || $this->model_journal3_filter->hasChildFilterData($category['id']);
+
+					if($category['checked']) {
+						$category['items'] = $this->getSubCategories($category['id']);
+					}
 					
 					if ($item['display'] === 'text') {
 						$category['image'] = false;
@@ -314,52 +323,49 @@ class ControllerJournal3Filter extends ModuleController {
 		}
 
 		// Part Categories
-		
-
-
-		if ($item = Arr::get($this->settings['items'], 'c')) {
+		// if ($item = Arr::get($this->settings['items'], 'c')) {
 			
-			$item['input'] = 'checkbox';
-			$item['title'] = 'Κατηγορίες Ανταλλακτικού';
-			$item['classes'][] = 'part-category';
+		// 	$item['input'] = 'checkbox';
+		// 	$item['title'] = 'Κατηγορίες Ανταλλακτικού';
+		// 	$item['classes'][] = 'part-category';
 
-			Profiler::start('journal3/filter/categories');
+		// 	Profiler::start('journal3/filter/categories');
 
-			$categories = $this->model_journal3_filter->getCategories(2);
+		// 	$categories = $this->model_journal3_filter->getCategories(2);
 
-			Profiler::end('journal3/filter/categories');
+		// 	Profiler::end('journal3/filter/categories');
 
-			if ($categories) {
-				foreach ($categories as &$category) {
-					$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
+		// 	if ($categories) {
+		// 		foreach ($categories as &$category) {
+		// 			$category['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']);
 
-					if ($item['display'] === 'text') {
-						$category['image'] = false;
-						$category['image2x'] = false;
-					} else {
-						$image = $category['image'];
+		// 			if ($item['display'] === 'text') {
+		// 				$category['image'] = false;
+		// 				$category['image2x'] = false;
+		// 			} else {
+		// 				$image = $category['image'];
 
-						if ($image) {
-							$category['image'] = $this->model_journal3_image->resize($image, $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
-							$category['image2x'] = $this->model_journal3_image->resize($image, $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
-						} else {
-							$category['image'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
-							$category['image2x'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
-						}
-					}
-				}
+		// 				if ($image) {
+		// 					$category['image'] = $this->model_journal3_image->resize($image, $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+		// 					$category['image2x'] = $this->model_journal3_image->resize($image, $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+		// 				} else {
+		// 					$category['image'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'], $this->settings['image_height'], $this->settings['image_resize']);
+		// 					$category['image2x'] = $this->model_journal3_image->resize('placeholder.png', $this->settings['image_width'] * 2, $this->settings['image_height'] * 2, $this->settings['image_resize']);
+		// 				}
+		// 			}
+		// 		}
 
-				$item['items'] = $categories;
+		// 		$item['items'] = $categories;
 
-				if (!$item['collapsed'] || isset($this->request->get['fc'])) {
-					$item['collapsed'] = false;
-					$item['classes'][] = 'panel-active';
-					$item['panel_classes'][] = 'in';
-				}
+		// 		if (!$item['collapsed'] || isset($this->request->get['fc'])) {
+		// 			$item['collapsed'] = false;
+		// 			$item['classes'][] = 'panel-active';
+		// 			$item['panel_classes'][] = 'in';
+		// 		}
 
-				$items[] = $item;
-			}
-		}
+		// 		$items[] = $item;
+		// 	}
+		// }
 	}
 		// manufacturers
 		if ($item = Arr::get($this->settings['items'], 'm')) {
@@ -654,6 +660,17 @@ class ControllerJournal3Filter extends ModuleController {
 		$this->journal3->document->addScript('catalog/view/theme/journal3/lib/ion-rangeSlider/ion.rangeSlider.min.js', 'footer');
 		$this->journal3->document->addScript('catalog/view/theme/journal3/lib/accounting/accounting.min.js', 'footer');
 		$this->journal3->document->addScript('catalog/view/theme/journal3/js/filter.js', 'footer');
+	}
+
+	protected function getSubCategories($category_id) {
+		$subcategories = [];
+		foreach ($this->model_journal3_filter->getCategories($category_id) as $key => $category) {
+			$subcategories[$key] = $category;
+			$subcategories[$key]['checked'] = $this->model_journal3_filter->hasFilterData('categories', $category['id']) || $this->model_journal3_filter->hasChildFilterData($category['id']);
+			$subcategories[$key]['items'] = $subcategories[$key]['checked'] ? $this->getSubCategories($category['id']) : array();
+		}
+
+		return $subcategories;
 	}
 
 }

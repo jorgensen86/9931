@@ -1,6 +1,7 @@
 <?php
 class ControllerProductAppliance extends Controller {
 	public function index() {
+		$this->config->set('theme_' . $this->config->get('config_theme') . '_product_limit', 999);
 		$this->load->language('product/appliance');
 
 		$this->load->model('catalog/appliance');
@@ -50,7 +51,6 @@ class ControllerProductAppliance extends Controller {
 			$limit = (int)$this->request->get['limit'];
 		} else {
 			$limit = $this->config->get('theme_' . $this->config->get('config_theme') . '_product_limit');
-			$limit = 999;
 		}
 
 		$data['breadcrumbs'] = array();

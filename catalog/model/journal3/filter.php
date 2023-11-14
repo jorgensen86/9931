@@ -257,6 +257,15 @@ class ModelJournal3Filter extends Model {
 		return in_array($value, $values);
 	}
 
+	public function hasChildFilterData($path_id) {
+
+		 if(isset(static::$filter_data['categories'])) {
+			 return $this->db->query("SELECT * FROM " . DB_PREFIX . "category_path WHERE path_id = '" . (int)$path_id . "' AND category_id = '" . (int)static::$filter_data['categories'][0] . "'")->num_rows;
+		} else {
+			return false;
+		}
+	}
+
 	public function getPriceRange() {
 		$discount = "
 			(
