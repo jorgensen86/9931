@@ -24,6 +24,7 @@ class ControllerJournal3Search extends Controller {
 
 		$filter_data = array(
 			'filter_name'        => $search,
+			'filter_ean'          => 1,
 			'filter_description' => $this->journal3->settings->get('searchStyleSearchAutoSuggestDescription'),
 			'start'              => 0,
 			'limit'              => $limit,

@@ -177,6 +177,7 @@ class ControllerProductSearch extends Controller {
 			$filter_data = array(
 				'filter_name'         => $search,
 				'filter_tag'          => $tag,
+				'filter_ean'  		  => 1,
 				'filter_description'  => $description,
 				'filter_category_id'  => $category_id,
 				'filter_sub_category' => $sub_category,

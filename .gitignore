@@ -1,5 +1,3 @@
-db.sql
-
 /image/cache/*
 !/image/cache/index.html
 
