@@ -20,37 +20,40 @@ class ControllerCheckoutCart extends Controller {
 		// jorgensen - preorders 
 
 		$error_confirm_preorder = false;
-
-		if (!isset($this->session->data['preorder']) && isset($this->request->get['preorder'])) {
-
-			$this->load->model('checkout/order');
-
-			$order_info = $this->model_checkout_order->getOrder($this->request->get['preorder']);
-
-			if ($order_info  && ($order_info['order_status_id'] === PREORDER_ID)) {
-
-				$this->cart->clear();
-
-				$order_products = $this->model_checkout_order->getOrderProducts($order_info['order_id']);
-
-				foreach ($order_products as $product) {
-					$this->request->post['product_id'] = $product['product_id'];
-					$this->request->post['quantity'] = $product['quantity'];
-					$this->request->post['price'] = $product['price'];
-					$this->request->post['days_of_delivery'] = $product['days_of_delivery'];
-					$this->add(true);
-
-					$this->session->data['po_products'][$product['product_id']] = array(
-						'model'	=> $product['model'],
-						'quantity' => $product['quantity'],
-						'price' => $product['price'],
-						'days_of_delivery' => $product['days_of_delivery']
-					);
+		if(isset($this->request->get['preorder'])) {
+			if (!isset($this->session->data['preorder']) || ($this->session->data['preorder'] !== $this->request->get['preorder'])) {
+	
+				$this->load->model('checkout/order');
+	
+				$order_info = $this->model_checkout_order->getOrder($this->request->get['preorder']);
+	
+				if ($order_info  && ($order_info['order_status_id'] === PREORDER_ID)) {
+	
+					$this->cart->clear();
+					unset($this->session->data['preorder']);
+					unset($this->session->data['po_products']);
+	
+					$order_products = $this->model_checkout_order->getOrderProducts($order_info['order_id']);
+	
+					foreach ($order_products as $product) {
+						$this->request->post['product_id'] = $product['product_id'];
+						$this->request->post['quantity'] = $product['quantity'];
+						$this->request->post['price'] = $product['price'];
+						$this->request->post['days_of_delivery'] = $product['days_of_delivery'];
+						$this->add(true);
+	
+						$this->session->data['po_products'][$product['product_id']] = array(
+							'model'	=> $product['model'],
+							'quantity' => $product['quantity'],
+							'price' => $product['price'],
+							'days_of_delivery' => $product['days_of_delivery']
+						);
+					}
+	
+					$this->session->data['preorder'] = $order_info['order_id'];
+				} else {
+					$error_confirm_preorder = true;
 				}
-
-				$this->session->data['preorder'] = $order_info['order_id'];
-			} else {
-				$error_confirm_preorder = true;
 			}
 		}
 		// end jorgensen - preorders

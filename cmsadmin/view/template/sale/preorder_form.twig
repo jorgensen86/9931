@@ -268,6 +268,8 @@
                         <input type="hidden" name="product[{{ product_row }}][quantity]" value="{{ order_product.quantity }}" /></td>
 					  <td class="text-right">{{ order_product.price }}
                         <input type="hidden" name="product[{{ product_row }}][price]" value="{{ order_product.price }}" /></td>
+					  <td class="text-right">{{ order_product.days_of_delivery }}
+							<input type="hidden" name="product[{{ product_row }}][days_of_delivery]" value="{{ order_product.days_of_delivery }}" /></td>
                       <td class="text-right"></td>
                       <td class="text-center"></td>
                     </tr>
@@ -882,7 +884,21 @@
                       </span></div>
                   </div>
                 </div>
-				<input type="hidden" name="order_status_id" value="{{ order_status_id }}">
+                <div class="form-group" style="display: none;">
+					<label class="col-sm-2 control-label" for="input-order-status">{{ entry_order_status }}</label>
+					<div class="col-sm-10">
+					  <select name="order_status_id" id="input-order-status" class="form-control">
+						{% for order_status in order_statuses %}
+						{% if order_status.order_status_id == order_status_id %}
+						<option value="{{ order_status.order_status_id }}" selected="selected">{{ order_status.name }}</option>
+						{% else %}
+						<option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+						{% endif %}
+						{% endfor %}
+					  </select>
+					  <input type="hidden" name="order_id" value="{{ order_id }}" />
+					</div>
+				  </div>
                 <div class="form-group">
                   <label class="col-sm-2 control-label" for="input-comment">{{ entry_comment }}</label>
                   <div class="col-sm-10">

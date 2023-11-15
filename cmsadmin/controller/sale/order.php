@@ -554,6 +554,7 @@ class ControllerSaleOrder extends Controller {
 					'product_id' => $product['product_id'],
 					'name'       => $product['name'],
 					'model'      => $product['model'],
+					'days_of_delivery' => $product['days_of_delivery'],
 					'option'     => $this->model_sale_order->getOrderOptions($this->request->get['order_id'], $product['order_product_id']),
 					'quantity'   => $product['quantity'],
 					'price'      => $product['price'],

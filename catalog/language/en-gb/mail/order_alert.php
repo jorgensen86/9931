@@ -8,3 +8,8 @@ $_['text_order_status'] = 'Order Status:';
 $_['text_product']      = 'Products';
 $_['text_total']        = 'Totals';
 $_['text_comment']      = 'The comments for your order are:';
+
+// Preorders
+$_['text_preorder_subject']      = '%s - Preorder %s';
+$_['text_preorder_order_id']     = 'Preorder ID:';
+$_['text_preorder_received']     = 'You have received a preorder.';

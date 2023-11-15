@@ -501,6 +501,11 @@ class ControllerMailOrder extends Controller {
 
 			$data['comment'] = strip_tags($order_info['comment']);
 
+			if (!$this->cart->hasStock()) {
+				$data['text_received'] = $this->language->get('text_preorder_received');
+				$data['text_order_id'] = $this->language->get('text_preorder_order_id');
+			}
+
 			$mail = new Mail($this->config->get('config_mail_engine'));
 			$mail->parameter = $this->config->get('config_mail_parameter');
 			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
@@ -513,7 +518,14 @@ class ControllerMailOrder extends Controller {
 			$mail->setFrom($this->config->get('config_email'));
 			$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
 			$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+			
+			// Jorgensen - change texts for preorder
+			if (!$this->cart->hasStock()) {
+				$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_preorder_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+			}
+
 			$mail->setText($this->load->view('mail/order_alert', $data));
+			
 			$mail->send();
 
 			// Send to additional alert emails

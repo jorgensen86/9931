@@ -17,6 +17,13 @@
                 $_['text_delivery'] = 'Παράδοση';]]></add>
         </operation>
     </file>
+    <file path="catalog/language/en-gb/en-gb.php" error="skip">
+        <operation info="change add to cart text">
+            <search><![CDATA[$_['button_cart']]]></search>
+            <add position="before"><![CDATA[
+                $_['text_delivery'] = 'Delivery';]]></add>
+        </operation>
+    </file>
 
     <!-- <file path="catalog/controller/{product/*,information/*,account/*}.php" error="skip">
         <operation info="hides home breadcrumb from pages">

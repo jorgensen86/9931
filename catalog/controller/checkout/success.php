@@ -4,6 +4,13 @@ class ControllerCheckoutSuccess extends Controller {
 		$this->load->language('checkout/success');
 
 		if (isset($this->session->data['order_id'])) {
+			
+			if(!$this->cart->hasStock()) {
+				$preorder = true;
+			} else {
+				$preorder = false;
+			}
+
 			$this->cart->clear();
 
 			unset($this->session->data['shipping_method']);
@@ -19,8 +26,9 @@ class ControllerCheckoutSuccess extends Controller {
 			unset($this->session->data['vouchers']);
 			unset($this->session->data['totals']);
 			
-			// Jorgensen -Preorders
+			// Jorgensen - Preorders
 			unset($this->session->data['preorder']);
+			unset($this->session->data['po_products']);
 		}
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -51,6 +59,12 @@ class ControllerCheckoutSuccess extends Controller {
 			$data['text_message'] = sprintf($this->language->get('text_customer'), $this->url->link('account/account', '', true), $this->url->link('account/order', '', true), $this->url->link('account/download', '', true), $this->url->link('information/contact'));
 		} else {
 			$data['text_message'] = sprintf($this->language->get('text_guest'), $this->url->link('information/contact'));
+		}
+
+		if($preorder) {
+			$data['text_message'] = sprintf($this->language->get('text_preorder'), $this->url->link('information/contact'));
+			$this->document->setTitle($this->language->get('heading_preorder_title'));
+			$data['heading_title'] = $this->language->get('heading_preorder_title');
 		}
 
 		$data['continue'] = $this->url->link('common/home');

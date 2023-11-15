@@ -468,6 +468,8 @@ class ControllerApiOrder extends Controller {
 					
 					$order_data = array();
 
+					$order_data['preorder'] = $order_info['preorder'];
+
 					// Store Details
 					$order_data['invoice_prefix'] = $this->config->get('config_invoice_prefix');
 					$order_data['store_id'] = $this->config->get('config_store_id');
@@ -691,7 +693,7 @@ class ControllerApiOrder extends Controller {
 					} else {
 						$notify = false;
 					}
-					
+
 					$this->model_checkout_order->addOrderHistory($order_id, $order_status_id, '', $notify);
 				}
 			} else {
