@@ -99,6 +99,8 @@ $_['button_category_add']           = 'Προσθήκη Κατηγορίας';
 $_['button_order']                  = 'Εμφάνιση Παραγγελίας';
 $_['button_order_recurring']        = 'Εμφάνιση Επαναλαμβανόμενης Παραγγελίας';
 $_['button_buy']                    = 'Αγορά';
+$_['button_order_supplier']         = 'Παραγγελία Προμηθευτή';
+$_['button_order_print']            = 'Εκτύπωση Παραγγελίας';
 
 // Tab
 $_['tab_affiliate']                 = 'Συνεργάτης';

@@ -106,7 +106,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="col-sm-2 control-label" for="input-upc"><span data-toggle="tooltip" title="{{ help_upc }}">{{ entry_upc }}</span></label>
+                <label class="col-sm-2 control-label" for="input-upc">{{ entry_upc }}</label>
                 <div class="col-sm-10">
                   <input type="text" name="upc" value="{{ upc }}" placeholder="{{ entry_upc }}" id="input-upc" class="form-control"/>
                 </div>
@@ -196,6 +196,12 @@
                 <label class="col-sm-2 control-label" for="input-minimum"><span data-toggle="tooltip" title="{{ help_minimum }}">{{ entry_minimum }}</span></label>
                 <div class="col-sm-10">
                   <input type="text" name="minimum" value="{{ minimum }}" placeholder="{{ entry_minimum }}" id="input-minimum" class="form-control"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-quantity-alert">{{ entry_quantity_alert }}</label>
+                <div class="col-sm-10">
+                  <input type="text" name="quantity_alert" value="{{ quantity_alert }}" placeholder="{{ entry_quantity_alert }}" id="input-quantity-alert" class="form-control"/>
                 </div>
               </div>
               <div class="form-group">
@@ -385,6 +391,12 @@
               </div>
             </div>
             <div class="tab-pane" id="tab-links">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-supplier"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_supplier }}</span></label>
+                <div class="col-sm-10">
+                  <input type="text" name="supplier" value="{{ supplier }}" placeholder="{{ entry_supplier }}" id="input-supplier" class="form-control"/> <input type="hidden" name="supplier_id" value="{{ supplier_id }}"/>
+                </div>
+              </div>
               <input type="hidden" name="manufacturer_id" value="0">
               <div class="form-group">
                 <label class="col-sm-2 control-label" for="input-manufacturer"><span data-toggle="tooltip" title="{{ help_manufacturer }}">{{ entry_manufacturer }}</span></label>
@@ -1148,6 +1160,33 @@
   <script type="text/javascript" src="view/javascript/summernote/summernote-image-attributes.js"></script>
   <script type="text/javascript" src="view/javascript/summernote/opencart.js"></script>
   <script type="text/javascript"><!--
+// supplier
+$('input[name=\'supplier\']').autocomplete({
+	  'source': function(request, response) {
+		  $.ajax({
+			  url: 'index.php?route=supplier/supplier/autocomplete&user_token={{ user_token }}&filter_company_name=' + encodeURIComponent(request),
+			  dataType: 'json',
+			  success: function(json) {
+				  json.unshift({
+					  supplier_id: 0,
+					  company_name: '{{ text_none }}'
+				  });
+
+				  response($.map(json, function(item) {
+					  return {
+						  label: item['company_name'],
+						  value: item['supplier_id']
+					  }
+				  }));
+			  }
+		  });
+	  },
+	  'select': function(item) {
+		  $('input[name=\'supplier\']').val(item['label']);
+		  $('input[name=\'supplier_id\']').val(item['value']);
+	  }
+  });
+
   // Manufacturer
  $('input[name=\'manufacturer\']').autocomplete({
 	  'source': function(request, response) {

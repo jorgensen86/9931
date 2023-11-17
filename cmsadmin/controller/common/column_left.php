@@ -364,6 +364,19 @@ class ControllerCommonColumnLeft extends Controller {
 					'children' => $customer
 				);	
 			}
+
+			// Supplier
+			$supplier = array();
+			
+			if ($this->user->hasPermission('access', 'supplier/supplier')) {
+				$data['menus'][] = array(
+					'id'       => 'menu-supplier',
+					'icon'	   => 'fa-users', 
+					'name'	   => $this->language->get('text_supplier'),
+					'href'     => $this->url->link('supplier/supplier', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()
+				);	
+			}
 			
 			// Marketing
 			$marketing = array();

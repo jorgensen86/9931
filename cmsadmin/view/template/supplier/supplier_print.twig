@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html dir="{{ direction }}" lang="{{ lang }}">
+<head>
+<meta charset="UTF-8" />
+<title>{{ title }}</title>
+<base href="{{ base }}" />
+<link href="view/javascript/bootstrap/css/bootstrap.css" rel="stylesheet" media="all" />
+<script type="text/javascript" src="view/javascript/jquery/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="view/javascript/bootstrap/js/bootstrap.min.js"></script>
+<link href="view/javascript/font-awesome/css/font-awesome.min.css" type="text/css" rel="stylesheet" />
+<link type="text/css" href="view/stylesheet/stylesheet.css" rel="stylesheet" media="all" />
+</head>
+<body>
+<div class="container">
+  <div>
+    <h3 style="margin: 20px 0">{{ heading_order_title }} {{ company_name }}</h3>
+    <div style="border: 1px solid #ddd; padding: 5px; margin-bottom: 10px;">
+        <p>{{ entry_company_name }} : <strong>{{ company_name }}</strong></p>
+        <p>{{ entry_address }} : <strong>{{ address }}, {{ postcode }} - {{ city }}</strong></p>
+        <p>{{ entry_telephone }} : <strong>{{ telephone }}</strong></p>
+    </div>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <td><b>{{ column_model }}</b></td>
+          <td><b>{{ entry_upc }}</b></td>
+          <td><b>{{ column_name }}</b></td>
+          <td class="text-right"><b>{{ column_quantity }}</b></td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.model }}</td>
+          <td>{{ product.upc }}</td>
+          <td>{{ product.name }}</td>
+          <td class="text-right">{{ product.quantity }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

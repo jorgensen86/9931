@@ -36,7 +36,7 @@ $_['entry_store']            = 'Καταστήματα';
 $_['entry_keyword']          = 'SEO URL';
 $_['entry_model']            = 'Κωδικός Προϊόντος';
 $_['entry_sku']              = 'SKU';
-$_['entry_upc']              = 'UPC';
+$_['entry_upc']              = 'Κωδικός Κεφαλαίου';
 $_['entry_ean']              = 'Κωδικοί Ανταλλακτικού';
 $_['entry_jan']              = 'JAN';
 $_['entry_isbn']             = 'Ανταλλακτικό';
@@ -82,6 +82,8 @@ $_['entry_tag']              = 'Ετικέτες Προϊόντος';
 $_['entry_reward']           = 'Πόντοι Ανταμοιβής';
 $_['entry_layout']           = 'Παράκαμψη Διάταξης';
 $_['entry_recurring']        = 'Επαναλαμβανόμενη Χρέωση';
+$_['entry_supplier']         = 'Προμηθευτής';
+$_['entry_quantity_alert']   = 'Όριο Παραγωγής';
 
 // Help
 $_['help_sku']               = 'Ποσότητα Διατήρησης Αποθέματος (Stock Keeping Unit).';

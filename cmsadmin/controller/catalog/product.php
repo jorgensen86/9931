@@ -747,6 +747,14 @@ class ControllerCatalogProduct extends Controller {
 			$data['minimum'] = 1;
 		}
 
+		if (isset($this->request->post['quantity_alert'])) {
+			$data['quantity_alert'] = $this->request->post['quantity_alert'];
+		} elseif (!empty($product_info)) {
+			$data['quantity_alert'] = $product_info['quantity_alert'];
+		} else {
+			$data['quantity_alert'] = 1;
+		}
+
 		if (isset($this->request->post['subtract'])) {
 			$data['subtract'] = $this->request->post['subtract'];
 		} elseif (!empty($product_info)) {
@@ -837,6 +845,30 @@ class ControllerCatalogProduct extends Controller {
 			$data['length_class_id'] = $product_info['length_class_id'];
 		} else {
 			$data['length_class_id'] = $this->config->get('config_length_class_id');
+		}
+
+		$this->load->model('supplier/supplier');
+
+		if (isset($this->request->post['supplier_id'])) {
+			$data['supplier_id'] = $this->request->post['supplier_id'];
+		} elseif (!empty($product_info)) {
+			$data['supplier_id'] = $product_info['supplier_id'];
+		} else {
+			$data['supplier_id'] = 0;
+		}
+
+		if (isset($this->request->post['supplier'])) {
+			$data['supplier'] = $this->request->post['supplier'];
+		} elseif (!empty($product_info)) {
+			$supplier_info = $this->model_supplier_supplier->getSupplier($product_info['supplier_id']);
+
+			if ($supplier_info) {
+				$data['supplier'] = $supplier_info['company_name'];
+			} else {
+				$data['supplier'] = '';
+			}
+		} else {
+			$data['supplier'] = '';
 		}
 
 		$this->load->model('catalog/manufacturer');

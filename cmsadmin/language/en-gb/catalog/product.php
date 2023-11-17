@@ -36,7 +36,7 @@ $_['entry_store']            = 'Stores';
 $_['entry_keyword']          = 'Keyword';
 $_['entry_model']            = 'Model';
 $_['entry_sku']              = 'SKU';
-$_['entry_upc']              = 'UPC';
+$_['entry_upc']              = 'Capital Code';
 $_['entry_ean']              = 'Part Codes';
 $_['entry_jan']              = 'JAN';
 $_['entry_isbn']             = 'Conumable';
@@ -82,6 +82,8 @@ $_['entry_tag']              = 'Product Tags';
 $_['entry_reward']           = 'Reward Points';
 $_['entry_layout']           = 'Layout Override';
 $_['entry_recurring']        = 'Recurring Profile';
+$_['entry_supplier']         = 'Supplier';
+$_['entry_quantity_alert']   = 'Quantity Alert';
 
 // Help
 $_['help_sku']               = 'Stock Keeping Unit';

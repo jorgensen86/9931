@@ -40,9 +40,9 @@ class ModelExtensionReportProduct extends Model {
 		$sql = "SELECT op.name, op.model, SUM(op.quantity) AS quantity, SUM((op.price + op.tax) * op.quantity) AS total FROM " . DB_PREFIX . "order_product op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id)";
 
 		if (!empty($data['filter_order_status_id'])) {
-			$sql .= " WHERE o.order_status_id = '" . (int)$data['filter_order_status_id'] . "'";
+			$sql .= " WHERE o.order_status_id = '" . (int)$data['filter_order_status_id'] . "'  AND preorder != 1";
 		} else {
-			$sql .= " WHERE o.order_status_id > '0'";
+			$sql .= " WHERE o.order_status_id > '0' AND preorder != 1";
 		}
 
 		if (!empty($data['filter_date_start'])) {
@@ -76,9 +76,9 @@ class ModelExtensionReportProduct extends Model {
 		$sql = "SELECT COUNT(DISTINCT op.product_id) AS total FROM `" . DB_PREFIX . "order_product` op LEFT JOIN `" . DB_PREFIX . "order` o ON (op.order_id = o.order_id)";
 
 		if (!empty($data['filter_order_status_id'])) {
-			$sql .= " WHERE o.order_status_id = '" . (int)$data['filter_order_status_id'] . "'";
+			$sql .= " WHERE o.order_status_id = '" . (int)$data['filter_order_status_id'] . "' AND preorder != 1";
 		} else {
-			$sql .= " WHERE o.order_status_id > '0'";
+			$sql .= " WHERE o.order_status_id > '0'  AND preorder != 1";
 		}
 
 		if (!empty($data['filter_date_start'])) {

@@ -91,3 +91,4 @@ $_['text_paypal_search']        = 'Αναζήτηση';
 $_['text_complete_status']      = 'Ολοκληρωμένες Παραγγελίες'; 
 $_['text_processing_status']    = 'Επεξεργασμένες Παραγγελίες'; 
 $_['text_other_status']         = 'Άλλες Καταστάσεις';
+$_['text_supplier']             = 'Προμηθευτές';
