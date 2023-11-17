@@ -731,6 +731,14 @@ class ControllerCatalogProduct extends Controller {
 			$data['date_available'] = date('Y-m-d');
 		}
 
+		if (isset($this->request->post['date_purchased'])) {
+			$data['date_purchased'] = $this->request->post['date_purchased'];
+		} elseif (!empty($product_info)) {
+			$data['date_purchased'] = ($product_info['date_purchased'] != '0000-00-00') ? $product_info['date_purchased'] : '';
+		} else {
+			$data['date_purchased'] = date('Y-m-d');
+		}
+
 		if (isset($this->request->post['quantity'])) {
 			$data['quantity'] = $this->request->post['quantity'];
 		} elseif (!empty($product_info)) {

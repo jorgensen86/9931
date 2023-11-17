@@ -45,6 +45,7 @@ $_['entry_location']         = 'Περιοχή';
 $_['entry_shipping']         = 'Απαιτεί Αποστολή';
 $_['entry_manufacturer']     = 'Κατασκευαστής';
 $_['entry_date_available']   = 'Ημερομηνία Διαθεσιμότητας';
+$_['entry_date_purchased']   = 'Ημερομηνία Αγοράς';
 $_['entry_quantity']         = 'Ποσότητα';
 $_['entry_minimum']          = 'Ελάχιστη Ποσότητα';
 $_['entry_stock_status']     = 'Κατάσταση μη διαθέσιμου αποθέματος';
