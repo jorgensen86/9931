@@ -334,6 +334,9 @@ class ModelCheckoutOrder extends Model {
 						$this->db->query("UPDATE " . DB_PREFIX . "product_option_value SET quantity = (quantity - " . (int)$order_product['quantity'] . ") WHERE product_option_value_id = '" . (int)$order_option['product_option_value_id'] . "' AND subtract = '1'");
 					}
 				}
+
+				// jorgensen - reset negative quantities to zero
+				$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = 0 WHERE quantity < 0 AND subtract = '1'");
 				
 				// Add commission if sale is linked to affiliate referral.
 				if ($order_info['affiliate_id'] && $this->config->get('config_affiliate_auto')) {

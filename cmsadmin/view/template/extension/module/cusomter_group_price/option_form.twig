@@ -1,0 +1,1 @@
+{% for customer_group in customer_groups %}<input type="text" name="cgp_option[' + option_row + '][product_option_value][' + option_value_row + '][{{customer_group.customer_group_id }}]" value="" placeholder="{{ customer_group.name }}" class="form-control"/>{% endfor %}

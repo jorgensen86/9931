@@ -705,7 +705,7 @@ class ControllerSupplierSupplier extends Controller {
 					'image' => $image,
 					'name'	=> html_entity_decode($result['name'], ENT_QUOTES, 'UTF-8'),
 					'quantity' => $result['quantity'],
-					'quantity_alert' => $result['quantity_alert'],
+					'quantity_alert' => $result['quantity_alert'] - $result['quantity'],
 					'price'	=>	$this->tax->calculate($result['price'], $result['tax-class_id'],  $this->config->get('config_tax'))
 				);
 			}
