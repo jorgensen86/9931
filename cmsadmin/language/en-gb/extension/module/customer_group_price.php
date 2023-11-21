@@ -12,6 +12,7 @@ $_['entry_tax']        = 'Display Price without Tax';
 $_['entry_option']     = 'Prices in options';
 $_['entry_delete']     = 'Keep Data after Uninstallation';
 $_['entry_status']     = 'Status';
+$_['entry_cg_discount'] = 'Discount';
 
 // Button
 $_['button_delete']    = 'Delete Data';

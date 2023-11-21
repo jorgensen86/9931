@@ -8,6 +8,10 @@ class ControllerExtensionModuleCustomerGroupPrice extends Controller {
             if($price = $this->model_extension_module_customer_group_price->getProductPrice($args)) {
                 $args['price'] += ($args['price'] * $price) / 100;
             }
+
+            if((float)$discount = $this->model_extension_module_customer_group_price->getProductDiscount($args)) {
+                $args['special'] = $args['price'] - ($args['price'] * $discount) / 100;
+            }
         }
     }
-}
+} 

@@ -7,4 +7,13 @@ class ModelExtensionModuleCustomerGroupPrice extends Model {
         
         return $price_query->row['price'];
     }
+
+    public function getProductDiscount($data) {
+        
+        $discount_query = $this->db->query("SELECT discount FROM " . DB_PREFIX . "customer_group_price WHERE product_id = '" . (int)$data['product_id'] . "' AND customer_group_id = '" . (int)$this->config->get('config_customer_group_id') . "'");
+        
+        if ($discount_query->num_rows) {
+            return $discount_query->row['discount'];
+        }
+    }
 }

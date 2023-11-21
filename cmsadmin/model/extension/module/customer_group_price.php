@@ -23,10 +23,10 @@ class ModelExtensionModuleCustomerGroupPrice extends Model {
 
     public function editCustomerGroupPrices($product_id, $data) {
         $this->db->query("DELETE FROM `" . DB_PREFIX . "customer_group_price` WHERE product_id = '" . (int)$product_id . "'");
-
-        foreach ($data as $cgid => $price) {
-            if($price) {
-                $this->db->query("INSERT INTO `" . DB_PREFIX . "customer_group_price` SET product_id = '" . (int)$product_id . "', customer_group_id ='" . (int)$cgid . "', price ='" . (float)$price . "'");
+        
+        foreach ($data as $cgid => $value) {
+            if($value['price'] || $value['discount'] ) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "customer_group_price` SET product_id = '" . (int)$product_id . "', customer_group_id ='" . (int)$cgid . "', price ='" . (float)$value['price'] . "', discount ='" . (float)$value['discount'] . "'");
             }
         }
     }
@@ -37,7 +37,10 @@ class ModelExtensionModuleCustomerGroupPrice extends Model {
         $query =  $this->db->query("SELECT * FROM `" . DB_PREFIX . "customer_group_price` WHERE product_id = '" . (int)$product_id . "'");
 
         foreach ($query->rows as $value) {
-            $cgp_data[$value['customer_group_id']] = $value['price'];
+            $cgp_data[$value['customer_group_id']] = [
+                'price' => $value['price'],
+                'discount' => $value['discount']
+            ];
         }
 
         return $cgp_data;
