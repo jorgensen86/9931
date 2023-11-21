@@ -152,7 +152,7 @@ class ModelCatalogManufacturer extends Model {
 			$manufacturer_code_data[] = $result['code_id'];
 		}
 
-		return $query->rows;
+		return $manufacturer_code_data;
 	}
 	
 	public function getManufacturerSeoUrls($manufacturer_id) {

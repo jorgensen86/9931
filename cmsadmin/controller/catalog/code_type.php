@@ -351,7 +351,7 @@ class ControllerCatalogCodeType extends Controller {
 
 		foreach ($this->request->post['selected'] as $code_id) {
 			$manufacturer_total = $this->model_catalog_code_type->getTotalManufacturerByCodeId($code_id);
-
+			
 			if ($manufacturer_total) {
 				$this->error['warning'] = sprintf($this->language->get('error_manufacturer'), $manufacturer_total);
 			}
